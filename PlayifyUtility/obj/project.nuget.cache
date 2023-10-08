@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "m8y9Wotv+lbvuasveWBwcIl9XNME1ZKR+BGkC3Tf/O8kP+VTkHA9iS935eCEThmKBqlZcFjaamequRX3E+zlFQ==",
+  "success": true,
+  "projectFilePath": "S:\\Code\\C#\\own\\PlayifyUtility\\PlayifyUtility\\PlayifyUtility.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\playify\\.nuget\\packages\\jetbrains.annotations\\2023.2.0\\jetbrains.annotations.2023.2.0.nupkg.sha512",
+    "C:\\Users\\playify\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.14\\microsoft.netcore.app.ref.6.0.14.nupkg.sha512",
+    "C:\\Users\\playify\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.14\\microsoft.windowsdesktop.app.ref.6.0.14.nupkg.sha512",
+    "C:\\Users\\playify\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.14\\microsoft.aspnetcore.app.ref.6.0.14.nupkg.sha512"
+  ],
+  "logs": []
+}

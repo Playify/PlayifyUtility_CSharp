@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <OutputPath>../_run</OutputPath>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>PlayifyUtility</Title>
+        <Authors>Playify</Authors>
+        <Description>Utilities for other Playify Projects</Description>
+        <RepositoryType>GitHub</RepositoryType>
+        <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <Compile Update="Utils\AsyncUtils.ValueTask.cs">
+            <DependentUpon>AsyncUtils.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Utils\AsyncUtils.JsPromise.cs">
+            <DependentUpon>AsyncUtils.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Special\CaseSensitiveDirectory.Native.cs">
+            <DependentUpon>CaseSensitiveDirectory.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Web\WebDocument.cs">
+          <DependentUpon>WebSend.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Web\WebSend.cs">
+          <DependentUpon>WebSession.cs</DependentUpon>
+        </Compile>
+        <Compile Remove="PlayifyUtils.Test\**" />
+        <Compile Remove="PlayifyUtils.Windows\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="PlayifyUtils.Test\**" />
+      <None Remove="PlayifyUtils.Windows\**" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Folder Include="Windows\" />
+    </ItemGroup>
+</Project>

@@ -1,0 +1,68 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "PlayifyUtility.Test/1.0.0": {
+        "dependencies": {
+          "PlayifyUtility": "1.0.0",
+          "PlayifyUtility.Windows": "1.0.0"
+        },
+        "runtime": {
+          "PlayifyUtility.Test.dll": {}
+        }
+      },
+      "JetBrains.Annotations/2023.2.0": {
+        "runtime": {
+          "lib/netstandard2.0/JetBrains.Annotations.dll": {
+            "assemblyVersion": "4242.42.42.42",
+            "fileVersion": "2023.2.0.0"
+          }
+        }
+      },
+      "PlayifyUtility/1.0.0": {
+        "dependencies": {
+          "JetBrains.Annotations": "2023.2.0"
+        },
+        "runtime": {
+          "PlayifyUtility.dll": {}
+        }
+      },
+      "PlayifyUtility.Windows/1.0.0": {
+        "dependencies": {
+          "JetBrains.Annotations": "2023.2.0"
+        },
+        "runtime": {
+          "PlayifyUtility.Windows.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "PlayifyUtility.Test/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "JetBrains.Annotations/2023.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dvO//8aLmLRsCVVgoc/7qBqi2/y4BTyRcg20LCBWtK4n6E9Um06Zp7jF1n0hOE+yqBHwcrDzAjWvCaM3qH8flg==",
+      "path": "jetbrains.annotations/2023.2.0",
+      "hashPath": "jetbrains.annotations.2023.2.0.nupkg.sha512"
+    },
+    "PlayifyUtility/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "PlayifyUtility.Windows/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <OutputPath>../_run</OutputPath>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>PlayifyUtility.Windows</Title>
+        <Authors>Playify</Authors>
+        <Description>Utilities for other Playify Projects (Windows extensions)</Description>
+        <RepositoryType>GitHub</RepositoryType>
+        <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
+
+        <UseWindowsForms>true</UseWindowsForms>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="CaseSensitiveDirectory.Native.cs">
+        <DependentUpon>CaseSensitiveDirectory.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>PlayifyUtility</id>
+    <version>1.0.0</version>
+    <title>PlayifyUtility</title>
+    <authors>Playify</authors>
+    <description>Utilities for other Playify Projects</description>
+    <repository type="GitHub" url="https://github.com/Playify/PlayifyUtility_CSharp" />
+    <dependencies>
+      <group targetFramework="net6.0">
+        <dependency id="JetBrains.Annotations" version="2023.2.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="S:\Code\C#\own\PlayifyUtility\_run\PlayifyUtility.dll" target="lib\net6.0\PlayifyUtility.dll" />
+  </files>
+</package>

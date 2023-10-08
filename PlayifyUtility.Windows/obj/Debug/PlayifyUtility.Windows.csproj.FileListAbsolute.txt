@@ -1,0 +1,12 @@
+S:\Code\C#\own\PlayifyUtility\_run\PlayifyUtility.Windows.deps.json
+S:\Code\C#\own\PlayifyUtility\_run\PlayifyUtility.Windows.dll
+S:\Code\C#\own\PlayifyUtility\_run\PlayifyUtility.Windows.pdb
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.csproj.AssemblyReference.cache
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.GeneratedMSBuildEditorConfig.editorconfig
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.AssemblyInfoInputs.cache
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.AssemblyInfo.cs
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.csproj.CoreCompileInputs.cache
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.dll
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\refint\PlayifyUtility.Windows.dll
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.pdb
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\ref\PlayifyUtility.Windows.dll

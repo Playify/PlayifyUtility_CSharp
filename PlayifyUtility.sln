@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayifyUtility", "PlayifyUtility\PlayifyUtility.csproj", "{BC8F16F5-4482-482F-B3A3-D179D1D70F2E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayifyUtility.Test", "PlayifyUtility.Test\PlayifyUtility.Test.csproj", "{0E3D1170-F0E6-4298-AD28-ACEFF1CF41C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayifyUtility.Windows", "PlayifyUtility.Windows\PlayifyUtility.Windows.csproj", "{B9874846-A049-4B90-9819-6E32CD25D937}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BC8F16F5-4482-482F-B3A3-D179D1D70F2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC8F16F5-4482-482F-B3A3-D179D1D70F2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC8F16F5-4482-482F-B3A3-D179D1D70F2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC8F16F5-4482-482F-B3A3-D179D1D70F2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E3D1170-F0E6-4298-AD28-ACEFF1CF41C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E3D1170-F0E6-4298-AD28-ACEFF1CF41C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E3D1170-F0E6-4298-AD28-ACEFF1CF41C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E3D1170-F0E6-4298-AD28-ACEFF1CF41C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9874846-A049-4B90-9819-6E32CD25D937}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9874846-A049-4B90-9819-6E32CD25D937}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9874846-A049-4B90-9819-6E32CD25D937}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9874846-A049-4B90-9819-6E32CD25D937}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
