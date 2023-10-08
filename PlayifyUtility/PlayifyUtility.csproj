@@ -12,6 +12,7 @@
         <Description>Utilities for other Playify Projects</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
+        <Version>1.0.1</Version>
     </PropertyGroup>
 
 
@@ -43,10 +44,5 @@
     <ItemGroup>
       <None Remove="PlayifyUtils.Test\**" />
       <None Remove="PlayifyUtils.Windows\**" />
-    </ItemGroup>
-
-
-    <ItemGroup>
-      <Folder Include="Windows\" />
     </ItemGroup>
 </Project>

@@ -16,7 +16,7 @@ namespace PlayifyUtility.Web;
 
 [PublicAPI]
 public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
-	public int PingCountUntilError=5;
+	public static int PingCountUntilError=5;
 	private readonly TcpClient? _client;
 	private readonly IWebStream _input;
 	private readonly Stream _output;

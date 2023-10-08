@@ -14,6 +14,10 @@ public class WebStream2:IWebStream{
 			Start=start;
 			End=end;
 		}
+
+		public override string ToString(){
+			return Encoding.UTF8.GetString(Bytes,Start,End-Start);
+		}
 	}
 
 	private readonly Stream _stream;
@@ -24,10 +28,10 @@ public class WebStream2:IWebStream{
 	}
 
 	public async Task SkipAsync(int count){
-		while(_list.First.NotNull(out var first)){
-			var link=first.ValueRef;
-			if(link.End-link.Start>=count){
-				count-=link.End-link.Start;
+		while((_list.First?.Value).NotNull(out var link)){
+			var available=link.End-link.Start;
+			if(available<=count){
+				count-=available;
 				_list.RemoveFirst();
 			} else{
 				link.Start+=count;
@@ -58,10 +62,9 @@ public class WebStream2:IWebStream{
 	public async Task<int> ReadAsync(byte[] buffer,int offset,int length){
 		var result=0;
 		while(length!=0)
-			if(_list.First.NotNull(out var first)){
-				var link=first.Value;
+			if((_list.First?.Value).NotNull(out var link)){
 				var available=link.End-link.Start;
-				if(available>=length){
+				if(available<=length){
 					Array.Copy(link.Bytes,link.Start,buffer,offset,available);
 					_list.RemoveFirst();
 					offset+=available;
@@ -108,11 +111,11 @@ public class WebStream2:IWebStream{
 					}
 					//Successfully found
 					if(withDelimiter){
-						var result=new byte[i+1];
+						var result=new byte[i-buffer.Start+1];
 						await ReadFullyAsync(result);
 						return result;
 					} else{
-						var result=new byte[i+1-delimiter.Length];
+						var result=new byte[i-buffer.Start+1-delimiter.Length];
 						await ReadFullyAsync(result);
 						await SkipAsync(delimiter.Length);
 						return result;

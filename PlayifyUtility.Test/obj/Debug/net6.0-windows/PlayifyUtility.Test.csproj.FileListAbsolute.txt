@@ -1,8 +1,3 @@
-S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.csproj.AssemblyReference.cache
-S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.GeneratedMSBuildEditorConfig.editorconfig
-S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.AssemblyInfoInputs.cache
-S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.AssemblyInfo.cs
-S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.csproj.CoreCompileInputs.cache
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\bin\Debug\net6.0-windows\PlayifyUtility.Test.exe
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\bin\Debug\net6.0-windows\PlayifyUtility.Test.deps.json
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\bin\Debug\net6.0-windows\PlayifyUtility.Test.runtimeconfig.json
@@ -13,6 +8,11 @@ S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\bin\Debug\net6.0-windows\Playi
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\bin\Debug\net6.0-windows\PlayifyUtility.Windows.dll
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\bin\Debug\net6.0-windows\PlayifyUtility.Windows.pdb
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\bin\Debug\net6.0-windows\PlayifyUtility.pdb
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.csproj.AssemblyReference.cache
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.GeneratedMSBuildEditorConfig.editorconfig
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.AssemblyInfoInputs.cache
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.AssemblyInfo.cs
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.csproj.CoreCompileInputs.cache
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.csproj.CopyComplete
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\PlayifyUtility.Test.dll
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\net6.0-windows\refint\PlayifyUtility.Test.dll
