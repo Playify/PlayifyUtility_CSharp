@@ -1,0 +1,16 @@
+S:\Code\C#\own\PlayifyUtility\_run\PlayifyUtility.Test.exe
+S:\Code\C#\own\PlayifyUtility\_run\PlayifyUtility.Test.deps.json
+S:\Code\C#\own\PlayifyUtility\_run\PlayifyUtility.Test.runtimeconfig.json
+S:\Code\C#\own\PlayifyUtility\_run\PlayifyUtility.Test.dll
+S:\Code\C#\own\PlayifyUtility\_run\PlayifyUtility.Test.pdb
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\PlayifyUtility.Test.csproj.AssemblyReference.cache
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\PlayifyUtility.Test.GeneratedMSBuildEditorConfig.editorconfig
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\PlayifyUtility.Test.AssemblyInfoInputs.cache
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\PlayifyUtility.Test.AssemblyInfo.cs
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\PlayifyUtility.Test.csproj.CoreCompileInputs.cache
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\PlayifyUtility.Test.csproj.CopyComplete
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\PlayifyUtility.Test.dll
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\refint\PlayifyUtility.Test.dll
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\PlayifyUtility.Test.pdb
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\PlayifyUtility.Test.genruntimeconfig.cache
+S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Test\obj\Debug\ref\PlayifyUtility.Test.dll

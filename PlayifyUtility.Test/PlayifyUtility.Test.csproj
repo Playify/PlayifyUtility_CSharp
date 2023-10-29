@@ -7,6 +7,9 @@
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
         <RootNamespace>PlayifyUtils.Test</RootNamespace>
+        
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <OutputPath>../_run</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
