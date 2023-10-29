@@ -15,7 +15,7 @@
           }
         }
       },
-      "PlayifyUtility/1.0.0": {
+      "PlayifyUtility/1.0.1": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
@@ -69,7 +69,7 @@
         "lib/portable40-net40+sl5+win8+wp8+wpa81/JetBrains.Annotations.xml"
       ]
     },
-    "PlayifyUtility/1.0.0": {
+    "PlayifyUtility/1.0.1": {
       "type": "project",
       "path": "../PlayifyUtility/PlayifyUtility.csproj",
       "msbuildProject": "../PlayifyUtility/PlayifyUtility.csproj"
@@ -82,7 +82,7 @@
   },
   "projectFileDependencyGroups": {
     "net6.0-windows7.0": [
-      "PlayifyUtility >= 1.0.0",
+      "PlayifyUtility >= 1.0.1",
       "PlayifyUtility.Windows >= 1.0.0"
     ]
   },

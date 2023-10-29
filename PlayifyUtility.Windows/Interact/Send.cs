@@ -3,9 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using static System.Windows.Forms.Keys;
-using static PlayifyUtils.Windows.Interact.Send.SendFlags;
+using static PlayifyUtility.Windows.Interact.Send.SendFlags;
 
-namespace PlayifyUtils.Windows.Interact;
+namespace PlayifyUtility.Windows.Interact;
 
 [PublicAPI]
 public class Send{

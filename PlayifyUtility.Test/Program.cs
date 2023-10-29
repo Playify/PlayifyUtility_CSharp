@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using PlayifyUtility.Web;
 
-namespace PlayifyRpc;
+namespace PlayifyUtils.Test;
 
 internal class Program:WebBase{
 	public static async Task Main(string[] args){

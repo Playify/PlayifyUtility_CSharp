@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using static System.Windows.Forms.Keys;
 
-namespace PlayifyUtils.Windows.Interact;
+namespace PlayifyUtility.Windows.Interact;
 
 public static class Modifiers{
 	[DllImport("USER32.dll")]

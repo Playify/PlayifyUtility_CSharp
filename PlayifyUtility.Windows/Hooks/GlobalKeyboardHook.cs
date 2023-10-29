@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using PlayifyUtils.Windows.Interact;
+using PlayifyUtility.Windows.Interact;
 
 namespace PlayifyUtility.Windows.Hooks;
 
