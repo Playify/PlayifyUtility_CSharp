@@ -14,6 +14,8 @@
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
 
         <UseWindowsForms>true</UseWindowsForms>
+
+        <Version>1.0.1</Version>
     </PropertyGroup>
 
     <ItemGroup>

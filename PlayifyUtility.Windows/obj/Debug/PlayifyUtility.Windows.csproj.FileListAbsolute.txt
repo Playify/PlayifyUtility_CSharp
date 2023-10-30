@@ -10,3 +10,15 @@ S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Wi
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\refint\PlayifyUtility.Windows.dll
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.pdb
 S:\Code\C#\own\PlayifyUtility\PlayifyUtility.Windows\obj\Debug\ref\PlayifyUtility.Windows.dll
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\_run\PlayifyUtility.Windows.deps.json
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\_run\PlayifyUtility.Windows.dll
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\_run\PlayifyUtility.Windows.pdb
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.csproj.AssemblyReference.cache
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.AssemblyInfoInputs.cache
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.AssemblyInfo.cs
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.csproj.CoreCompileInputs.cache
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.dll
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\PlayifyUtility.Windows\obj\Debug\refint\PlayifyUtility.Windows.dll
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\PlayifyUtility.Windows\obj\Debug\PlayifyUtility.Windows.pdb
+C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\PlayifyUtility.Windows\obj\Debug\ref\PlayifyUtility.Windows.dll

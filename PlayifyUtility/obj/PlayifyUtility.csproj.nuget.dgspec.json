@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "S:\\Code\\C#\\own\\PlayifyUtility\\PlayifyUtility\\PlayifyUtility.csproj": {}
+    "C:\\Users\\TE282179\\TE_APP_DEV\\Projects\\alsoAtHome\\PlayifyUtility_CSharp\\PlayifyUtility\\PlayifyUtility.csproj": {}
   },
   "projects": {
-    "S:\\Code\\C#\\own\\PlayifyUtility\\PlayifyUtility\\PlayifyUtility.csproj": {
+    "C:\\Users\\TE282179\\TE_APP_DEV\\Projects\\alsoAtHome\\PlayifyUtility_CSharp\\PlayifyUtility\\PlayifyUtility.csproj": {
       "version": "1.0.1",
       "restore": {
-        "projectUniqueName": "S:\\Code\\C#\\own\\PlayifyUtility\\PlayifyUtility\\PlayifyUtility.csproj",
+        "projectUniqueName": "C:\\Users\\TE282179\\TE_APP_DEV\\Projects\\alsoAtHome\\PlayifyUtility_CSharp\\PlayifyUtility\\PlayifyUtility.csproj",
         "projectName": "PlayifyUtility",
-        "projectPath": "S:\\Code\\C#\\own\\PlayifyUtility\\PlayifyUtility\\PlayifyUtility.csproj",
-        "packagesPath": "C:\\Users\\playify\\.nuget\\packages\\",
-        "outputPath": "S:\\Code\\C#\\own\\PlayifyUtility\\PlayifyUtility\\obj\\",
+        "projectPath": "C:\\Users\\TE282179\\TE_APP_DEV\\Projects\\alsoAtHome\\PlayifyUtility_CSharp\\PlayifyUtility\\PlayifyUtility.csproj",
+        "packagesPath": "C:\\Users\\TE282179\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\TE282179\\TE_APP_DEV\\Projects\\alsoAtHome\\PlayifyUtility_CSharp\\PlayifyUtility\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\playify\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\TE282179\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
@@ -54,26 +54,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[6.0.14, 6.0.14]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[6.0.14, 6.0.14]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[6.0.14, 6.0.14]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Users\\playify\\.dotnet\\sdk\\7.0.200\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.413\\RuntimeIdentifierGraph.json"
         }
       }
     }

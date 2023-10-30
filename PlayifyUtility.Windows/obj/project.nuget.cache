@@ -1,13 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "FXjo2xzX2GsVwPeDw3xJak6NU2tBnFDzs6oV7RfSz6bNO9PLu7cYu1qL8MSG2rOpSEsQZqLzJUG+zdrvGjnXug==",
+  "dgSpecHash": "dh/SYZP0CS3pLhC3KnX70CdsDYfny2Ak3dIzKcdZ8tS5xY3AdBM7gDmgi9W0ZLYsQPUmpLvV56t47J+Kqhm7uw==",
   "success": true,
-  "projectFilePath": "S:\\Code\\C#\\own\\PlayifyUtility\\PlayifyUtility.Windows\\PlayifyUtility.Windows.csproj",
+  "projectFilePath": "C:\\Users\\TE282179\\TE_APP_DEV\\Projects\\alsoAtHome\\PlayifyUtility_CSharp\\PlayifyUtility.Windows\\PlayifyUtility.Windows.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\playify\\.nuget\\packages\\jetbrains.annotations\\2023.2.0\\jetbrains.annotations.2023.2.0.nupkg.sha512",
-    "C:\\Users\\playify\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.14\\microsoft.netcore.app.ref.6.0.14.nupkg.sha512",
-    "C:\\Users\\playify\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.14\\microsoft.windowsdesktop.app.ref.6.0.14.nupkg.sha512",
-    "C:\\Users\\playify\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.14\\microsoft.aspnetcore.app.ref.6.0.14.nupkg.sha512"
+    "C:\\Users\\TE282179\\.nuget\\packages\\jetbrains.annotations\\2023.2.0\\jetbrains.annotations.2023.2.0.nupkg.sha512"
   ],
   "logs": []
 }
