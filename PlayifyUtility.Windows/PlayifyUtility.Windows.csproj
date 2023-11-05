@@ -12,6 +12,10 @@
         <Description>Utilities for other Playify Projects (Windows extensions)</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
+        <Version>1.0.2</Version>
+
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
         <UseWindowsForms>true</UseWindowsForms>
     </PropertyGroup>

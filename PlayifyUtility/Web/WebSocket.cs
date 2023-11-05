@@ -52,12 +52,12 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 			stream=ssl;
 		}
 
-		return await CreateWebSocketTo(client,stream,uri.PathAndQuery,headers);
+		return await CreateWebSocketTo(client,stream,uri.PathAndQuery,headers,uri.Host);
 	}
 
-	public static Task<WebSocket> CreateWebSocketTo(TcpClient client,string path,NameValueCollection? headers=null)=>CreateWebSocketTo(client,client.GetStream(),path,headers);
+	public static Task<WebSocket> CreateWebSocketTo(TcpClient client,string path,NameValueCollection? headers=null,string? host=null)=>CreateWebSocketTo(client,client.GetStream(),path,headers,host);
 
-	public static async Task<WebSocket> CreateWebSocketTo(TcpClient client,Stream stream,string path,NameValueCollection? headers=null){
+	public static async Task<WebSocket> CreateWebSocketTo(TcpClient client,Stream stream,string path,NameValueCollection? headers=null,string? host=null){
 		var random=new Random();
 		const string source="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		var webSocketKey=EnumerableUtils.RepeatSelect(16,()=>source[random.Next(source.Length)])
@@ -74,6 +74,8 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 			foreach(string key in headers)
 			foreach(var value in headers.GetValues(key)!)
 				header+=key+": "+value+"\r\n";
+
+		if(host!=null) header+="Host: "+host+"\r\n";
 
 
 		header+="\r\n";
@@ -101,11 +103,15 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 			if(match.Success){
 				valid=match.Groups[1].Value=="101";
 				first=true;
+				if(!valid){
+					client.Close();//force close. This connection would be useless after a failed attempt.
+					throw new ProtocolViolationException("Error opening WebSocket, Wrong response code received: "+line);
+				}
 				continue;
 			}
 			var i=line.IndexOf(':');
-			var key=line.Substring(0,i);
-			var val=line.Substring(i+1).Trim();
+			var key=line[..i];
+			var val=line[(i+1)..].Trim();
 			if(key.Equals("Connection",StringComparison.OrdinalIgnoreCase)) con=val.Equals("Upgrade",StringComparison.OrdinalIgnoreCase);
 			else if(key.Equals("Upgrade",StringComparison.OrdinalIgnoreCase)) upgrade=val.Equals("websocket",StringComparison.OrdinalIgnoreCase);
 			else if(key.Equals("Sec-WebSocket-Accept",StringComparison.OrdinalIgnoreCase)) accept=val==webSocketKey;

@@ -22,6 +22,7 @@ public class WebStream2:IWebStream{
 
 	private readonly Stream _stream;
 	private readonly LinkedList<ByteBuffer> _list=new();
+	private static readonly byte[] Skipper=new byte[1024];
 
 	public WebStream2(Stream stream){
 		_stream=stream;
@@ -38,9 +39,8 @@ public class WebStream2:IWebStream{
 				return;
 			}
 		}
-		var buffer=new byte[Math.Min(1024,count)];
 		while(count>0){
-			var bytesRead=await _stream.ReadAsync(buffer,0,Math.Min(count,buffer.Length));
+			var bytesRead=await _stream.ReadAsync(Skipper,0,Math.Min(count,Skipper.Length));
 			if(bytesRead==0) throw new EndOfStreamException();// End of stream reached
 
 			count-=bytesRead;

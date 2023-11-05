@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
 namespace PlayifyUtility.Utils;
@@ -20,5 +21,10 @@ public static class VariableExtensions{
 	public static bool TryGet<T>(this T? t,out T result) where T:struct{
 		result=t.GetValueOrDefault();
 		return t.HasValue;
+	}
+
+	public static bool IsSuccess(this Match t,out Match result){
+		result=t;
+		return t.Success;
 	}
 }
