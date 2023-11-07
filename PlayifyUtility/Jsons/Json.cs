@@ -6,6 +6,15 @@ namespace PlayifyUtility.Jsons;
 
 [PublicAPI]
 public abstract class Json{
+
+	public virtual Json this[string index]{
+		get=>throw new ArgumentException("Can't get property from "+GetType().Name);
+		set=>throw new ArgumentException("Can't set property from "+GetType().Name);
+	}
+	public virtual Json this[int index]{
+		get=>throw new ArgumentException("Can't get element from "+GetType().Name);
+		set=>throw new ArgumentException("Can't set element from "+GetType().Name);
+	}
 	public override string ToString()=>ToString(null);
 
 	public string ToString(int indentSpaces)=>ToString(indentSpaces<0?null:new string(' ',indentSpaces));

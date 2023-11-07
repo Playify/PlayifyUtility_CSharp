@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace PlayifyUtility.Jsons;
@@ -9,8 +10,8 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 
 	public int Length=>_order.Count;
 
-	public Json? this[string index]{
-		get=>Get(index);
+	public override Json this[string index]{
+		get=>_dictionary[index];
 		set=>Put(index,value);
 	}
 
@@ -45,9 +46,8 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 
 	public bool Has(string key)=>_dictionary.ContainsKey(key);
 	public Json? Get(string key)=>_dictionary.TryGetValue(key,out var value)?value:null;
-	public JsonObject? GetO(string key)=>Get(key) as JsonObject;
-	public JsonArray? GetA(string key)=>Get(key) as JsonArray;
-
+	public bool TryGet(string key,[MaybeNullWhen(false)] out Json json)=>_dictionary.TryGetValue(key,out json);
+	
 	public void Remove(string key){
 		_order.Remove(key);
 		_dictionary.Remove(key);

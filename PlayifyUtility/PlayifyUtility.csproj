@@ -12,7 +12,7 @@
         <Description>Utilities for other Playify Projects</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
-        <Version>1.0.2</Version>
+        <Version>1.0.3</Version>
 
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -42,6 +42,9 @@
         </Compile>
         <Compile Remove="PlayifyUtils.Test\**" />
         <Compile Remove="PlayifyUtils.Windows\**" />
+        <Compile Update="Utils\PlatformUtils.CommandLine.cs">
+          <DependentUpon>PlatformUtils.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>

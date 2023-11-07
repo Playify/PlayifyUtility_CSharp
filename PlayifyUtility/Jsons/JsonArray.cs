@@ -33,9 +33,9 @@ public class JsonArray:Json,IEnumerable<Json>{
 		foreach(var json in e) Add(json);
 	}
 
-	public Json this[int i]{
-		get=>_value[i];
-		set=>_value[i]=value;
+	public override Json this[int index]{
+		get=>_value[index];
+		set=>_value[index]=value;
 	}
 
 	public int Length=>_value.Count;
@@ -63,8 +63,6 @@ public class JsonArray:Json,IEnumerable<Json>{
 	public void Set(int i,Json value)=>_value[i]=value;
 
 	public Json Get(int i)=>_value[i];
-	public JsonObject? GetO(int i)=>_value[i] as JsonObject;
-	public JsonArray? GetA(int i)=>_value[i] as JsonArray;
 
 	public void Remove(int i)=>_value.RemoveAt(i);
 

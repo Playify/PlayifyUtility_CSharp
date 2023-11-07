@@ -10,6 +10,7 @@ namespace PlayifyUtility.Utils;
 public partial class PlatformUtils{
 	public static bool IsAndroid()=>Type.GetType("Android.Content.Context")!=null;
 	public static bool IsLinux()=>RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+	public static bool IsWindows()=>RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
 
 	public static async ValueTask<PhysicalAddress?> GetMac(IPAddress ip){
