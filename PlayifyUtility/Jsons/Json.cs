@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 
 namespace PlayifyUtility.Jsons;
 
+[Obsolete]
 [PublicAPI]
 public abstract class Json{
 

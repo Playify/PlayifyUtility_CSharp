@@ -2,6 +2,7 @@ using System.Globalization;
 
 namespace PlayifyUtility.Jsons;
 
+[Obsolete]
 public class JsonNumber:Json{
 	private readonly double _number;
 	public JsonNumber(double number)=>_number=number;

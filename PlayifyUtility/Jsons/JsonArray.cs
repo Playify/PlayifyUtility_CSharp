@@ -3,6 +3,7 @@ using System.Text;
 
 namespace PlayifyUtility.Jsons;
 
+[Obsolete]
 public class JsonArray:Json,IEnumerable<Json>{
 	private readonly List<Json> _value=new();
 

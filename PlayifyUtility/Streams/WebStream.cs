@@ -2,6 +2,7 @@ using System.Text;
 
 namespace PlayifyUtility.Streams;
 
+[Obsolete]
 public class WebStream:IWebStream{
 	public static readonly byte[] NewLine=Encoding.ASCII.GetBytes("\r\n");
 	private readonly byte[] _buffer=new byte[1024];

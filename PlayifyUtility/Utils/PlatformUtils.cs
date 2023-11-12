@@ -4,9 +4,11 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 
 namespace PlayifyUtility.Utils;
 
+[PublicAPI]
 public partial class PlatformUtils{
 	public static bool IsAndroid()=>Type.GetType("Android.Content.Context")!=null;
 	public static bool IsLinux()=>RuntimeInformation.IsOSPlatform(OSPlatform.Linux);

@@ -1,5 +1,3 @@
-using System.Windows.Forms;
-
 namespace PlayifyUtility.Windows.Hooks;
 
 public delegate void MouseEventHandler(MouseEvent mouseEvent);

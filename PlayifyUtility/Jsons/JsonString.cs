@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace PlayifyUtility.Jsons;
 
+[Obsolete]
 public class JsonString:Json{
 	private static readonly Regex ControlCharacters=new("[\0-\x1f]");
 	private readonly string _string;

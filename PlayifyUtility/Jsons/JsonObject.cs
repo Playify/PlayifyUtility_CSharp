@@ -4,6 +4,7 @@ using System.Text;
 
 namespace PlayifyUtility.Jsons;
 
+[Obsolete]
 public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 	private readonly Dictionary<string,Json> _dictionary=new();
 	private readonly List<string> _order=new();

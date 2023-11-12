@@ -1,5 +1,6 @@
 namespace PlayifyUtility.Jsons;
 
+[Obsolete]
 public class JsonNull:Json{
 	public static readonly JsonNull Null=new();
 

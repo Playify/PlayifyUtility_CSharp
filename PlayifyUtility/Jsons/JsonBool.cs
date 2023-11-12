@@ -1,5 +1,6 @@
 namespace PlayifyUtility.Jsons;
 
+[Obsolete]
 public class JsonBool:Json{
 	public static readonly JsonBool True=new(true);
 	public static readonly JsonBool False=new(false);
