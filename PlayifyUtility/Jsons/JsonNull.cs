@@ -1,36 +1,41 @@
+using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
+using PlayifyUtility.Utils;
+
 namespace PlayifyUtility.Jsons;
 
-[Obsolete]
+[PublicAPI]
 public class JsonNull:Json{
 	public static readonly JsonNull Null=new();
 
-	private JsonNull(){
-	}
+	private JsonNull(){}
 
-	public new static JsonNull? Parse(string s)=>Json.Parse(s) as JsonNull;
+	#region Parse
+	public static bool TryParse(string s,[MaybeNullWhen(false)]out JsonNull json)=>TryParseGeneric(s,out json,ParseOrNull);
+	public static bool TryParse(ref string s,[MaybeNullWhen(false)]out JsonNull json)=>TryParseGeneric(ref s,out json,ParseOrNull);
+	public static bool TryParse(TextReader s,[MaybeNullWhen(false)]out JsonNull json)=>ParseOrNull(s).NotNull(out json);
 
-	public new static JsonNull? Parse(ref string s){
-		var old=s;
-		if(Json.Parse(ref s) is JsonNull arr) return arr;
-		s=old;
-		return null;
-	}
 
-	public new static JsonNull Parse(TextReader r){
-		if(NextPeek(r)!='n') throw new JsonException();
-		return (JsonNull) Json.Parse(r);
-	}
+	public new static JsonNull? ParseOrNull(string s)=>TryParse(s,out var json)?json:null;
+	public new static JsonNull? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
+	public new static JsonNull? ParseOrNull(TextReader r)=>NextRead(r)=='n'&&r.Read()=='u'&&r.Read()=='l'&&r.Read()=='l'?Null:null;
+	#endregion
 
-	public override string ToString(string? indent)=>"null";
+	#region Convert
 
 	public override Json DeepCopy()=>this;
 
-	public override double AsNumber()=>0;
+	public override double AsDouble()=>0;
 
-	public override bool AsBoolean()=>false;
+	public override bool AsBool()=>false;
 
-	public override string? AsString()=>null;
+	public override string AsString()=>"null";
+	public override string ToString(string? indent)=>"null";
+	#endregion
+
+	#region Operators
 	public override bool Equals(object? obj)=>obj is JsonNull;
 
-	public override int GetHashCode()=>0;
+	public override int GetHashCode()=>-1;
+	#endregion
 }

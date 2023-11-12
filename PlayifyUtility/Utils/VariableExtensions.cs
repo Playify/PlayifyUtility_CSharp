@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 
 namespace PlayifyUtility.Utils;
@@ -13,8 +13,8 @@ public static class VariableExtensions{
 		return true;
 	}
 
-	public static bool NotNull<T>(this T? t,out T result) where T:class{
-		result=t!;
+	public static bool NotNull<T>(this T? t,[MaybeNullWhen(false)]out T result) where T:class{
+		result=t;
 		return t!=null;
 	}
 
@@ -23,8 +23,8 @@ public static class VariableExtensions{
 		return t.HasValue;
 	}
 
-	public static bool IsSuccess(this Match t,out Match result){
-		result=t;
-		return t.Success;
+	public static bool TryGetNever<T>([MaybeNullWhen(false)]out T t){
+		t=default;
+		return false;
 	}
 }

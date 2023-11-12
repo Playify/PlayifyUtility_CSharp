@@ -1,76 +1,63 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
+using PlayifyUtility.Utils;
 
 namespace PlayifyUtility.Jsons;
 
-[Obsolete]
+[PublicAPI]
 public class JsonString:Json{
-	private static readonly Regex ControlCharacters=new("[\0-\x1f]");
-	private readonly string _string;
+	public readonly string Value;
+	public JsonString(string value)=>Value=value;
 
-	public JsonString(string s)=>_string=s??throw new ArgumentNullException(nameof(s));
+	#region Parse
+	public static bool TryParse(string s,[MaybeNullWhen(false)]out JsonString json)=>TryParseGeneric(s,out json,ParseOrNull);
+	public static bool TryParse(ref string s,[MaybeNullWhen(false)]out JsonString json)=>TryParseGeneric(ref s,out json,ParseOrNull);
+	public static bool TryParse(TextReader s,[MaybeNullWhen(false)]out JsonString json)=>ParseOrNull(s).NotNull(out json);
 
-	public new static JsonString? Parse(string s){
-		try{
-			var reader=new StringReader(s);
-			var parse=Parse(reader);
-			return NextPeek(reader)!=-1?null:parse;
-		} catch(Exception){
-			return null;
-		}
+
+	public new static JsonString? ParseOrNull(string s)=>TryParse(s,out var json)?json:null;
+	public new static JsonString? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
+
+	public new static JsonString? ParseOrNull(TextReader r){
+		if(NextPeek(r)!='"') return null;
+		return UnescapeOrNull(r).NotNull(out var s)?new JsonString(s):null;
 	}
+	#endregion
 
-	public new static JsonString? Parse(ref string s){
-		try{
-			var reader=new StringReader(s);
-			var parse=Parse(reader);
-
-			s=reader.ReadToEnd();
-
-			return parse;
-		} catch(Exception){
-			return null;
-		}
-	}
-
-	public new static JsonString Parse(TextReader r){
-		if(NextRead(r)!='"') throw new JsonException();
-		return ContinueParseString(r);
-	}
-
-	public override string ToString(string? indent){
-		var str=new StringBuilder();
-		Append(str,indent);
-		return str.ToString();
-	}
-
-	public override void Append(StringBuilder str,string? indent)=>Escape(str,_string);
+	#region Convert
 	public override Json DeepCopy()=>this;
 
-	public override double AsNumber()=>double.TryParse(_string,out var v)?v:0;
+	public override double AsDouble()=>double.TryParse(Value,out var v)?v:0;
 
-	public override bool AsBoolean()=>_string.Equals("true",StringComparison.OrdinalIgnoreCase);
+	public override bool AsBool()=>Value.Equals("true",StringComparison.OrdinalIgnoreCase);
 
-	public override string AsString()=>_string;
+	public override string AsString()=>Value;
+	#endregion
 
-	public static string Escape(string? s){
-		var str=new StringBuilder();
-		Escape(str,s);
-		return str.ToString();
-	}
+	#region ToString
+	public override string ToString(string? indent)=>Escape(Value);
 
-	public static string Unescape(string s){
-		if(s.Length==0) throw new JsonException();
-		var reader=new StringReader(s);
-		if(reader.Read()!='"') throw new JsonException();
-		return ContinueParseString(reader);
-	}
+	public override StringBuilder Append(StringBuilder str,string? indent)=>Escape(str,Value);
+	#endregion
 
-	public static void Escape(StringBuilder str,string? s){
-		if(s==null){
-			str.Append("null");
-			return;
-		}
+	#region Operators
+	public override bool Equals(object? obj)=>obj is JsonString other&&other.Value==Value;
+
+	public override int GetHashCode()=>Value.GetHashCode();
+	
+	public static bool operator==(JsonString l,JsonString r)=>l.Value==r.Value;
+	public static bool operator!=(JsonString l,JsonString r)=>!(l==r);
+	public static implicit operator string(JsonString j)=>j.Value;
+	public static implicit operator JsonString(string b)=>new(b);
+	#endregion
+
+	#region Accessor
+	private static readonly Regex ControlCharacters=new("[\0-\x1f]");
+	public static string Escape(string? s)=>Escape(new StringBuilder(),s).ToString();
+	public static StringBuilder Escape(StringBuilder str,string? s){
+		if(s==null) return str.Append("null");
 		str.Append('"');
 		s=s.Replace("\\",@"\\");
 		s=s.Replace("\"","\\\"");
@@ -91,17 +78,78 @@ public class JsonString:Json{
 		}
 		str.Append(s,from,s.Length-from);
 		str.Append('"');
+		return str;
 	}
 
+	public static bool TryUnescape(string s,[MaybeNullWhen(false)]out string result){
+		if(s.Length<2) return VariableExtensions.TryGetNever(out result);
+		using var reader=new StringReader(s);
+		return UnescapeOrNull(reader).NotNull(out result);
+	}
 
-	public override bool Equals(object? obj)=>obj is JsonString s&&s._string==_string;
+	public static string? UnescapeOrNull(TextReader r){
+		if(r.Read()!='"') return null;
 
-	public override int GetHashCode()=>_string.GetHashCode();
-
-	public static bool operator==(JsonString? a,JsonString? b)=>a?._string==b?._string;
-
-	public static bool operator!=(JsonString? a,JsonString? b)=>!(a==b);
-
-
-	public static implicit operator JsonString(string s)=>new(s);
+		var str=new StringBuilder();
+		var escape=false;
+		while(true)
+			if(escape){
+				switch(r.Read()){
+					case '\\':
+						str.Append('\\');
+						break;
+					case '"':
+						str.Append('"');
+						break;
+					case '/':
+						str.Append('/');
+						break;
+					case 'b':
+						str.Append('\b');
+						break;
+					case 'f':
+						str.Append('\f');
+						break;
+					case 'r':
+						str.Append('\r');
+						break;
+					case 'n':
+						str.Append('\n');
+						break;
+					case 't':
+						str.Append('\t');
+						break;
+					case 'u':
+						var cp=0;
+						for(var i=0;i<4;i++){
+							cp<<=4;
+							var c=r.Read();
+							if(!(c switch{
+									    >='0' and <='9'=>c-'0',
+									    >='a' and <='f'=>(c-'a')+10,
+									    >='A' and <='F'=>(c-'A')+10,
+									    //-1=>throw new EndOfStreamException(),
+									    _=>(int?) null,
+								    }).TryGet(out var hex)) return null;
+							cp|=hex;
+						}
+						str.Append(char.ConvertFromUtf32(cp));
+						break;
+					default:return null;
+				}
+				escape=false;
+			} else
+				switch(r.Read()){
+					case '"':return str.ToString();
+					//case -1:throw new EndOfStreamException();
+					case -1:return null;
+					case '\\':
+						escape=true;
+						break;
+					case var c:
+						str.Append((char) c);
+						break;
+				}
+	}
+	#endregion
 }

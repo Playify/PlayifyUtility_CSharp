@@ -1,6 +1,8 @@
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
+using PlayifyUtility.HelperClasses;
 
 namespace PlayifyUtility.Utils;
 
@@ -53,5 +55,14 @@ public static class TypeExtensions{
 			cancellationToken.Register(()=>tcs.SetCanceled(cancellationToken));
 
 		return process.HasExited?Task.CompletedTask:tcs.Task;
+	}
+
+	public static bool IsSuccess(this Match t,out Match result){
+		result=t;
+		return t.Success;
+	}
+	public static IDisposable AddTemporary<T>(this HashSet<T> set,T t){
+		set.Add(t);
+		return new CallbackAsDisposable(()=>set.Remove(t));
 	}
 }
