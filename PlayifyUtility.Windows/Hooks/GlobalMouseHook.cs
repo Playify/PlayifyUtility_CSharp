@@ -1,8 +1,10 @@
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace PlayifyUtility.Windows.Hooks;
 
-public class GlobalMouseHook{
+[PublicAPI]
+public static class GlobalMouseHook{
 	#region Constant, Structure and Delegate Definitions
 	private delegate int MouseHookProc(int code,int wParam,ref MsLlHookStruct lParam);
 
@@ -26,39 +28,31 @@ public class GlobalMouseHook{
 	#endregion
 
 	#region Instance Variables
-	private IntPtr _hook=IntPtr.Zero;
-	private MouseHookProc _proc=null!;
+	private static IntPtr _hook=IntPtr.Zero;
+	private static MouseHookProc _proc=null!;
 	#endregion
 
 	#region Events
-	public event MouseEventHandler? KeyDown;
-	public event MouseEventHandler? KeyUp;
-	public event MouseEventHandler? MouseMove;
-	public event MouseEventHandler? MouseScroll;
-	#endregion
-
-	#region Constructors and Destructors
-	public GlobalMouseHook(bool hook){
-		if(hook) Hook();
-	}
-
-	~GlobalMouseHook()=>Unhook();
+	public static event MouseEventHandler? KeyDown;
+	public static event MouseEventHandler? KeyUp;
+	public static event MouseEventHandler? MouseMove;
+	public static event MouseEventHandler? MouseScroll;
 	#endregion
 
 	#region Public Methods
-	public void Hook(){
+	public static void Hook(){
 		if(_hook!=IntPtr.Zero) return;
 		_proc=HookProc;
 		_hook=SetWindowsHookEx(WhMouseLl,_proc,GetModuleHandle(IntPtr.Zero),0);
 	}
 
-	public void Unhook(){
+	public static void Unhook(){
 		if(_hook==IntPtr.Zero) return;
 		UnhookWindowsHookEx(_hook);
 		_hook=IntPtr.Zero;
 	}
 
-	public int HookProc(int code,int wParam,ref MsLlHookStruct lParam){
+	private static int HookProc(int code,int wParam,ref MsLlHookStruct lParam){
 		try{
 			if(code>=0){
 				if(wParam==512){

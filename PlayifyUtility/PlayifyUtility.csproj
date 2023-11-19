@@ -12,7 +12,7 @@
         <Description>Utilities for other Playify Projects</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
-        <Version>1.0.5</Version>
+        <Version>1.0.6</Version>
 
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -46,6 +46,9 @@
           <DependentUpon>PlatformUtils.cs</DependentUpon>
         </Compile>
         <Compile Update="Jsons2\Json.Parse.cs">
+          <DependentUpon>Json.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Jsons\Json.Parse.cs">
           <DependentUpon>Json.cs</DependentUpon>
         </Compile>
     </ItemGroup>

@@ -1,7 +1,10 @@
+using JetBrains.Annotations;
+
 namespace PlayifyUtility.Windows.Hooks;
 
-public delegate void KeyEventHandler(object sender,KeyEvent e);
+public delegate void KeyEventHandler(KeyEvent e);
 
+[PublicAPI]
 public class KeyEvent{
 	public readonly int ScanCode;
 

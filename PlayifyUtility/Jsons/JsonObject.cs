@@ -64,14 +64,8 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 		return o;
 	}
 
-	public override double AsDouble()=>Count;
+	public override JsonObject AsObject()=>this;
 
-	public override bool AsBool()=>Count!=0;
-
-	public override string AsString()=>ToString();
-	#endregion
-	
-	#region ToString
 	public override string ToString(string? indent)=>Append(new StringBuilder(),indent).ToString();
 
 	public override StringBuilder Append(StringBuilder str,string? indent){

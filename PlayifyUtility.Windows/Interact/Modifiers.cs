@@ -1,10 +1,12 @@
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using static System.Windows.Forms.Keys;
 
 namespace PlayifyUtility.Windows.Interact;
 
+[PublicAPI]
 public static class Modifiers{
-	[DllImport("USER32.dll")]
+	[DllImport("user32.dll")]
 	private static extern short GetKeyState(Keys key);
 
 	public static bool Shift=>(GetKeyState(LShiftKey)&128)!=0||(GetKeyState(RShiftKey)&128)!=0;

@@ -22,9 +22,4 @@ public static class VariableExtensions{
 		result=t.GetValueOrDefault();
 		return t.HasValue;
 	}
-
-	public static bool TryGetNever<T>([MaybeNullWhen(false)]out T t){
-		t=default;
-		return false;
-	}
 }

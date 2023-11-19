@@ -60,15 +60,8 @@ public class JsonArray:Json,IEnumerable<Json>{
 		return o;
 	}
 
-	public override double AsDouble()=>Count;
+	public override JsonArray AsArray()=>this;
 
-	public override bool AsBool()=>Count!=0;
-
-	public override string AsString()=>ToString();
-	
-	#endregion
-	
-	#region ToString
 	public override string ToString(string? indent)=>Append(new StringBuilder(),indent).ToString();
 
 	public override StringBuilder Append(StringBuilder str,string? indent){
@@ -116,7 +109,7 @@ public class JsonArray:Json,IEnumerable<Json>{
 		set=>_value[index]=value??JsonNull.Null;
 	}
 	public override bool TryGet(int index,[MaybeNullWhen(false)]out Json json){
-		if(index<0||index>=Count) return VariableExtensions.TryGetNever(out json);
+		if(index<0||index>=Count) return FunctionUtils.TryGetNever(out json);
 		json=_value[index];
 		return true;
 	}

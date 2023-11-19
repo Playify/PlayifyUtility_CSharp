@@ -24,12 +24,6 @@ public class JsonNull:Json{
 	#region Convert
 
 	public override Json DeepCopy()=>this;
-
-	public override double AsDouble()=>0;
-
-	public override bool AsBool()=>false;
-
-	public override string AsString()=>"null";
 	public override string ToString(string? indent)=>"null";
 	#endregion
 

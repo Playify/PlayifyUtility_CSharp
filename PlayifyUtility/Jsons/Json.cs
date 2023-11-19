@@ -29,9 +29,11 @@ public abstract partial class Json{
 
 	#region Convert
 	public abstract Json DeepCopy();
-	public abstract double AsDouble();
-	public abstract bool AsBool();
-	public abstract string AsString();
+	public virtual double AsDouble()=>throw new NotSupportedException("Can't convert "+GetType().Name+" to double");
+	public virtual bool AsBool()=>throw new NotSupportedException("Can't convert "+GetType().Name+" to bool");
+	public virtual string AsString()=>throw new NotSupportedException("Can't convert "+GetType().Name+" to string");
+	public virtual JsonArray AsArray()=>throw new NotSupportedException("Can't convert "+GetType().Name+" to array");
+	public virtual JsonObject AsObject()=>throw new NotSupportedException("Can't convert "+GetType().Name+" to object");
 	#endregion
 
 	#region ToString
@@ -75,8 +77,31 @@ public abstract partial class Json{
 		get=>throw new NotSupportedException(GetType().Name+" has no index access");
 		set=>throw new NotSupportedException(GetType().Name+" has no index access");
 	}
-	public virtual bool TryGet(string property,[MaybeNullWhen(false)]out Json json)=>VariableExtensions.TryGetNever(out json);
-	public virtual bool TryGet(int index,[MaybeNullWhen(false)]out Json json)=>VariableExtensions.TryGetNever(out json);
 	public virtual bool Has(string property)=>false;
+	
+	
+	public virtual bool TryGet(string property,[MaybeNullWhen(false)]out Json json)=>FunctionUtils.TryGetNever(out json);
+	public virtual bool TryGet(int index,[MaybeNullWhen(false)]out Json json)=>FunctionUtils.TryGetNever(out json);
+	
+	
+	public bool TryGetArray(string property,[MaybeNullWhen(false)]out JsonArray json)=>GetArray(property).NotNull(out json);
+	public bool TryGetArray(int index,[MaybeNullWhen(false)]out JsonArray json)=>GetArray(index).NotNull(out json);
+	
+	public bool TryGetObject(string property,[MaybeNullWhen(false)]out JsonObject json)=>GetObject(property).NotNull(out json);
+	public bool TryGetObject(int index,[MaybeNullWhen(false)]out JsonObject json)=>GetObject(index).NotNull(out json);
+	
+	
+	public Json? Get(string property)=>TryGet(property,out var json)?json:null;
+	public Json? Get(int index)=>TryGet(index,out var json)?json:null;
+	
+	
+	public JsonArray? GetArray()=>this as JsonArray;
+	public JsonArray? GetArray(string property)=>Get(property) as JsonArray;
+	public JsonArray? GetArray(int index)=>Get(index) as JsonArray;
+	
+	
+	public JsonObject? GetObject()=>this as JsonObject;
+	public JsonObject? GetObject(string property)=>Get(property) as JsonObject;
+	public JsonObject? GetObject(int index)=>Get(index) as JsonObject;
 	#endregion
 }

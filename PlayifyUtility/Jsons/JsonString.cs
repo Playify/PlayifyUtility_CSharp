@@ -82,7 +82,7 @@ public class JsonString:Json{
 	}
 
 	public static bool TryUnescape(string s,[MaybeNullWhen(false)]out string result){
-		if(s.Length<2) return VariableExtensions.TryGetNever(out result);
+		if(s.Length<2) return FunctionUtils.TryGetNever(out result);
 		using var reader=new StringReader(s);
 		return UnescapeOrNull(reader).NotNull(out result);
 	}

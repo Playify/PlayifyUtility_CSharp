@@ -1,13 +1,16 @@
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using PlayifyUtility.Windows.Interact;
 
 namespace PlayifyUtility.Windows.Hooks;
 
-public class GlobalKeyboardHook{
+[PublicAPI]
+public static class GlobalKeyboardHook{
 	#region Constant, Structure and Delegate Definitions
-	public delegate int KeyboardHookProc(int code,int wParam,ref KeyboardHookStruct lParam);
+	private delegate int KeyboardHookProc(int code,int wParam,ref KeyboardHookStruct lParam);
 
-	public struct KeyboardHookStruct{
+	[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+	private struct KeyboardHookStruct{
 		public int VkCode;
 		public int ScanCode;
 		public int Flags;
@@ -25,51 +28,43 @@ public class GlobalKeyboardHook{
 	#endregion
 
 	#region Instance Variables
-	private IntPtr _hook=IntPtr.Zero;
-	private KeyboardHookProc _proc=null!;
+	private static IntPtr _hook=IntPtr.Zero;
+	private static KeyboardHookProc _proc=null!;
 	#endregion
 
 	#region Events
-	public event KeyEventHandler? KeyDown;
-	public event KeyEventHandler? KeyUp;
+	public static event KeyEventHandler? KeyDown;
+	public static event KeyEventHandler? KeyUp;
 	#endregion
 
-	#region Constructors and Destructors
-	public GlobalKeyboardHook(bool hook){
-		if(hook) Hook();
-	}
-
-	~GlobalKeyboardHook()=>Unhook();
-	#endregion
 
 	#region Public Methods
-	public void Hook(){
+	public static void Hook(){
 		if(_hook!=IntPtr.Zero) return;
 		_proc=HookProc;
 		_hook=SetWindowsHookEx(WhKeyboardLl,_proc,GetModuleHandle(IntPtr.Zero),0);
 	}
 
-	public void Unhook(){
+	public static void Unhook(){
 		if(_hook==IntPtr.Zero) return;
 		UnhookWindowsHookEx(_hook);
 		_hook=IntPtr.Zero;
 	}
 
 
-	private int HookProc(int code,int wParam,ref KeyboardHookStruct lParam){
+	private static int HookProc(int code,int wParam,ref KeyboardHookStruct lParam){
 		try{
 			if(code>=0&&lParam.DwExtraInfo!=Send.ProcessHandle){
 				var key=(Keys) lParam.VkCode;
-				//if(!Config.Constant.BetterCircumflex&&(key==Keys.OemPipe||key==Keys.OemCloseBrackets)) return CallNextHookEx(_hhook,code,wParam,ref lParam);
 				var kea=new KeyEvent(key,lParam.VkCode,lParam.ScanCode);
 				switch(wParam){
 					case WmKeydown:
 					case WmSysKeyDown:
-						KeyDown?.Invoke(this,kea);
+						KeyDown?.Invoke(kea);
 						break;
 					case WmKeyup:
 					case WmSysKeyUp:
-						KeyUp?.Invoke(this,kea);
+						KeyUp?.Invoke(kea);
 						break;
 				}
 				if(kea.Handled) return 1;
