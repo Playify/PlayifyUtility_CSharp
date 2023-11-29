@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using PlayifyUtility.Windows.Hooks;
+using PlayifyUtility.Windows.Native;
 
 namespace PlayifyUtility.Windows.Helpers;
 
@@ -14,7 +15,7 @@ public static partial class ToolTip{
 		if(!NativeMethods.GetCursorPos(out var p)) return;
 		p.x+=16;
 		p.y+=16;
-		NativeMethods.SendMessage(_currentToolTip,0x412,0,(uint) (((p.y&0xffff)<<16)|(p.x&0xffff)));//TTM_TRACKPOSITION
+		_currentToolTip.SendMessage(0x412,0,((p.y&0xffff)<<16)|(p.x&0xffff));//TTM_TRACKPOSITION
 	}
 	
 	[StructLayout(LayoutKind.Sequential)]
@@ -37,7 +38,7 @@ public static partial class ToolTip{
 	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
 	private static extern bool SendMessage(IntPtr hWnd,uint msg,uint wParam,ref ToolInfo lParam);
 
-	private static IntPtr _currentToolTip;
+	private static WinWindow _currentToolTip;
 	private static ToolInfo _toolInfo;
 	private static CancellationTokenSource _cancel=new();
 }

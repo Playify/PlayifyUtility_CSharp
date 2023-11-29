@@ -5,35 +5,6 @@ using JetBrains.Annotations;
 namespace PlayifyUtility.Windows;
 
 public static class NativeMethods{
-	[DllImport("User32.dll")]
-	public static extern bool MoveWindow(IntPtr handle,int x,int y,int width,int height,bool redraw);
-
-	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
-	public static extern IntPtr FindWindow(string lpClassName,string lpWindowName);
-
-	[DllImport("user32.dll",CharSet=CharSet.Auto)]
-	public static extern IntPtr SendMessage(IntPtr hWnd,uint msg,uint wParam,uint lParam);
-	[DllImport("user32.dll",SetLastError=true,CharSet=CharSet.Auto)]
-	public static extern bool PostMessage(IntPtr hWnd,uint msg,int wParam,int lParam);
-
-	[DllImport("user32.dll")]
-	public static extern bool SetWindowPos(IntPtr hWnd,IntPtr hWndInsertAfter,int x,int y,int cx,int cy,uint uFlags);
-	[DllImport("user32.dll")]
-	public static extern bool SetWindowPos(IntPtr hWnd,int hWndInsertAfter,int x,int y,int cx,int cy,uint uFlags);
-
-	[DllImport("user32.dll")]
-	public static extern bool GetWindowRect(IntPtr hWnd,out Rect rect);
-
-	[DllImport("user32.dll")]
-	public static extern int GetWindowLong(IntPtr hWnd,int nIndex);
-
-	[DllImport("user32.dll")]
-	public static extern int SetWindowLong(IntPtr hWnd,int nIndex,int dwNewLong);
-
-
-	[DllImport("user32.dll")]
-	internal static extern IntPtr WindowFromPoint(Point lpPoint);
-
 	[DllImport("user32.dll")]
 	internal static extern bool GetCursorPos(out Point lpPoint);
 
@@ -42,38 +13,8 @@ public static class NativeMethods{
 
 
 
-	// Enumerates all windows
-	public delegate bool EnumWindowsProc(IntPtr hWnd,IntPtr lParam);
-
-	[DllImport("user32.dll")]
-	public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc,IntPtr lParam);
-
-	[DllImport("user32.dll")]
-	public static extern bool EnumChildWindows(IntPtr hwndParent,EnumWindowsProc lpEnumFunc,IntPtr lParam);
 
 
-	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
-	internal static extern int GetClassName(IntPtr hWnd,StringBuilder lpClassName,int nMaxCount);
-
-
-
-	[DllImport("user32.dll")]
-	internal static extern int GetWindowThreadProcessId(IntPtr handle,out uint processId);
-
-	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
-	internal static extern int GetWindowText(IntPtr hWnd,StringBuilder title,int size);
-
-	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
-	internal static extern int GetWindowTextLength(IntPtr hWnd);
-
-	[DllImport("user32.dll")]
-	internal static extern bool ShowWindow(IntPtr hWnd,ShowWindowCommands nCmdShow);
-
-	[DllImport("user32.dll")]
-	internal static extern bool SetLayeredWindowAttributes(IntPtr hWnd,ColorRef color,byte alpha,int dwFlags);
-
-	[DllImport("user32.dll")]
-	internal static extern bool GetLayeredWindowAttributes(IntPtr hWnd,out ColorRef color,out byte alpha,out int dwFlags);
 
 	[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 	[StructLayout(LayoutKind.Sequential)]
@@ -128,19 +69,8 @@ public static class NativeMethods{
 
 
 	[DllImport("user32.dll")]
-	internal static extern bool GetClientRect(IntPtr hWnd,out Rect lpRect);
-
-
-	[DllImport("user32.dll")]
-	public static extern bool DestroyWindow(IntPtr hwnd);
-
-	[DllImport("user32.dll")]
 	[return:MarshalAs(UnmanagedType.Bool)]
 	public static extern bool IsWindow(IntPtr hWnd);
-
-
-	[DllImport("user32.dll")]
-	internal static extern bool GetWindowPlacement(IntPtr hwnd,ref WindowPlacement placement);
 
 
 	[Serializable,StructLayout(LayoutKind.Sequential)]
@@ -153,7 +83,7 @@ public static class NativeMethods{
 		public Rectangle rcNormalPosition;
 	}
 
-	internal enum ShowWindowCommands{
+	public enum ShowWindowCommands{
 		Hide=0,
 		Normal=1,
 		Minimized=2,

@@ -11,14 +11,14 @@ public static class GlobalMouseHook{
 	private const int WhMouseLl=14;
 
 	[StructLayout(LayoutKind.Sequential)]
-	public struct Point{
+	private struct Point{
 		public int x;
 		public int y;
 	}
 
 
 	[StructLayout(LayoutKind.Sequential)]
-	public struct MsLlHookStruct{
+	private struct MsLlHookStruct{
 		public Point pt;
 		public int mouseData;
 		public uint flags;

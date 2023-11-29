@@ -25,11 +25,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="CaseSensitiveDirectory.Native.cs">
-        <DependentUpon>CaseSensitiveDirectory.cs</DependentUpon>
-      </Compile>
       <Compile Update="Helpers\ToolTip.Internal.cs">
         <DependentUpon>ToolTip.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Native\WinControl.Pinvoke.cs">
+        <DependentUpon>NativeControl.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Native\WinWindow.Pinvoke.cs">
+        <DependentUpon>NativeWindow.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

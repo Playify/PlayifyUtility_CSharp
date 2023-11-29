@@ -46,7 +46,7 @@ public class JsonString:Json{
 	public override bool Equals(object? obj)=>obj is JsonString other&&other.Value==Value;
 
 	public override int GetHashCode()=>Value.GetHashCode();
-	
+
 	public static bool operator==(JsonString l,JsonString r)=>l.Value==r.Value;
 	public static bool operator!=(JsonString l,JsonString r)=>!(l==r);
 	public static implicit operator string(JsonString j)=>j.Value;
@@ -56,6 +56,7 @@ public class JsonString:Json{
 	#region Accessor
 	private static readonly Regex ControlCharacters=new("[\0-\x1f]");
 	public static string Escape(string? s)=>Escape(new StringBuilder(),s).ToString();
+
 	public static StringBuilder Escape(StringBuilder str,string? s){
 		if(s==null) return str.Append("null");
 		str.Append('"');
@@ -86,6 +87,8 @@ public class JsonString:Json{
 		using var reader=new StringReader(s);
 		return UnescapeOrNull(reader).NotNull(out result);
 	}
+
+	public static string? UnescapeOrNull(string s)=>TryUnescape(s,out var result)?result:null;
 
 	public static string? UnescapeOrNull(TextReader r){
 		if(r.Read()!='"') return null;

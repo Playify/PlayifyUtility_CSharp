@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace PlayifyUtility.Windows;
+namespace PlayifyUtility.Windows.WindowsFeatures;
 
 public static partial class CaseSensitiveDirectory{
 	[StructLayout(LayoutKind.Sequential)]

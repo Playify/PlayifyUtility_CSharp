@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using PlayifyUtility.Windows.Native;
 
 namespace PlayifyUtility.Windows.Helpers;
 
@@ -9,19 +10,20 @@ public static partial class ToolTip{
 		_cancel.Cancel();
 		if(_toolInfo.lpszText==null) return;
 		_toolInfo.lpszText=null;
-		SendMessage(_currentToolTip,0x411,0,ref _toolInfo);//TTM_TRACKACTIVATE
+		SendMessage(_currentToolTip.Hwnd,0x411,0,ref _toolInfo);//TTM_TRACKACTIVATE
 	}
 
 	public static void ShowToolTip(string s)=>ShowToolTip(s,TimeSpan.FromSeconds(1));
 	public static void ShowToolTip(string s,TimeSpan timeout){
-		if(_currentToolTip==IntPtr.Zero){
-			_currentToolTip=CreateWindowEx(0x28,//WS_EX_TRANSPARENT|WS_EX_TOPMOST
+		if(_currentToolTip==default){
+			var hwnd=CreateWindowEx(0x28,//WS_EX_TRANSPARENT|WS_EX_TOPMOST
 			                               "tooltips_class32",//TOOLTIPS_CLASS
 			                               null,0x33,//TTS_NOANIMATE|TTS_NOFADE|TTS_NOPREFIX|TTS_ALWAYSTIP
 			                               int.MinValue,int.MinValue,int.MinValue,int.MinValue,//CW_USEDEFAULT
 			                               IntPtr.Zero,IntPtr.Zero,IntPtr.Zero,IntPtr.Zero);
+			_currentToolTip=new WinWindow(hwnd);
 
-			AppDomain.CurrentDomain.ProcessExit+=(_,_)=>NativeMethods.DestroyWindow(_currentToolTip);
+			AppDomain.CurrentDomain.ProcessExit+=(_,_)=>_currentToolTip.DestroyWindow();
 
 
 			_toolInfo=new ToolInfo();
@@ -33,19 +35,19 @@ public static partial class ToolTip{
 			_toolInfo.lpszText=s;
 			_toolInfo.rect=new NativeMethods.Rect();
 
-			SendMessage(_currentToolTip,0x432,0,ref _toolInfo);//TTM_ADDTOOLW
+			SendMessage(_currentToolTip.Hwnd,0x432,0,ref _toolInfo);//TTM_ADDTOOLW
 
-			NativeMethods.SendMessage(_currentToolTip,0x418,0,0);//TTM_SETMAXTIPWIDTH
+			_currentToolTip.SendMessage(0x418,0,0);//TTM_SETMAXTIPWIDTH
 		}
 		if(_toolInfo.lpszText!=s){
 			_toolInfo.lpszText=s;
-			SendMessage(_currentToolTip,0x439,0,ref _toolInfo);//TTM_UPDATETIPTEXTW
+			SendMessage(_currentToolTip.Hwnd,0x439,0,ref _toolInfo);//TTM_UPDATETIPTEXTW
 		}
 
 		CorrectToolTip(null);
 
-		SendMessage(_currentToolTip,0x411,1,ref _toolInfo);//TTM_TRACKACTIVATE
-		NativeMethods.SetWindowPos(_currentToolTip,new IntPtr(-1),0,0,0,0,0x13);
+		SendMessage(_currentToolTip.Hwnd,0x411,1,ref _toolInfo);//TTM_TRACKACTIVATE
+		_currentToolTip.SetWindowPos(-1,0,0,0,0,0x13);
 
 		_cancel.Cancel();
 		if(!_cancel.TryReset()) _cancel=new CancellationTokenSource();

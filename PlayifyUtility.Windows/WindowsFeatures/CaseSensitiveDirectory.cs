@@ -1,8 +1,10 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
-namespace PlayifyUtility.Windows;
+namespace PlayifyUtility.Windows.WindowsFeatures;
 
+[PublicAPI]
 public static partial class CaseSensitiveDirectory{
 	// Read access is NOT required
 	public static bool IsDirectoryCaseSensitive(string directory){

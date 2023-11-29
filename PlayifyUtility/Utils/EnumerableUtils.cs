@@ -46,6 +46,10 @@ public static class EnumerableUtils{
 	}
 
 
+
+	public static IEnumerable<T> Concat<T>(params IEnumerable<T>[] sources)=>sources.SelectMany();
+	public static IEnumerable<T> Concat<T>(IEnumerable<IEnumerable<T>> sources)=>sources.SelectMany();
+	
 	public static IEnumerable<T> SelectMany<T>(this IEnumerable<IEnumerable<T>> source)=>source.SelectMany(enumerable=>enumerable);
 
 	public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source) where T:class=>source.Where(t=>t!=null)!;
