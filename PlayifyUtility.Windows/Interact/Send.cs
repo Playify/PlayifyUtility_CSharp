@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
-using PlayifyUtility.Windows.Native;
+using PlayifyUtility.Windows.Win;
 using static System.Windows.Forms.Keys;
 using static PlayifyUtility.Windows.Interact.Send.SendFlags;
 

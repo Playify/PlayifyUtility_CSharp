@@ -2,7 +2,11 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace PlayifyUtility.Windows.Native;
+#if NETFRAMEWORK
+using PlayifyUtility.Windows.Internal;
+#endif
+
+namespace PlayifyUtility.Windows.Win;
 
 public readonly partial struct WinWindow{
 	static WinWindow()=>AppDomain.CurrentDomain.ProcessExit+=(_,_)=>RestoreAll();

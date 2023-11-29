@@ -2,7 +2,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using JetBrains.Annotations;
 
-namespace PlayifyUtility.Windows.Native;
+#if NETFRAMEWORK
+using PlayifyUtility.Windows.Internal;
+#endif
+
+namespace PlayifyUtility.Windows.Win;
 
 [PublicAPI]
 [SuppressMessage("ReSharper","CommentTypo")]

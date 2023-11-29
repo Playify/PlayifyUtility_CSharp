@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
-using PlayifyUtility.Windows.Native;
+using PlayifyUtility.Windows.Win;
 
 namespace PlayifyUtility.Windows.Helpers;
 
@@ -14,24 +14,32 @@ public static partial class ToolTip{
 	}
 
 	public static void ShowToolTip(string s)=>ShowToolTip(s,TimeSpan.FromSeconds(1));
+
 	public static void ShowToolTip(string s,TimeSpan timeout){
 		if(_currentToolTip==default){
 			var hwnd=CreateWindowEx(0x28,//WS_EX_TRANSPARENT|WS_EX_TOPMOST
-			                               "tooltips_class32",//TOOLTIPS_CLASS
-			                               null,0x33,//TTS_NOANIMATE|TTS_NOFADE|TTS_NOPREFIX|TTS_ALWAYSTIP
-			                               int.MinValue,int.MinValue,int.MinValue,int.MinValue,//CW_USEDEFAULT
-			                               IntPtr.Zero,IntPtr.Zero,IntPtr.Zero,IntPtr.Zero);
+			                        "tooltips_class32",//TOOLTIPS_CLASS
+			                        null,
+			                        0x33,//TTS_NOANIMATE|TTS_NOFADE|TTS_NOPREFIX|TTS_ALWAYSTIP
+			                        int.MinValue,
+			                        int.MinValue,
+			                        int.MinValue,
+			                        int.MinValue,//CW_USEDEFAULT
+			                        IntPtr.Zero,
+			                        IntPtr.Zero,
+			                        IntPtr.Zero,
+			                        IntPtr.Zero);
 			_currentToolTip=new WinWindow(hwnd);
 
 			AppDomain.CurrentDomain.ProcessExit+=(_,_)=>_currentToolTip.DestroyWindow();
 
 
 			_toolInfo=new ToolInfo();
-			_toolInfo.cbSize=(uint) Marshal.SizeOf(_toolInfo);
+			_toolInfo.cbSize=(uint)Marshal.SizeOf(_toolInfo);
 			_toolInfo.uFlags=0x120;//TTF_TRACK
 			_toolInfo.hwnd=IntPtr.Zero;
 			_toolInfo.hInst=IntPtr.Zero;
-			_toolInfo.uId=(UIntPtr) 0;
+			_toolInfo.uId=(UIntPtr)0;
 			_toolInfo.lpszText=s;
 			_toolInfo.rect=new NativeMethods.Rect();
 
@@ -50,10 +58,14 @@ public static partial class ToolTip{
 		_currentToolTip.SetWindowPos(-1,0,0,0,0,0x13);
 
 		_cancel.Cancel();
+#if NETCOREAPP
 		if(!_cancel.TryReset()) _cancel=new CancellationTokenSource();
+#else
+		_cancel=new CancellationTokenSource();
+#endif
 		_cancel.CancelAfter(timeout);
-		Task.Delay(timeout,_cancel.Token).ContinueWith(t=>{
-			if(t.IsCompletedSuccessfully) HideToolTip();
-		});
+		Task.Delay(timeout,_cancel.Token).ContinueWith(
+		                                               _=>HideToolTip(),
+		                                               TaskContinuationOptions.OnlyOnRanToCompletion);
 	}
 }

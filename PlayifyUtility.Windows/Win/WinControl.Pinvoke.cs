@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace PlayifyUtility.Windows.Native;
+namespace PlayifyUtility.Windows.Win;
 
 public readonly partial struct WinControl{
 

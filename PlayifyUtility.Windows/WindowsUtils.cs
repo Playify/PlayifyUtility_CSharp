@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Imaging;
-using System.Text;
 using static PlayifyUtility.Windows.NativeMethods;
 using Point=System.Drawing.Point;
 
