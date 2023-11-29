@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 
 namespace PlayifyUtility.Utils;
@@ -12,8 +13,8 @@ public static class VariableExtensions{
 		return true;
 	}
 
-	public static bool NotNull<T>(this T? t,out T result) where T:class{
-		result=t!;
+	public static bool NotNull<T>(this T? t,[MaybeNullWhen(false)]out T result) where T:class{
+		result=t;
 		return t!=null;
 	}
 

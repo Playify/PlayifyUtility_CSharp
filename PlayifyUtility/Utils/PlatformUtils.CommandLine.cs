@@ -65,6 +65,7 @@ public partial class PlatformUtils{
 	}
 
 
+	//use ProcessStartInfo.ArgumentList instead of ProcessStartInfo.Arguments
 	public static string EscapeArguments(params string[] args){
 		var arguments=new StringBuilder();
 		var invalidChar=new Regex("[\x00\x0a\x0d]");//these can not be escaped

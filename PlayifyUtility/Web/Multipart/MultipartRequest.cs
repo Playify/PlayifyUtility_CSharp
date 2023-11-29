@@ -43,7 +43,7 @@ public abstract class MultipartRequest<TThis> where TThis:class{
 		string s;
 		while(!string.IsNullOrEmpty(s=await WebStream.ReadLineAsync())){
 			var i=s.IndexOf(": ",StringComparison.Ordinal);
-			if(i!=-1) Headers[s.Substring(0,i).Trim()]=s.Substring(i+1).Trim();
+			if(i!=-1) Headers[s[..i].Trim()]=s[(i+1)..].Trim();
 			else{
 				await Session.Send.Error(400);
 				throw new CloseException("Invalid Header in "+GetType().Name+": \""+s+"\"");
@@ -74,7 +74,7 @@ public abstract class MultipartRequest<TThis> where TThis:class{
 		var i=type.IndexOf("boundary=",StringComparison.OrdinalIgnoreCase);
 		if(i==-1) return null;
 		MarkFinished();
-		return new Multipart(Session,WebStream,type.Substring(i+"boundary=".Length)).LoopAsync();
+		return new Multipart(Session,WebStream,type[(i+"boundary=".Length)..]).LoopAsync();
 	}
 
 	protected abstract void MarkFinished();

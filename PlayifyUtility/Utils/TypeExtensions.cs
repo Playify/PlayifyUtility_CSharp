@@ -1,6 +1,9 @@
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
+using PlayifyUtility.HelperClasses;
 
 namespace PlayifyUtility.Utils;
 
@@ -53,5 +56,35 @@ public static class TypeExtensions{
 			cancellationToken.Register(()=>tcs.SetCanceled(cancellationToken));
 
 		return process.HasExited?Task.CompletedTask:tcs.Task;
+	}
+
+	public static bool IsSuccess(this Match t,out Match result){
+		result=t;
+		return t.Success;
+	}
+	public static IDisposable AddTemporary<T>(this HashSet<T> set,T t){
+		set.Add(t);
+		return new CallbackAsDisposable(()=>set.Remove(t));
+	}
+	
+	
+	public static TaskAwaiter GetAwaiter(this WaitHandle handle)=>handle.ToTask().GetAwaiter();
+	public static Task ToTask(this WaitHandle handle){
+		var tcs=new TaskCompletionSource();
+		var localVariableInitLock=new object();
+		lock(localVariableInitLock){
+			RegisteredWaitHandle callbackHandle=null!;
+			callbackHandle=ThreadPool.RegisterWaitForSingleObject(handle,
+			                                                      (_,_)=>{
+				                                                      tcs.SetResult();
+				                                                      // ReSharper disable once AccessToModifiedClosure
+				                                                      lock(localVariableInitLock) callbackHandle.Unregister(null);
+			                                                      },
+			                                                      null,
+			                                                      Timeout.Infinite,
+			                                                      true);
+		}
+
+		return tcs.Task;
 	}
 }

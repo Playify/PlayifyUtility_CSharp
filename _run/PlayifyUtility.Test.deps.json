@@ -8,8 +8,8 @@
     ".NETCoreApp,Version=v6.0": {
       "PlayifyUtility.Test/1.0.0": {
         "dependencies": {
-          "PlayifyUtility": "1.0.1",
-          "PlayifyUtility.Windows": "1.0.0"
+          "PlayifyUtility": "1.0.5",
+          "PlayifyUtility.Windows": "1.0.2"
         },
         "runtime": {
           "PlayifyUtility.Test.dll": {}
@@ -23,7 +23,7 @@
           }
         }
       },
-      "PlayifyUtility/1.0.1": {
+      "PlayifyUtility/1.0.5": {
         "dependencies": {
           "JetBrains.Annotations": "2023.2.0"
         },
@@ -31,7 +31,7 @@
           "PlayifyUtility.dll": {}
         }
       },
-      "PlayifyUtility.Windows/1.0.0": {
+      "PlayifyUtility.Windows/1.0.2": {
         "dependencies": {
           "JetBrains.Annotations": "2023.2.0"
         },
@@ -54,12 +54,12 @@
       "path": "jetbrains.annotations/2023.2.0",
       "hashPath": "jetbrains.annotations.2023.2.0.nupkg.sha512"
     },
-    "PlayifyUtility/1.0.1": {
+    "PlayifyUtility/1.0.5": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "PlayifyUtility.Windows/1.0.0": {
+    "PlayifyUtility.Windows/1.0.2": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

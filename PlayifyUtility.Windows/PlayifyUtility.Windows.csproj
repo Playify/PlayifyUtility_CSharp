@@ -12,6 +12,10 @@
         <Description>Utilities for other Playify Projects (Windows extensions)</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
+        <Version>1.0.3</Version>
+
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
         <UseWindowsForms>true</UseWindowsForms>
 
@@ -23,8 +27,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="CaseSensitiveDirectory.Native.cs">
-        <DependentUpon>CaseSensitiveDirectory.cs</DependentUpon>
+      <Compile Update="Helpers\ToolTip.Internal.cs">
+        <DependentUpon>ToolTip.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Native\WinControl.Pinvoke.cs">
+        <DependentUpon>NativeControl.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Native\WinWindow.Pinvoke.cs">
+        <DependentUpon>NativeWindow.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

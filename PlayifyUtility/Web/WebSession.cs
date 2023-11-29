@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using JetBrains.Annotations;
 using PlayifyUtility.Streams;
 using PlayifyUtility.Utils;
@@ -85,7 +86,7 @@ public class WebSession:MultipartRequest<WebSession>{
 			if(Path!=path){
 				var url=Uri.EscapeDataString(path);
 				var i=RawUrl.IndexOf('?');
-				if(i!=-1) url+=RawUrl.Substring(i);
+				if(i!=-1) url+=RawUrl[i..];
 				await Send.Redirect(url,false);
 				return;
 			}
@@ -99,7 +100,7 @@ public class WebSession:MultipartRequest<WebSession>{
 			foreach(var cookie in cookies)
 			foreach(var s in CookieSplitter.Split(cookie)){
 				var i=s.IndexOf('=');
-				if(i!=-1) Cookies.Add(s.Substring(0,i),s.Substring(i+1));
+				if(i!=-1) Cookies.Add(HttpUtility.UrlDecode(s[..i]),HttpUtility.UrlDecode(s[(i+1)..]));
 			}
 
 		if(Headers.Get("Content-Length").Push(out var lengthStr)!=null&&int.TryParse(lengthStr,out var length)){

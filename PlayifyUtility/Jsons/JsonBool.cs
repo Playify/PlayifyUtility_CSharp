@@ -1,38 +1,57 @@
+using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
+using PlayifyUtility.Utils;
+
 namespace PlayifyUtility.Jsons;
 
+[PublicAPI]
 public class JsonBool:Json{
 	public static readonly JsonBool True=new(true);
 	public static readonly JsonBool False=new(false);
-	private readonly bool _b;
+	public static JsonBool Get(bool b)=>b?True:False;
+	
+	public readonly bool Value;
 
-	private JsonBool(bool b)=>_b=b;
+	
+	private JsonBool(bool value)=>Value=value;
 
-	public new static JsonBool? Parse(string s)=>Json.Parse(s) as JsonBool;
+	#region Parse
+	public static bool TryParse(string s,[MaybeNullWhen(false)]out JsonBool json)=>TryParseGeneric(s,out json,ParseOrNull);
+	public static bool TryParse(ref string s,[MaybeNullWhen(false)]out JsonBool json)=>TryParseGeneric(ref s,out json,ParseOrNull);
+	public static bool TryParse(TextReader s,[MaybeNullWhen(false)]out JsonBool json)=>ParseOrNull(s).NotNull(out json);
 
-	public new static JsonBool? Parse(ref string s){
-		var old=s;
-		if(Json.Parse(ref s) is JsonBool arr) return arr;
-		s=old;
-		return null;
-	}
 
-	public new static JsonBool Parse(TextReader r){
-		if(NextPeek(r) is not ('t' or 'f')) throw new JsonException();
-		return (JsonBool) Json.Parse(r);
-	}
+	public new static JsonBool? ParseOrNull(string s)=>TryParse(s,out var json)?json:null;
+	public new static JsonBool? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
+	public new static JsonBool? ParseOrNull(TextReader r)
+		=>NextRead(r) switch{
+			't' when r.Read()=='r'&&r.Read()=='u'&&r.Read()=='e'=>True,
+			'f' when r.Read()=='a'&&r.Read()=='l'&&r.Read()=='s'&&r.Read()=='e'=>False,
+			_=>null,
+		};
+	#endregion
 
-	public override string ToString(string? indent)=>_b?"true":"false";
+	#region Convert
 
 	public override Json DeepCopy()=>this;
 
-	public override double AsNumber()=>_b?1:0;
+	public override double AsDouble()=>Value?1:0;
 
-	public override bool AsBoolean()=>_b;
+	public override bool AsBool()=>Value;
 
-	public override string AsString()=>_b?"true":"false";
-	public override bool Equals(object? obj)=>obj is JsonBool b&&_b==b._b;
+	public override string AsString()=>Value?"true":"false";
+	
+	public override string ToString(string? indent)=>AsString();
+	#endregion
 
-	public override int GetHashCode()=>_b?1:0;
+	#region Operators
+	public override bool Equals(object? obj)=>ReferenceEquals(this,obj);
 
+	public override int GetHashCode()=>Value?1:0;
+
+	public static bool operator==(JsonBool l,JsonBool r)=>ReferenceEquals(l,r);
+	public static bool operator!=(JsonBool l,JsonBool r)=>!(l==r);
+	public static implicit operator bool(JsonBool j)=>j.Value;
 	public static implicit operator JsonBool(bool b)=>b?True:False;
+	#endregion
 }

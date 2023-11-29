@@ -1,9 +1,10 @@
-using System.Windows.Forms;
+using JetBrains.Annotations;
 
 namespace PlayifyUtility.Windows.Hooks;
 
-public delegate void MouseEventHandler(MouseEvent mouseEvent);
+public delegate void MouseEventHandler(MouseEvent e);
 
+[PublicAPI]
 public class MouseEvent{
 	public MouseEvent(int x,int y,MouseButtons button,int delta=0){
 		X=x;

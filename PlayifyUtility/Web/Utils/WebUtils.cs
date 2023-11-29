@@ -24,7 +24,7 @@ public static class WebUtils{
 	public static Task<string> Read(FileInfo path)=>Read(path.FullName);
 
 	public static NameValueCollection ParseQueryString(string value){
-		if(value.Length>0&&value[0]=='?') value=value.Substring(1);
+		if(value.Length>0&&value[0]=='?') value=value[1..];
 		var collection=new NameValueCollection();
 
 		var num1=value.Length;

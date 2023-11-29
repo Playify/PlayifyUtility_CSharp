@@ -1,9 +1,13 @@
+using System.Collections;
 using JetBrains.Annotations;
 
 namespace PlayifyUtility.Utils;
 
 [PublicAPI]
 public static class EnumerableUtils{
+	public static IEnumerator<T> GetEnumerator<T>(this IEnumerator<T> e)=>e;
+	public static IEnumerator GetEnumerator(this IEnumerator e)=>e;
+
 	public static T[] Combine<T>(T a,T[] b){
 		var arr=new T[b.Length+1];
 		arr[0]=a;
@@ -42,6 +46,10 @@ public static class EnumerableUtils{
 	}
 
 
+
+	public static IEnumerable<T> Concat<T>(params IEnumerable<T>[] sources)=>sources.SelectMany();
+	public static IEnumerable<T> Concat<T>(IEnumerable<IEnumerable<T>> sources)=>sources.SelectMany();
+	
 	public static IEnumerable<T> SelectMany<T>(this IEnumerable<IEnumerable<T>> source)=>source.SelectMany(enumerable=>enumerable);
 
 	public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source) where T:class=>source.Where(t=>t!=null)!;
@@ -52,12 +60,11 @@ public static class EnumerableUtils{
 				yield return t;
 	}
 
-	public static IEnumerable<(T value,int index)> WithIndex<T>(this IEnumerable<T> source,int offset=0)=>source.Select(value=>(value,offset++));
+	public static IEnumerable<(T value,int index)> WithIndex<T>(this IEnumerable<T> source)=>source.Select((value,i)=>(value,i));
 
 	public static IEnumerable<(TFirst a,TSecond b,int index)> ZipWithIndex<TFirst,TSecond>(this IEnumerable<TFirst> first,
 	                                                                                       IEnumerable<TSecond> second){
-		var i=0;
-		return first.Zip(second,(f,s)=>(f,s,i++));
+		return first.Zip(second,(f,s,i)=>(f,s,i));
 	}
 
 	public static IEnumerable<(TFirst a,TSecond b)> Zip<TFirst,TSecond>(this IEnumerable<TFirst> first,
@@ -67,8 +74,7 @@ public static class EnumerableUtils{
 	public static IEnumerable<TResult> Zip<TFirst,TSecond,TResult>(this IEnumerable<TFirst> first,
 	                                                               IEnumerable<TSecond> second,
 	                                                               Func<TFirst,TSecond,int,TResult> resultSelector){
-		var i=0;
-		return first.Zip(second,(f,s)=>resultSelector(f,s,i++));
+		return first.Zip(second).Select((tuple,i)=>resultSelector(tuple.a,tuple.b,i));
 	}
 
 	public static string Join<T>(this IEnumerable<T> source,string sep)=>string.Join(sep,source);

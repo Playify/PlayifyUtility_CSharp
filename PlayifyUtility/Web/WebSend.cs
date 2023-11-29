@@ -56,7 +56,7 @@ public class WebSend{
 		else key+="="+value+"; Max-Age="+60*60*24*30;
 		if(Session.Headers.TryGetValue("Host",out var host)){
 			if(host.Count(c=>c=='.')==2)//If Host is domain and contains subdomain
-				host=host.Substring(host.IndexOf('.')+1);
+				host=host[(host.IndexOf('.')+1)..];
 			key+="; domain="+host;
 		}
 		return Header("Set-Cookie",key);
@@ -77,15 +77,15 @@ public class WebSend{
 			Header("Accept-Ranges","bytes");
 			var httpCode=200;
 			if(Session.Headers.TryGetValue("Range",out var range)){
-				range=range.Substring(range.IndexOf('=')+1);
+				range=range[(range.IndexOf('=')+1)..];
 				if(range.Contains(',')){
 					Header("Content-Range","bytes "+start+"-"+end+"/"+size);
 					await Begin(416);
 					return;
 				}
 				var dash=range.IndexOf('-');
-				var cStart=long.Parse(range.Substring(0,dash));
-				if(!long.TryParse(range.Substring(dash+1),out var cEnd)) cEnd=size;
+				var cStart=long.Parse(range[..dash]);
+				if(!long.TryParse(range[(dash+1)..],out var cEnd)) cEnd=size;
 				cEnd=Math.Min(cEnd,end);
 				if(cStart>cEnd||cStart>size-1||cEnd>=size){
 					Header("Content-Range","bytes "+start+"-"+end+"/"+size);

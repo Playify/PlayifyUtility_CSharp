@@ -1,7 +1,8 @@
+
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using PlayifyUtility.Windows.Native;
 using static System.Windows.Forms.Keys;
 using static PlayifyUtility.Windows.Interact.Send.SendFlags;
 
@@ -18,7 +19,7 @@ public class Send{
 	public enum SendFlags{
 		KeyDown=1,
 		KeyUp=2,
-		KeyPress=3,
+		KeyPress=KeyDown|KeyUp,
 		Hidden=4,
 	}
 
@@ -162,47 +163,13 @@ public class Send{
 				Remove(i+1);
 				i=0;
 				if(time!=0) Thread.Sleep(time);
+				Application.DoEvents();
 				continue;
 			}
 			i++;
 		}
 	}
 	#endregion
-
-	/*
-	#region Send
-	private readonly List<Input> _list=new List<Input>();
-
-	private Send Add(Input input){
-		_list.Add(input);
-		return this;
-	}
-
-	public void SendNow(){
-		Restore();
-		while(_list.Count!=0){
-			var i=_list.FindIndex(input=>input.Type==-1);
-			if(i==0){
-				var time=_list[0].InputUnion.ki.Time;
-				if(time!=0) Thread.Sleep(time);
-				Application.DoEvents();
-				_list.RemoveAt(0);
-			} else if(i==-1){
-				var array=_list.ToArray();
-				SendInput(array.Length,array,Marshal.SizeOf(typeof(Input)));
-				_list.Clear();
-				return;
-			} else{
-				var array=_list.ToArray();
-				SendInput(i,array,Marshal.SizeOf(typeof(Input)));
-				var time=_list[i].InputUnion.ki.Time;
-				if(time!=0) Thread.Sleep(time);
-				Application.DoEvents();
-				_list.RemoveRange(0,i+1);
-			}
-		}
-	}
-	#endregion*/
 
 	#region Primitives
 	public Send Unicode(char c,SendFlags flags)
@@ -259,7 +226,7 @@ public class Send{
 						  MButton=>flags.HasFlag(KeyDown)?0x20:0x40,
 						  XButton1=>flags.HasFlag(KeyDown)?0x80:0x100,
 						  XButton2=>flags.HasFlag(KeyDown)?0x80:0x100,
-						  var _=>throw new ArgumentOutOfRangeException(nameof(key),key,null),
+						  _=>throw new ArgumentOutOfRangeException(nameof(key),key,null),
 					  },
 					  DwExtraInfo=flags.HasFlag(Hidden)||_hidden?ProcessHandle:IntPtr.Zero,
 				  },
@@ -271,7 +238,16 @@ public class Send{
 	#endregion
 
 	#region Mouse
-	[SuppressMessage("ReSharper","CommentTypo")]
+	public Send MouseMove(WinWindow window,Point delta,bool check=true,bool hidden=false)=>MouseMove(window,delta.X,delta.Y,check,hidden);
+	public Send MouseMove(WinWindow window,int dx,int dy,bool check=true,bool hidden=false){
+		if(check&&WinWindow.Foreground!=window) throw new Exception("Tried to click in a window that was not focused");
+		var rect=window.WindowRect;
+		
+		dx=dx<0?rect.Right+dx:rect.Left+dx;
+		dy=dy<0?rect.Bottom+dy:rect.Top+dy;
+		return MouseMove(dx,dy,false,hidden);
+	}
+
 	public Send MouseMove(int x,int y,bool relative=false,bool hidden=false){
 		if(!relative)
 			(x,y)=(x*65536/GetSystemMetrics(SmCxScreen),

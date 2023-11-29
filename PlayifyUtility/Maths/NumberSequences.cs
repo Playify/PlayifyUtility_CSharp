@@ -57,4 +57,11 @@ public static class NumberSequences{
 		}
 		// ReSharper disable once IteratorNeverReturns
 	}
+
+	public static IEnumerable<long> Increment(){
+		var l=0L;
+		while(true)
+			yield return l++;
+		// ReSharper disable once IteratorNeverReturns
+	}
 }

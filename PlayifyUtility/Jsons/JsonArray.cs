@@ -1,117 +1,123 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using JetBrains.Annotations;
+using PlayifyUtility.Utils;
 
 namespace PlayifyUtility.Jsons;
 
+[PublicAPI]
 public class JsonArray:Json,IEnumerable<Json>{
 	private readonly List<Json> _value=new();
+	public JsonArray(){}
+	public JsonArray(IEnumerable<Json> e){_value.AddRange(e);}
+	public JsonArray(IEnumerable<double> e):this(e.Select(el=>(Json)el)){}
+	public JsonArray(IEnumerable<int> e):this(e.Select(el=>(Json)el)){}
+	public JsonArray(IEnumerable<long> e):this(e.Select(el=>(Json)el)){}
+	public JsonArray(IEnumerable<bool> e):this(e.Select(el=>(Json)el)){}
+	public JsonArray(IEnumerable<string> e):this(e.Select(el=>(Json)el)){}
+	
+	#region Parse
+	public static bool TryParse(string s,[MaybeNullWhen(false)]out JsonArray json)=>TryParseGeneric(s,out json,ParseOrNull);
+	public static bool TryParse(ref string s,[MaybeNullWhen(false)]out JsonArray json)=>TryParseGeneric(ref s,out json,ParseOrNull);
+	public static bool TryParse(TextReader s,[MaybeNullWhen(false)]out JsonArray json)=>ParseOrNull(s).NotNull(out json);
 
-	public JsonArray(){
-	}
 
-	public JsonArray(IEnumerable<Json> e){
-		foreach(var json in e) Add(json);
-	}
-
-	public JsonArray(IEnumerable<double> e){
-		foreach(var json in e) Add(json);
-	}
-
-	public JsonArray(IEnumerable<int> e){
-		foreach(var json in e) Add(json);
-	}
-
-	public JsonArray(IEnumerable<long> e){
-		foreach(var json in e) Add(json);
-	}
-
-	public JsonArray(IEnumerable<bool> e){
-		foreach(var json in e) Add(json);
-	}
-
-	public JsonArray(IEnumerable<string> e){
-		foreach(var json in e) Add(json);
-	}
-
-	public Json this[int i]{
-		get=>_value[i];
-		set=>_value[i]=value;
-	}
-
-	public int Length=>_value.Count;
-
-	public IEnumerator<Json> GetEnumerator()=>_value.GetEnumerator();
-
-	IEnumerator IEnumerable.GetEnumerator()=>GetEnumerator();
-
-	public new static JsonArray? Parse(string s)=>Json.Parse(s) as JsonArray;
-
-	public new static JsonArray? Parse(ref string s){
-		var old=s;
-		if(Json.Parse(ref s) is JsonArray arr) return arr;
-		s=old;
-		return null;
-	}
-
-	public new static JsonArray Parse(TextReader r){
-		if(NextPeek(r)!='[') throw new JsonException();
-		return (JsonArray) Json.Parse(r);
-	}
-
-	public void Add(Json value)=>_value.Add(value);
-	public void Add(int i,Json value)=>_value.Insert(i,value);
-	public void Set(int i,Json value)=>_value[i]=value;
-
-	public Json Get(int i)=>_value[i];
-	public JsonObject? GetO(int i)=>_value[i] as JsonObject;
-	public JsonArray? GetA(int i)=>_value[i] as JsonArray;
-
-	public void Remove(int i)=>_value.RemoveAt(i);
-
-	public override string ToString(string? indent){
-		var str=new StringBuilder();
-		Append(str,indent);
-		return str.ToString();
-	}
-
-	public override void Append(StringBuilder str,string? indent){
-		if(Length==0){
-			str.Append("[]");
-			return;
+	public new static JsonArray? ParseOrNull(string s)=>TryParse(s,out var json)?json:null;
+	public new static JsonArray? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
+	public new static JsonArray? ParseOrNull(TextReader r){
+		if(NextRead(r)!='[') return null;
+		var o=new JsonArray();
+		var c=NextPeek(r);
+		switch(c){
+			case ',':
+				r.Read();
+				return NextRead(r)==']'?o:null;
+			case ']':{
+				r.Read();
+				return o;
+			}
 		}
+		while(true){
+			if(!Json.TryParse(r,out var child)) return null;
+			o.Add(child);
+			c=NextRead(r);
+			if(c==']') return o;
+			if(c!=',') return null;
+			c=NextPeek(r);
+			if(c!=']') continue;
+			r.Read();
+			return o;
+		}
+	}
+	#endregion
+
+	#region Convert
+
+	public override Json DeepCopy(){
+		var o=new JsonArray();
+		foreach(var value in this) o.Add(value.DeepCopy());
+		return o;
+	}
+
+	public override JsonArray AsArray()=>this;
+
+	public override string ToString(string? indent)=>Append(new StringBuilder(),indent).ToString();
+
+	public override StringBuilder Append(StringBuilder str,string? indent){
+		if(Count==0) return str.Append("[]");
 		if(indent==null){
 			str.Append('[');
 			var first=true;
-			foreach(var j in _value){
+			foreach(var child in _value){
 				if(first) first=false;
 				else str.Append(',');
-				str.Append(j.ToString(null));
+				child.Append(str,null);
 			}
-			str.Append(']');
+			return str.Append(']');
 		} else{
 			str.Append("[\n");
 			var start=str.Length-1;
 			var first=true;
-			foreach(var j in _value){
+			foreach(var child in _value){
 				if(first) first=false;
 				else str.Append(",\n");
-				str.Append(j.ToString(indent));
+				child.Append(str,indent);
 			}
 			for(var i=str.Length-1;i>=start;i--)
 				if(str[i]=='\n')
 					str.Insert(i+1,indent);
-			str.Append("\n]");
+			return str.Append("\n]");
 		}
 	}
+	#endregion
 
-	public override Json DeepCopy()=>new JsonArray(this.Select(j=>j.DeepCopy()));
-
-	public override double AsNumber()=>Length;
-
-	public override string AsString()=>ToString();
-	public override bool Equals(object? obj)=>obj is JsonArray other&&_value.SequenceEqual(other._value);
-
+	#region Operators
+	public override bool Equals(object? obj)=>obj is JsonArray other&&other._value.SequenceEqual(_value);
 	public override int GetHashCode()=>_value.GetHashCode();
+	
+	public IEnumerator<Json> GetEnumerator()=>_value.GetEnumerator();
+	IEnumerator IEnumerable.GetEnumerator()=>GetEnumerator();
+	#endregion
+	
+	#region Accessor
+	public override int Count=>_value.Count;
+	
+	[AllowNull]
+	public override Json this[int index]{
+		get=>_value[index];
+		set=>_value[index]=value??JsonNull.Null;
+	}
+	public override bool TryGet(int index,[MaybeNullWhen(false)]out Json json){
+		if(index<0||index>=Count) return FunctionUtils.TryGetNever(out json);
+		json=_value[index];
+		return true;
+	}
 
-	public override bool AsBoolean()=>Length!=0;
+	public void Add(Json? json)=>_value.Add(json??JsonNull.Null);
+	public void Insert(int index,Json? json)=>_value.Insert(index,json??JsonNull.Null);
+	public void Remove(Json? json)=>_value.Remove(json??JsonNull.Null);
+	public void RemoveAt(int index)=>_value.RemoveAt(index);
+
+	#endregion
 }
