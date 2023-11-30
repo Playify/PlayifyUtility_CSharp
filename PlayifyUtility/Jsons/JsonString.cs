@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using PlayifyUtility.Utils;
+using PlayifyUtility.Utils.Extensions;
 
 namespace PlayifyUtility.Jsons;
 

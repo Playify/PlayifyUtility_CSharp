@@ -1,7 +1,9 @@
 using System.Text;
+using JetBrains.Annotations;
 
 namespace PlayifyUtility.Streams.Data;
 
+[PublicAPI]
 public class DataOutput{
 	private readonly byte[] _writeBuffer=new byte[8];
 	protected readonly Stream OutputStream;

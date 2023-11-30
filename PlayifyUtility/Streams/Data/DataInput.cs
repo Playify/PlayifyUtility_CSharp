@@ -1,7 +1,9 @@
 using System.Text;
+using JetBrains.Annotations;
 
 namespace PlayifyUtility.Streams.Data;
 
+[PublicAPI]
 public class DataInput:IDisposable{
 	private readonly Stream _in;
 	private readonly byte[] _readBuffer=new byte[16];

@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace PlayifyUtility.Web.Utils;
 
+[PublicAPI]
 public class CloseException:Exception{
 	public CloseException(){
 	}

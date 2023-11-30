@@ -1,8 +1,10 @@
 using System.Numerics;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace PlayifyUtility.Maths;
 
+[PublicAPI]
 public static class Numbers{
 	public static int Clamp(int v,int min,int max)=>v<min?min:v>max?max:v;
 	public static byte Clamp(byte v,byte min,byte max)=>v<min?min:v>max?max:v;
@@ -18,19 +20,29 @@ public static class Numbers{
 
 	public static float Clamp01(float v)=>v<0?0:v>1?1:v;
 	public static double Clamp01(double v)=>v<0?0:v>1?1:v;
-	public static int Random()=>System.Random.Shared.Next();
-	public static int Random(int max)=>System.Random.Shared.Next(max);
-	public static int Random(int min,int max)=>System.Random.Shared.Next(min,max);
-	public static double RandomDouble()=>System.Random.Shared.NextDouble();
-	public static void RandomBytes(byte[] buffer)=>System.Random.Shared.NextBytes(buffer);
+
+	public static Random SharedRandom
+		=>
+#if NETFRAMEWORK
+		Shared.Value??=new Random();
+	private static readonly ThreadLocal<Random> Shared=new();
+#else
+		System.Random.Shared;
+#endif
+
+	public static int Random()=>SharedRandom.Next();
+	public static int Random(int max)=>SharedRandom.Next(max);
+	public static int Random(int min,int max)=>SharedRandom.Next(min,max);
+	public static double RandomDouble()=>SharedRandom.NextDouble();
+	public static void RandomBytes(byte[] buffer)=>SharedRandom.NextBytes(buffer);
 
 	public static int SetBit(int value,int mask,bool to)=>to?value|mask:value&~mask;
-	public static byte SetBit(byte value,byte mask,bool to)=>(byte) (to?value|mask:value&~mask);
-	public static short SetBit(short value,short mask,bool to)=>(short) (to?value|mask:value&~mask);
+	public static byte SetBit(byte value,byte mask,bool to)=>(byte)(to?value|mask:value&~mask);
+	public static short SetBit(short value,short mask,bool to)=>(short)(to?value|mask:value&~mask);
 	public static long SetBit(long value,long mask,bool to)=>to?value|mask:value&~mask;
 	public static uint SetBit(uint value,uint mask,bool to)=>to?value|mask:value&~mask;
-	public static sbyte SetBit(sbyte value,sbyte mask,bool to)=>(sbyte) (to?value|mask:value&~mask);
-	public static ushort SetBit(ushort value,ushort mask,bool to)=>(ushort) (to?value|mask:value&~mask);
+	public static sbyte SetBit(sbyte value,sbyte mask,bool to)=>(sbyte)(to?value|mask:value&~mask);
+	public static ushort SetBit(ushort value,ushort mask,bool to)=>(ushort)(to?value|mask:value&~mask);
 	public static ulong SetBit(ulong value,ulong mask,bool to)=>to?value|mask:value&~mask;
 
 
@@ -55,7 +67,7 @@ public static class Numbers{
 		while(true){
 			value=BigInteger.DivRem(value,radix,out var remainder);
 
-			str.Insert(0,digits[(int) remainder]);
+			str.Insert(0,digits[(int)remainder]);
 			if(value.Sign==0) return str.ToString();
 		}
 	}
@@ -65,24 +77,24 @@ public static class Numbers{
 
 		var ret=0UL;
 		var radixInt=digits.Length;
-		var radixBig=(ulong) radixInt;
+		var radixBig=(ulong)radixInt;
 		foreach(var c in value){
 			ret*=radixBig;
 			var i=digits.IndexOf(c);
 			if(i<0||i>radixInt) throw new ArgumentException("Illegal Character: '"+c+"'");
-			ret+=(ulong) i;
+			ret+=(ulong)i;
 		}
 		return ret;
 	}
 
 	public static string ToString(ulong value,string digits){
 		var str=new StringBuilder();
-		var radix=(ulong) digits.Length;
+		var radix=(ulong)digits.Length;
 		while(true){
 			var remainder=value%radix;
 			value/=radix;
 
-			str.Insert(0,digits[(int) remainder]);
+			str.Insert(0,digits[(int)remainder]);
 			if(value==0) return str.ToString();
 		}
 	}

@@ -8,6 +8,9 @@
     <description>Utilities for other Playify Projects (Windows extensions)</description>
     <repository type="GitHub" url="https://github.com/Playify/PlayifyUtility_CSharp" />
     <dependencies>
+      <group targetFramework=".NETFramework4.8">
+        <dependency id="JetBrains.Annotations" version="2023.2.0" exclude="Build,Analyzers" />
+      </group>
       <group targetFramework="net6.0-windows7.0">
         <dependency id="JetBrains.Annotations" version="2023.2.0" exclude="Build,Analyzers" />
       </group>
@@ -16,9 +19,11 @@
       <group targetFramework="net6.0-windows7.0">
         <frameworkReference name="Microsoft.WindowsDesktop.App.WindowsForms" />
       </group>
+      <group targetFramework=".NETFramework4.8" />
     </frameworkReferences>
   </metadata>
   <files>
-    <file src="C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\_run\PlayifyUtility.Windows.dll" target="lib\net6.0-windows7.0\PlayifyUtility.Windows.dll" />
+    <file src="C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\_run\net48\PlayifyUtility.Windows.dll" target="lib\net48\PlayifyUtility.Windows.dll" />
+    <file src="C:\Users\TE282179\TE_APP_DEV\Projects\alsoAtHome\PlayifyUtility_CSharp\_run\net6.0-windows\PlayifyUtility.Windows.dll" target="lib\net6.0-windows7.0\PlayifyUtility.Windows.dll" />
   </files>
 </package>

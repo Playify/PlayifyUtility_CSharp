@@ -1,13 +1,12 @@
 using System.Collections.Specialized;
+using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
 using JetBrains.Annotations;
 using PlayifyUtility.Streams;
-using PlayifyUtility.Utils;
+using PlayifyUtility.Utils.Extensions;
 using PlayifyUtility.Web.Multipart;
 using PlayifyUtility.Web.Utils;
 
@@ -86,7 +85,7 @@ public class WebSession:MultipartRequest<WebSession>{
 			if(Path!=path){
 				var url=Uri.EscapeDataString(path);
 				var i=RawUrl.IndexOf('?');
-				if(i!=-1) url+=RawUrl[i..];
+				if(i!=-1) url+=RawUrl.Substring(i);
 				await Send.Redirect(url,false);
 				return;
 			}
@@ -100,14 +99,13 @@ public class WebSession:MultipartRequest<WebSession>{
 			foreach(var cookie in cookies)
 			foreach(var s in CookieSplitter.Split(cookie)){
 				var i=s.IndexOf('=');
-				if(i!=-1) Cookies.Add(HttpUtility.UrlDecode(s[..i]),HttpUtility.UrlDecode(s[(i+1)..]));
+				if(i!=-1) Cookies.Add(WebUtility.UrlDecode(s.Substring(0,i)),WebUtility.UrlDecode(s.Substring(i+1)));
 			}
 
 		if(Headers.Get("Content-Length").Push(out var lengthStr)!=null&&int.TryParse(lengthStr,out var length)){
 			_length=length;
 			_finished=false;
-		}
-		else{
+		} else{
 			_length=0;
 			_finished=true;
 		}
@@ -122,7 +120,7 @@ public class WebSession:MultipartRequest<WebSession>{
 		if(!WantsWebSocket()) return null;
 		var key=Headers["Sec-WebSocket-Key"];
 		key+="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-		var hash=SHA1.HashData(Encoding.ASCII.GetBytes(key));
+		var hash=WebUtils.Sha1(Encoding.ASCII.GetBytes(key));
 		key=Convert.ToBase64String(hash);
 		Send.Header("Connection","Upgrade");
 		Send.Header("Upgrade","websocket");
@@ -162,7 +160,10 @@ public class WebSession:MultipartRequest<WebSession>{
 	public override async Task<bool> ReadToFileAsync(string path){
 		if(Finished) return false;
 		var buffer=new byte[Math.Min(1024*1024,_length)];
-		await using var stream=new FileStream(path,FileMode.OpenOrCreate,FileAccess.Write,FileShare.Read,buffer.Length,FileOptions.Asynchronous);
+#if !NETFRAMEWORK
+		await
+#endif
+		using var stream=new FileStream(path,FileMode.OpenOrCreate,FileAccess.Write,FileShare.Read,buffer.Length,FileOptions.Asynchronous);
 		while(_length>0){
 			var i=await WebStream.ReadAsync(buffer,0,Math.Min(buffer.Length,_length));
 			_length-=i;

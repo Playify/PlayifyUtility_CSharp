@@ -2,19 +2,22 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFrameworks>net6.0-windows;net48</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
         <RootNamespace>PlayifyUtils.Test</RootNamespace>
         
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <OutputPath>../_run</OutputPath>
     </PropertyGroup>
+
+    <ItemGroup Condition="'$(TargetFrameworkIdentifier)'=='.NETFramework'">
+        <Using Remove="System.Net.Http" />
+    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\PlayifyUtility.Windows\PlayifyUtility.Windows.csproj" />
       <ProjectReference Include="..\PlayifyUtility\PlayifyUtility.csproj" />
     </ItemGroup>
-
 </Project>

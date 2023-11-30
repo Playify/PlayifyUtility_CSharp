@@ -1,36 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFrameworks>net6.0;net48</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <OutputPath>../_run</OutputPath>
+        <DefineConstants>TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
+        
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>PlayifyUtility</Title>
         <Authors>Playify</Authors>
         <Description>Utilities for other Playify Projects</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
-        <Version>1.0.6</Version>
+        <Version>1.1.0</Version>
 
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
+    <ItemGroup Condition="'$(TargetFrameworkIdentifier)'=='.NETFramework'">
+        <Using Remove="System.Net.Http" />
+    </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
+        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
+        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0"  Condition="'$(TargetFrameworkIdentifier)'=='.NETFramework'"/>
+        <PackageReference Include="System.Threading.Tasks.Dataflow" Version="8.0.0"  Condition="'$(TargetFrameworkIdentifier)'=='.NETFramework'"/>
     </ItemGroup>
 
 
     <ItemGroup>
-        <Compile Update="Utils\AsyncUtils.ValueTask.cs">
-            <DependentUpon>AsyncUtils.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Utils\AsyncUtils.JsPromise.cs">
-            <DependentUpon>AsyncUtils.cs</DependentUpon>
-        </Compile>
         <Compile Update="Special\CaseSensitiveDirectory.Native.cs">
             <DependentUpon>CaseSensitiveDirectory.cs</DependentUpon>
         </Compile>
@@ -42,19 +43,17 @@
         </Compile>
         <Compile Remove="PlayifyUtils.Test\**" />
         <Compile Remove="PlayifyUtils.Windows\**" />
-        <Compile Update="Utils\PlatformUtils.CommandLine.cs">
-          <DependentUpon>PlatformUtils.cs</DependentUpon>
-        </Compile>
         <Compile Update="Jsons2\Json.Parse.cs">
           <DependentUpon>Json.cs</DependentUpon>
         </Compile>
         <Compile Update="Jsons\Json.Parse.cs">
           <DependentUpon>Json.cs</DependentUpon>
         </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="PlayifyUtils.Test\**" />
-      <None Remove="PlayifyUtils.Windows\**" />
+        <Compile Update="Utils\Extensions\AsyncExtensions.JsPromise.cs">
+          <DependentUpon>AsyncExtensions.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Utils\Extensions\AsyncExtensions.ValueTask.cs">
+          <DependentUpon>AsyncExtensions.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

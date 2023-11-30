@@ -1,13 +1,13 @@
 using System.Text;
-using PlayifyUtility.Utils;
+using PlayifyUtility.Utils.Extensions;
 
 namespace PlayifyUtility.Streams;
 
 public class WebStream2:IWebStream{
 	private class ByteBuffer{
-		public byte[] Bytes;
+		public readonly byte[] Bytes;
 		public int Start;
-		public int End;
+		public readonly int End;
 
 		public ByteBuffer(byte[] bytes,int start,int end){
 			Bytes=bytes;

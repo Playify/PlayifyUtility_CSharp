@@ -1,13 +1,16 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using JetBrains.Annotations;
+using PlayifyUtility.Windows.Win.Native;
 
 #if NETFRAMEWORK
-using PlayifyUtility.Windows.Internal;
+using PlayifyUtility.Windows.Utils;
 #endif
 
 namespace PlayifyUtility.Windows.Win;
 
+[PublicAPI]
 public readonly partial struct WinWindow{
 	static WinWindow()=>AppDomain.CurrentDomain.ProcessExit+=(_,_)=>RestoreAll();
 
@@ -26,13 +29,13 @@ public readonly partial struct WinWindow{
 	}
 
 	public static WinWindow GetWindowUnderCursor(bool detectInvisibleForeground=false){
-		NativeMethods.GetCursorPos(out var ptCursor);
+		var cursor=WinCursor.CursorPos;
 		if(detectInvisibleForeground){
 			var foreground=Foreground;
 			var rect=foreground.WindowRect;
-			if(rect.Left<=ptCursor.x&&ptCursor.y<=rect.Right&&rect.Top<=ptCursor.y&&ptCursor.y<=rect.Bottom) return foreground;
+			if(rect.Left<=cursor.X&&cursor.Y<=rect.Right&&rect.Top<=cursor.Y&&cursor.Y<=rect.Bottom) return foreground;
 		}
-		return GetWindowAt(ptCursor.x,ptCursor.y);
+		return GetWindowAt(cursor.X,cursor.Y);
 	}
 
 	public static WinWindow GetWindowAt(Point point)=>GetWindowAt(point.X,point.Y);
@@ -70,7 +73,8 @@ public readonly partial struct WinWindow{
 		set=>SetWindowLong(Hwnd,-16,value);
 	}
 	public bool IsVisible=>IsWindowVisible(Hwnd);
-	public NativeMethods.Rect WindowRect{
+	public bool Exists=>IsWindow(Hwnd);
+	public NativeRect WindowRect{
 		get{
 			GetWindowRect(Hwnd,out var rect);
 			return rect;
@@ -89,7 +93,7 @@ public readonly partial struct WinWindow{
 		}
 	}
 
-	private static readonly Dictionary<IntPtr,NativeMethods.Rect> FullScreened=new();
+	private static readonly Dictionary<IntPtr,NativeRect> FullScreened=new();
 	public bool Fullscreen{
 		get=>Borderless&&FullScreened.ContainsKey(Hwnd);
 		set{
@@ -131,34 +135,34 @@ public readonly partial struct WinWindow{
 	}
 
 
-	public NativeMethods.ShowWindowCommands ShowWindowCommand{
+	public ShowWindowCommands ShowWindowCommand{
 		get{
-			var placement=new NativeMethods.WindowPlacement{length=Marshal.SizeOf<NativeMethods.WindowPlacement>()};
+			var placement=new WindowPlacement{length=Marshal.SizeOf<WindowPlacement>()};
 			GetWindowPlacement(Hwnd,ref placement);
 			return placement.showCmd;
 		}
 		set=>ShowWindow(Hwnd,value);
 	}
 	public bool Maximized{
-		get=>ShowWindowCommand==NativeMethods.ShowWindowCommands.Maximized;
-		set=>ShowWindowCommand=value?NativeMethods.ShowWindowCommands.Maximized:NativeMethods.ShowWindowCommands.Normal;
+		get=>ShowWindowCommand==ShowWindowCommands.Maximized;
+		set=>ShowWindowCommand=value?ShowWindowCommands.Maximized:ShowWindowCommands.Normal;
 	}
 
 	private static readonly Stack<WinWindow> Hidden=new();
 
 	public void Hide(){
 		Hidden.Push(this);
-		ShowWindowCommand=NativeMethods.ShowWindowCommands.Hide;
+		ShowWindowCommand=ShowWindowCommands.Hide;
 	}
 
 	public static void RestoreLast(){
 		if(Hidden.TryPop(out var restore))
-			restore.ShowWindowCommand=NativeMethods.ShowWindowCommands.Show;
+			restore.ShowWindowCommand=ShowWindowCommands.Show;
 	}
 
 	public static void RestoreAll(){
 		while(Hidden.TryPop(out var restore))
-			restore.ShowWindowCommand=NativeMethods.ShowWindowCommands.Show;
+			restore.ShowWindowCommand=ShowWindowCommands.Show;
 	}
 
 
@@ -181,7 +185,7 @@ public readonly partial struct WinWindow{
 		}
 	}
 
-	public NativeMethods.ColorRef? TransparentColor{
+	public NativeColor? TransparentColor{
 		get{
 			GetLayeredWindowAttributes(Hwnd,out var clr,out _,out var dw);
 			return (dw&1)!=0?clr:null;

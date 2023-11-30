@@ -3,13 +3,13 @@ using System.Text;
 using JetBrains.Annotations;
 
 #if NETFRAMEWORK
-using PlayifyUtility.Windows.Internal;
+using PlayifyUtility.Windows.Utils;
 #endif
 
 namespace PlayifyUtility.Windows.Win;
 
-[PublicAPI]
 [SuppressMessage("ReSharper","CommentTypo")]
+[PublicAPI]
 public readonly partial struct WinControl{
 	public readonly IntPtr Hwnd;
 

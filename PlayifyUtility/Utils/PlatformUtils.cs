@@ -9,16 +9,16 @@ using JetBrains.Annotations;
 namespace PlayifyUtility.Utils;
 
 [PublicAPI]
-public partial class PlatformUtils{
+public class PlatformUtils{
 	public static bool IsAndroid()=>Type.GetType("Android.Content.Context")!=null;
 	public static bool IsLinux()=>RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 	public static bool IsWindows()=>RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
 
-	public static async ValueTask<PhysicalAddress?> GetMac(IPAddress ip){
+	public static async Task<PhysicalAddress?> GetMac(IPAddress ip){
 		if(IsAndroid()){
 			var process=Process.Start(new ProcessStartInfo("su","-c cat /proc/net/arp"){
-				UseShellExecute=false,RedirectStandardOutput=true,CreateNoWindow=true
+				UseShellExecute=false,RedirectStandardOutput=true,CreateNoWindow=true,
 			});
 			if(process==null) throw new IOException("Error getting MAC Address from "+ip+" (Error starting Process)");
 			var s=await process.StandardOutput.ReadToEndAsync();
@@ -32,7 +32,7 @@ public partial class PlatformUtils{
 			return null;
 		} else{
 			var process=Process.Start(new ProcessStartInfo("arp","-a "+ip){
-				UseShellExecute=false,RedirectStandardOutput=true,CreateNoWindow=true
+				UseShellExecute=false,RedirectStandardOutput=true,CreateNoWindow=true,
 			});
 			if(process==null) throw new IOException("Error getting MAC Address from "+ip+" (Error starting Process)");
 			var s=await process.StandardOutput.ReadToEndAsync();

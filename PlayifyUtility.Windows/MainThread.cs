@@ -5,6 +5,8 @@ public static class MainThread{
 	public static SynchronizationContext? SynchronizationContext=>_ctx??=SynchronizationContext.Current;
 	
 	public static void Init(){
+		
+		//Initializes Singleton
 		if(SynchronizationContext==null) throw new Exception("Error getting "+nameof(SynchronizationContext));
 	}
 	
@@ -24,5 +26,10 @@ public static class MainThread{
 		T result=default!;
 		ctx.Send(_=>result=func(),null);
 		return result;
+	}
+	public static void Invoke(Action func){
+		var ctx=SynchronizationContext;
+		if(ctx==null) func();
+		else ctx.Send(_=>func(),null);
 	}
 }

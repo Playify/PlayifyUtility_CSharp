@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
-using PlayifyUtility.Utils;
+using PlayifyUtility.Utils.Extensions;
 
 namespace PlayifyUtility.Jsons;
 

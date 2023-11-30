@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using PlayifyUtility.Utils;
+using PlayifyUtility.Utils.Extensions;
 
 namespace PlayifyUtility.Jsons;
 
@@ -12,6 +12,7 @@ public abstract partial class Json{
 	protected static bool TryParseGeneric<T>(ref string s,[MaybeNullWhen(false)]out T json,Func<TextReader,T?> func) where T:Json{
 		using var reader=new StringReader(s);
 		if(!func(reader).NotNull(out json)) return false;
+		// ReSharper disable once AssignNullToNotNullAttribute
 		s=reader.ReadToEnd();
 		return true;
 	}

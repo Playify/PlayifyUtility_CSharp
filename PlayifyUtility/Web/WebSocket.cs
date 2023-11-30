@@ -3,13 +3,13 @@ using System.IO.Pipes;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks.Dataflow;
 using JetBrains.Annotations;
 using PlayifyUtility.Streams;
 using PlayifyUtility.Utils;
+using PlayifyUtility.Utils.Extensions;
 using PlayifyUtility.Web.Utils;
 
 namespace PlayifyUtility.Web;
@@ -60,7 +60,7 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 	public static async Task<WebSocket> CreateWebSocketTo(TcpClient client,Stream stream,string path,NameValueCollection? headers=null,string? host=null){
 		var random=new Random();
 		const string source="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-		var webSocketKey=EnumerableUtils.RepeatSelect(16,()=>source[random.Next(source.Length)])
+		var webSocketKey=Sequences.RepeatSelect(16,()=>source[random.Next(source.Length)])
 		                                .Join("");
 
 
@@ -84,7 +84,7 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 		await stream.FlushAsync();
 
 		webSocketKey+="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-		var hash=SHA1.HashData(Encoding.ASCII.GetBytes(webSocketKey));
+		var hash=WebUtils.Sha1(Encoding.ASCII.GetBytes(webSocketKey));
 		webSocketKey=Convert.ToBase64String(hash);
 
 		var webStream=new WebStream2(stream);
@@ -110,8 +110,8 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 				continue;
 			}
 			var i=line.IndexOf(':');
-			var key=line[..i];
-			var val=line[(i+1)..].Trim();
+			var key=line.Substring(0,i);
+			var val=line.Substring(i+1).Trim();
 			if(key.Equals("Connection",StringComparison.OrdinalIgnoreCase)) con=val.Equals("Upgrade",StringComparison.OrdinalIgnoreCase);
 			else if(key.Equals("Upgrade",StringComparison.OrdinalIgnoreCase)) upgrade=val.Equals("websocket",StringComparison.OrdinalIgnoreCase);
 			else if(key.Equals("Sec-WebSocket-Accept",StringComparison.OrdinalIgnoreCase)) accept=val==webSocketKey;

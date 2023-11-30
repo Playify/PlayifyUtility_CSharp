@@ -1,5 +1,12 @@
+
+using JetBrains.Annotations;
+#if NETFRAMEWORK
+using PlayifyUtility.Utils.Extensions;
+#endif
+
 namespace PlayifyUtility.Streams;
 
+[PublicAPI]
 public class PushbackReader:TextReader{
 	private readonly Stack<int> _pushback=new();
 	private readonly TextReader _reader;

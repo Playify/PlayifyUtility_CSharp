@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using PlayifyUtility.Web;
 
-namespace PlayifyUtils.Test;
+namespace PlayifyUtils.Test;// ReSharper disable once EmptyNamespace
 
 internal class Program:WebBase{
 	public static async Task Main(string[] args){

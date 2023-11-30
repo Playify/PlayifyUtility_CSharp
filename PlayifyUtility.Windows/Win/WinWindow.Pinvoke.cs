@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Text;
+using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Win;
 
@@ -9,6 +10,8 @@ public readonly partial struct WinWindow{
 	private static extern bool EnumWindows(Func<IntPtr,int,bool> lpEnumFunc,int lParam);
 	[DllImport("user32.dll")]
 	private static extern bool IsWindowVisible(IntPtr hWnd);
+	[DllImport("user32.dll")]
+	private static extern bool IsWindow(IntPtr hWnd);
 	
 	[DllImport("kernel32.dll")]
 	private static extern IntPtr GetConsoleWindow();
@@ -34,10 +37,10 @@ public readonly partial struct WinWindow{
 	private static extern bool SetWindowPos(IntPtr hWnd,int hWndInsertAfter,int x,int y,int cx,int cy,uint uFlags);
 
 	[DllImport("user32.dll")]
-	private static extern bool GetClientRect(IntPtr hWnd,out NativeMethods.Rect lpRect);
+	private static extern bool GetClientRect(IntPtr hWnd,out NativeRect lpRect);
 
 	[DllImport("user32.dll")]
-	private static extern bool GetWindowRect(IntPtr hWnd,out NativeMethods.Rect rect);
+	private static extern bool GetWindowRect(IntPtr hWnd,out NativeRect rect);
 	[DllImport("User32.dll")]
 	private static extern bool MoveWindow(IntPtr handle,int x,int y,int width,int height,bool redraw);
 
@@ -46,15 +49,24 @@ public readonly partial struct WinWindow{
 	[DllImport("user32.dll",SetLastError=true,CharSet=CharSet.Auto)]
 	private static extern bool PostMessage(IntPtr hWnd,int msg,int wParam,int lParam);
 	
+	[Serializable,StructLayout(LayoutKind.Sequential)]
+	private struct WindowPlacement{
+		public int length;
+		public int flags;
+		public ShowWindowCommands showCmd;
+		public NativePoint ptMinPosition;
+		public NativePoint ptMaxPosition;
+		public Rectangle rcNormalPosition;
+	}
 	[DllImport("user32.dll")]
-	private static extern bool GetWindowPlacement(IntPtr hwnd,ref NativeMethods.WindowPlacement placement);
+	private static extern bool GetWindowPlacement(IntPtr hwnd,ref WindowPlacement placement);
 	[DllImport("user32.dll")]
-	private static extern bool ShowWindow(IntPtr hWnd,NativeMethods.ShowWindowCommands nCmdShow);
+	private static extern bool ShowWindow(IntPtr hWnd,ShowWindowCommands nCmdShow);
 
 	[DllImport("user32.dll")]
-	private static extern bool GetLayeredWindowAttributes(IntPtr hWnd,out NativeMethods.ColorRef color,out byte alpha,out int dwFlags);
+	private static extern bool GetLayeredWindowAttributes(IntPtr hWnd,out NativeColor color,out byte alpha,out int dwFlags);
 	[DllImport("user32.dll")]
-	private static extern bool SetLayeredWindowAttributes(IntPtr hWnd,NativeMethods.ColorRef color,byte alpha,int dwFlags);
+	private static extern bool SetLayeredWindowAttributes(IntPtr hWnd,NativeColor color,byte alpha,int dwFlags);
 
 	[DllImport("user32.dll")]
 	private static extern IntPtr GetWindowThreadProcessId(IntPtr handle,out int processId);

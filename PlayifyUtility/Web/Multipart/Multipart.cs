@@ -1,9 +1,11 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using PlayifyUtility.Streams;
 
 namespace PlayifyUtility.Web.Multipart;
 
+[PublicAPI]
 public class Multipart:MultipartRequest<Multipart>{
 	private static readonly Regex NameFinder=new("(?<=(?<!file)name=\")(.*?)(?=\")");
 	private static readonly Regex FilenameFinder=new("(?<=filename=\")(.*?)(?=\")");
@@ -74,6 +76,7 @@ public class Multipart:MultipartRequest<Multipart>{
 	}
 
 	private static readonly byte[] NewLine=Encoding.ASCII.GetBytes("\r\n");
+
 	private async IAsyncEnumerable<byte[]> ReadAll(){
 		if(Finished) yield break;
 		var first=true;
@@ -96,7 +99,10 @@ public class Multipart:MultipartRequest<Multipart>{
 
 	public override async Task<bool> ReadToFileAsync(string path){
 		if(Finished) return false;
-		await using var stream=new FileStream(path,FileMode.OpenOrCreate,FileAccess.Write,FileShare.Read,4096,FileOptions.Asynchronous);
+#if !NETFRAMEWORK
+		await
+#endif
+		using var stream=new FileStream(path,FileMode.OpenOrCreate,FileAccess.Write,FileShare.Read,4096,FileOptions.Asynchronous);
 		await foreach(var bytes in ReadAll()) await stream.WriteAsync(bytes,0,bytes.Length);
 		return true;
 	}

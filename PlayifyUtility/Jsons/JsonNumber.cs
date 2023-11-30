@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 using JetBrains.Annotations;
-using PlayifyUtility.Utils;
+using PlayifyUtility.Utils.Extensions;
 
 namespace PlayifyUtility.Jsons;
 

@@ -1,10 +1,12 @@
 using System.Collections.Specialized;
+using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks.Dataflow;
-using System.Web;
+using JetBrains.Annotations;
 
 namespace PlayifyUtility.Web.Utils;
 
+[PublicAPI]
 public static class WebUtils{
 
 	#region Extension Methods
@@ -24,7 +26,7 @@ public static class WebUtils{
 	public static Task<string> Read(FileInfo path)=>Read(path.FullName);
 
 	public static NameValueCollection ParseQueryString(string value){
-		if(value.Length>0&&value[0]=='?') value=value[1..];
+		if(value.Length>0&&value[0]=='?') value=value.Substring(1);
 		var collection=new NameValueCollection();
 
 		var num1=value.Length;
@@ -50,7 +52,7 @@ public static class WebUtils{
 				str1=null;
 				str2=value.Substring(startIndex,index-startIndex);
 			}
-			collection.Add(HttpUtility.UrlDecode(str1),HttpUtility.UrlDecode(str2));
+			collection.Add(WebUtility.UrlDecode(str1),WebUtility.UrlDecode(str2));
 			if(index==num1-1&&value[index]=='&') collection.Add(null,string.Empty);
 		}
 
@@ -150,9 +152,13 @@ public static class WebUtils{
 		return ToString(algo.Hash??throw new NullReferenceException());
 	}
 
-	public static string GetHash(byte[] bytes)=>ToString(SHA1.HashData(bytes));
+	public static byte[] Sha1(byte[] bytes){
+		using var sha1=SHA1.Create();
+		return sha1.ComputeHash(bytes);
+	}
+	public static string GetHash(byte[] bytes)=>ToString(Sha1(bytes));
 
-	public static string ToString(byte[] array)=>Convert.ToHexString(array).ToLowerInvariant();
+	public static string ToString(byte[] array)=>BitConverter.ToString(array).Replace("-","").ToLowerInvariant();
 	#endregion
 
 }

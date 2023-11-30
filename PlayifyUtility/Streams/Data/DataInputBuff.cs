@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace PlayifyUtility.Streams.Data;
 
+[PublicAPI]
 public class DataInputBuff:DataInput,ICloneable{
 	private static DataInputBuff? _empty;
 
