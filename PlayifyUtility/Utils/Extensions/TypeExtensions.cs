@@ -32,29 +32,31 @@ public static class TypeExtensions{
 	}
 
 	public static bool TryPop<T>(this Stack<T> t,[MaybeNullWhen(false)]out T pop){
-#if NETFRAMEWORK
 		if(t.Count==0){
 			pop=default!;
 			return false;
 		}
 		pop=t.Pop();
 		return true;
-#else
-		return t.TryPop(out pop);
-#endif
 	}
 
 	public static bool TryPeek<T>(this Stack<T> t,[MaybeNullWhen(false)]out T peek){
-#if NETFRAMEWORK
 		if(t.Count==0){
 			peek=default!;
 			return false;
 		}
 		peek=t.Peek();
 		return true;
-#else
-		return t.TryPeek(out peek);
-#endif
+	}
+
+	public static bool Remove<TKey,TValue>(this Dictionary<TKey,TValue> t,TKey key,[MaybeNullWhen(false)]out TValue value) where TKey:notnull{
+		return t.TryGetValue(key,out value)&&t.Remove(key);
+	}
+
+	public static bool TryAdd<TKey,TValue>(this Dictionary<TKey,TValue> t,TKey key,TValue value) where TKey:notnull{
+		if(!t.ContainsKey(key)) return false;
+		t.Add(key,value);
+		return true;
 	}
 
 	public static bool TryGetValue(this NameValueCollection t,string key,[MaybeNullWhen(false)]out string result){
@@ -69,7 +71,7 @@ public static class TypeExtensions{
 
 	public static async Task<byte[]> ReadFullyAsync(this Stream stream,int length,CancellationToken cancel=new()){
 		var bytes=new byte[length];
-		await ReadFullyAsync(stream,bytes,cancel);
+		await stream.ReadFullyAsync(bytes,cancel);
 		return bytes;
 	}
 
@@ -88,16 +90,10 @@ public static class TypeExtensions{
 		if(process.HasExited) return Task.CompletedTask;
 
 		process.EnableRaisingEvents=true;
-#if NETFRAMEWORK
-		var tcs=new TaskCompletionSource<VoidType>();
-		process.Exited+=(_,_)=>tcs.TrySetResult(default);
-		if(cancellationToken!=default) cancellationToken.Register(()=>tcs.SetCanceled());
-#else
 		var tcs=new TaskCompletionSource();
 		process.Exited+=(_,_)=>tcs.TrySetResult();
 		if(cancellationToken!=default)
 			cancellationToken.Register(()=>tcs.SetCanceled(cancellationToken));
-#endif
 
 		return process.HasExited?Task.CompletedTask:tcs.Task;
 	}
@@ -107,30 +103,18 @@ public static class TypeExtensions{
 		return t.Success;
 	}
 
-	public static IDisposable AddTemporary<T>(this HashSet<T> set,T t){
-		set.Add(t);
-		return new CallbackAsDisposable(()=>set.Remove(t));
-	}
-
+	public static IDisposable AddTemporary<T>(this ISet<T> set,T t)=>new TemporarySetValue<T>(set,t);
 
 	public static TaskAwaiter GetAwaiter(this WaitHandle handle)=>handle.ToTask().GetAwaiter();
 
 	public static Task ToTask(this WaitHandle handle){
-#if NETFRAMEWORK
-		var tcs=new TaskCompletionSource<VoidType>();
-#else
 		var tcs=new TaskCompletionSource();
-#endif
 		var localVariableInitLock=new object();
 		lock(localVariableInitLock){
 			RegisteredWaitHandle callbackHandle=null!;
 			callbackHandle=ThreadPool.RegisterWaitForSingleObject(handle,
 			                                                      (_,_)=>{
-#if NETFRAMEWORK
-				                                                      tcs.SetResult(default);
-#else
 				                                                      tcs.SetResult();
-#endif
 				                                                      // ReSharper disable once AccessToModifiedClosure
 				                                                      lock(localVariableInitLock) callbackHandle.Unregister(null);
 			                                                      },

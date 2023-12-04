@@ -2,10 +2,10 @@ using System.Numerics;
 using System.Text;
 using JetBrains.Annotations;
 
-namespace PlayifyUtility.Maths;
+namespace PlayifyUtility.Utils;
 
 [PublicAPI]
-public static class Numbers{
+public static class MathsUtils{
 	public static int Clamp(int v,int min,int max)=>v<min?min:v>max?max:v;
 	public static byte Clamp(byte v,byte min,byte max)=>v<min?min:v>max?max:v;
 	public static short Clamp(short v,short min,short max)=>v<min?min:v>max?max:v;

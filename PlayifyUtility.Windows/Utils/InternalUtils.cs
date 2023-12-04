@@ -1,3 +1,4 @@
+#if NETFRAMEWORK
 using System.Text;
 
 namespace PlayifyUtility.Windows.Utils;
@@ -61,3 +62,4 @@ internal static class InternalUtils{
 		return idx;
 	}
 }
+#endif
