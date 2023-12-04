@@ -317,10 +317,6 @@ public class Send{
 		EnsureModsAreLoaded();
 		var b=flags.HasFlag(KeyDown);
 
-		if((keys&ModifierKeys.AltGr)==ModifierKeys.AltGr){
-			Console.WriteLine("Send.Mod(ModifierKeys.AltGr,...) is not Supported");//TODO why??
-			return this;
-		}
 		if(keys.HasFlag(ModifierKeys.Shift))
 			if(b!=(_currentMods.Shift.L||_currentMods.Shift.R))
 				if(b)
@@ -342,7 +338,7 @@ public class Send{
 		if(keys.HasFlag(ModifierKeys.Alt))
 			if(b!=(_currentMods.Alt.L||_currentMods.Alt.R))
 				if(b)
-					if(_startingMods.Alt.L&&!keys.HasFlag(ModifierKeys.AltGr)) Key(LMenu,SetDown(flags,_currentMods.Alt.L=true));
+					if(_startingMods.Alt.L||(keys&ModifierKeys.AltGr)!=ModifierKeys.AltGr) Key(LMenu,SetDown(flags,_currentMods.Alt.L=true));
 					else Key(RMenu,SetDown(flags,_currentMods.Alt.R=true));
 				else{
 					if(_currentMods.Alt.L) Key(LMenu,SetDown(flags,_currentMods.Alt.L=false));
