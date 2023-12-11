@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using JetBrains.Annotations;
-
 #if NETFRAMEWORK
 using PlayifyUtility.Windows.Utils;
 #endif
@@ -34,17 +33,19 @@ public readonly partial struct WinControl{
 	public static Dictionary<string,WinControl> GetControls(IntPtr window){
 		var controls=new Dictionary<string,WinControl>();
 		var counter=new Dictionary<string,int>();
-		EnumChildWindows(window,(child,_)=>{
-			var control=new WinControl(child);
-			var controlClass=control.Class;
+		EnumChildWindows(window,
+		                 (child,_)=>{
+			                 var control=new WinControl(child);
+			                 var controlClass=control.Class??"";
 
-			var count=counter.TryGetValue(controlClass,out var already)?already+1:1;
-			counter[controlClass]=count;
+			                 var count=counter.TryGetValue(controlClass,out var already)?already+1:1;
+			                 counter[controlClass]=count;
 
 
-			controls[controlClass+count]=control;
-			return true;
-		},0);
+			                 controls[controlClass+count]=control;
+			                 return true;
+		                 },
+		                 0);
 		return controls;
 	}
 
@@ -60,20 +61,20 @@ public readonly partial struct WinControl{
 		}
 		set=>SendMessage(Hwnd,0xC,0,value.ReplaceLineEndings());//WM_SETTEXT
 	}
-	public string Class{
+	public string? Class{
 		get{
 			try{
 				var title=new StringBuilder(256);
-				if(GetClassName(Hwnd,title,title.Capacity)==0) throw new Exception("Error reading class from "+Hwnd);
+				if(GetClassName(Hwnd,title,title.Capacity)==0) return null;
 				return title.ToString();
-			} catch(AccessViolationException e){
-				throw new Exception("Error reading class from "+Hwnd,e);
+			} catch(AccessViolationException){
+				return null;
 			}
 		}
 	}
 
 	public IntPtr Parent=>GetParent(Hwnd);
-	
+
 	public WinWindow Window{
 		get{
 			for(var hwnd=Hwnd;;){
@@ -105,10 +106,10 @@ public readonly partial struct WinControl{
 	}
 
 	public void DoubleClick()=>SendMessage(Hwnd,0x203,0,0);//WM_LBUTTONDBLCLK
-	
-	public static void SendKey(IntPtr hwnd,Keys keys){
-		PostMessage(hwnd,0x100,(int) keys,0);//WM_KEYDOWN
-		PostMessage(hwnd,0x101,(int) keys,0);//WM_KEYUP
+
+	public void SendKey(Keys keys){
+		PostMessage(Hwnd,0x100,(int)keys,0);//WM_KEYDOWN
+		PostMessage(Hwnd,0x101,(int)keys,0);//WM_KEYUP
 	}
 	#endregion
 

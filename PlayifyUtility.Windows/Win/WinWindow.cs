@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Win.Native;
-
 #if NETFRAMEWORK
 using PlayifyUtility.Windows.Utils;
 #endif
@@ -21,10 +20,11 @@ public readonly partial struct WinWindow{
 	public static List<WinWindow> GetOpenWindows(){
 		var list=new List<WinWindow>();
 		EnumWindows((hwnd,_)=>{
-			var window=new WinWindow(hwnd);
-			if(window.IsVisible) list.Add(window);
-			return true;
-		},0);
+			            var window=new WinWindow(hwnd);
+			            if(window.IsVisible) list.Add(window);
+			            return true;
+		            },
+		            0);
 		return list;
 	}
 
@@ -80,7 +80,7 @@ public readonly partial struct WinWindow{
 			return rect;
 		}
 	}
-	
+
 
 	public bool ClickThrough{
 		get=>(ExStyle&0x20)!=0;
@@ -174,7 +174,7 @@ public readonly partial struct WinWindow{
 	public byte Alpha{
 		get{
 			GetLayeredWindowAttributes(Hwnd,out _,out var alpha,out var dw);
-			return (dw&2)!=0?alpha:(byte) 255;
+			return (dw&2)!=0?alpha:(byte)255;
 		}
 		set{
 			var l=ExStyle;
@@ -234,24 +234,24 @@ public readonly partial struct WinWindow{
 				var title=new StringBuilder(length);
 				GetWindowText(Hwnd,title,length);
 				return title.ToString();
-			} catch(AccessViolationException e){
-				Console.WriteLine(e);
+			} catch(AccessViolationException){
 				return null;
 			}
 		}
 	}
-	public string Class=>new WinControl(Hwnd).Class;
+	public string? Class=>new WinControl(Hwnd).Class;
 	#endregion
-	public Dictionary<string,WinControl> Controls=>WinControl.GetControls(Hwnd);
-	
-	
+
+	public Dictionary<string,WinControl> GetControls()=>WinControl.GetControls(Hwnd);
+
+
 	public bool MoveWindow(int x,int y,int width,int height,bool redraw)=>MoveWindow(Hwnd,x,y,width,height,redraw);
 	public bool SetWindowPos(int hwndInsertAfter,int x,int y,int cx,int cy,uint uFlags)=>SetWindowPos(Hwnd,hwndInsertAfter,x,y,cx,cy,uFlags);
 	public bool DestroyWindow()=>DestroyWindow(Hwnd);
 	public int SendMessage(int msg,int wParam,int lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
 	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
 
-	
+
 	public override bool Equals(object? obj)=>obj is WinWindow other&&this==other;
 	public override int GetHashCode()=>Hwnd.GetHashCode();
 	public static bool operator!=(WinWindow left,WinWindow right)=>!(left==right);

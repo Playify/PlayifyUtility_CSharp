@@ -178,7 +178,7 @@ public class Send{
 			  InputUnion=new InputUnion{
 				  ki=new KeyBdInput{
 					  WVk=0,
-					  WScan=(short) c,
+					  WScan=(short)c,
 					  Time=0,
 					  DwFlags=flags.HasFlag(KeyDown)?4:6,
 					  DwExtraInfo=flags.HasFlag(Hidden)||_hidden?ProcessHandle:IntPtr.Zero,
@@ -195,8 +195,8 @@ public class Send{
 			   Type=1,
 			   InputUnion=new InputUnion{
 				   ki=new KeyBdInput{
-					   WVk=(short) key,
-					   WScan=MapVirtualKey((short) key,0),
+					   WVk=(short)key,
+					   WScan=MapVirtualKey((short)key,0),
 					   Time=0,
 					   DwFlags=(flags.HasFlag(KeyDown)?0:2)|(Extended.Contains(key)?1:0),
 					   DwExtraInfo=flags.HasFlag(Hidden)||_hidden?ProcessHandle:IntPtr.Zero,
@@ -239,10 +239,11 @@ public class Send{
 	#region Mouse
 	public Send MouseMove(WinWindow window,(int X,int Y) delta,bool hidden=false)=>MouseMove(window,delta.X,delta.Y,hidden);
 	public Send MouseMove(WinWindow window,Point delta,bool hidden=false)=>MouseMove(window,delta.X,delta.Y,hidden);
+
 	public Send MouseMove(WinWindow window,int dx,int dy,bool hidden=false){
 		if(WinWindow.Foreground!=window) throw new Exception("Tried to click in a window that was not focused");
 		var rect=window.WindowRect;
-		
+
 		dx=dx<0?rect.Right+dx:rect.Left+dx;
 		dy=dy<0?rect.Bottom+dy:rect.Top+dy;
 		return MouseMove(dx,dy,false,hidden);
@@ -252,7 +253,7 @@ public class Send{
 		if(!relative)
 			(x,y)=(x*65536/GetSystemMetrics(SmCxScreen),
 			       y*65536/GetSystemMetrics(SmCyScreen));
-			
+
 		/*Another way to "Normalize" Coordinates:
 		Windows.GetClientRect(Windows.GetDesktopWindow(),out var rect);
 		x=x*65536/(rect.x2-rect.x1);
@@ -273,17 +274,15 @@ public class Send{
 		});
 	}
 
-	public Send Click(Keys mouseButton,int x,int y,bool relative=false,bool hidden=false)
-		=>MouseMove(x,y,relative,hidden)
-		.Key(mouseButton,null,hidden);
+	public Send Click(Keys mouseButton,int x,int y,bool relative=false,bool hidden=false)=>MouseMove(x,y,relative,hidden).Key(mouseButton,null,hidden);
 
-	public Send Click(int x,int y,bool relative=false,bool hidden=false)
-		=>MouseMove(x,y,relative,hidden)
-		.Key(LButton,null,hidden);
+	public Send Click(int x,int y,bool relative=false,bool hidden=false)=>MouseMove(x,y,relative,hidden).Key(LButton,null,hidden);
 
-	public Send ClickRight(Keys mouseButton,int x,int y,bool relative=false,bool hidden=false)
-		=>MouseMove(x,y,relative,hidden)
-		.Key(RButton,null,hidden);
+	public Send ClickRight(int x,int y,bool relative=false,bool hidden=false)=>MouseMove(x,y,relative,hidden).Key(RButton,null,hidden);
+
+	public Send Click(Keys mouseButton,bool hidden=false)=>Key(mouseButton,null,hidden);
+	public Send Click(bool hidden=false)=>Key(LButton,null,hidden);
+	public Send ClickRight(bool hidden=false)=>Key(RButton,null,hidden);
 	#endregion
 
 	#region Advanced
@@ -302,7 +301,7 @@ public class Send{
 		Mod(ModifierKeys.Control,(num1&512)!=0);
 		Mod(ModifierKeys.Alt,(num1&1024)!=0);
 		Mod(ModifierKeys.Windows,false);
-		Key((Keys) (num1&255),flags);
+		Key((Keys)(num1&255),flags);
 		return this;
 	}
 
@@ -432,4 +431,5 @@ public class Send{
 	private const int SmCxScreen=0;
 	private const int SmCyScreen=1;
 	#endregion
+
 }
