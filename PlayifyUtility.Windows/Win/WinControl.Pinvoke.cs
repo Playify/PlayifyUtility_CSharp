@@ -21,8 +21,9 @@ public readonly partial struct WinControl{
 	private static extern IntPtr GetForegroundWindow();
 
 
+	private delegate bool EnumChildWindowFunc(IntPtr hwnd,int lParam);
 	[DllImport("user32.dll")]
-	private static extern bool EnumChildWindows(IntPtr hwndParent,Func<IntPtr,int,bool> lpEnumFunc,int lParam);
+	private static extern bool EnumChildWindows(IntPtr hwndParent,EnumChildWindowFunc lpEnumFunc,int lParam);
 
 
 	[DllImport("user32.dll")]
