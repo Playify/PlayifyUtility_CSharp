@@ -56,7 +56,7 @@ public class WebSession:MultipartRequest<WebSession>{
 		if(!match.Success){
 			throw new CloseException("Illegal HTTP Request: \""+firstLine+"\"");
 		}
-		Type=(RequestType)Enum.Parse(typeof(RequestType),match.Groups[1].Value,true);
+		Type=(RequestType) Enum.Parse(typeof(RequestType),match.Groups[1].Value,true);
 		Path=Uri.UnescapeDataString(match.Groups[2].Value);
 		RawUrl=match.Groups[2].Value;
 

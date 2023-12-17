@@ -8,7 +8,6 @@ namespace PlayifyUtility.Web.Utils;
 
 [PublicAPI]
 public static class WebUtils{
-
 	#region Extension Methods
 	public static async IAsyncEnumerator<T> ToAsyncEnumerable<T>(this IReceivableSourceBlock<T> source,CancellationToken cancelToken){
 		while(await source.OutputAvailableAsync(cancelToken).ConfigureAwait(false))
@@ -156,9 +155,9 @@ public static class WebUtils{
 		using var sha1=SHA1.Create();
 		return sha1.ComputeHash(bytes);
 	}
+
 	public static string GetHash(byte[] bytes)=>ToString(Sha1(bytes));
 
 	public static string ToString(byte[] array)=>BitConverter.ToString(array).Replace("-","").ToLowerInvariant();
 	#endregion
-
 }

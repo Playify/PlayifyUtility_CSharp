@@ -79,28 +79,28 @@ public abstract partial class Json{
 		set=>throw new NotSupportedException(GetType().Name+" has no index access");
 	}
 	public virtual bool Has(string property)=>false;
-	
-	
+
+
 	public virtual bool TryGet(string property,[MaybeNullWhen(false)]out Json json)=>FunctionUtils.TryGetNever(out json);
 	public virtual bool TryGet(int index,[MaybeNullWhen(false)]out Json json)=>FunctionUtils.TryGetNever(out json);
-	
-	
+
+
 	public bool TryGetArray(string property,[MaybeNullWhen(false)]out JsonArray json)=>GetArray(property).NotNull(out json);
 	public bool TryGetArray(int index,[MaybeNullWhen(false)]out JsonArray json)=>GetArray(index).NotNull(out json);
-	
+
 	public bool TryGetObject(string property,[MaybeNullWhen(false)]out JsonObject json)=>GetObject(property).NotNull(out json);
 	public bool TryGetObject(int index,[MaybeNullWhen(false)]out JsonObject json)=>GetObject(index).NotNull(out json);
-	
-	
+
+
 	public Json? Get(string property)=>TryGet(property,out var json)?json:null;
 	public Json? Get(int index)=>TryGet(index,out var json)?json:null;
-	
-	
+
+
 	public JsonArray? GetArray()=>this as JsonArray;
 	public JsonArray? GetArray(string property)=>Get(property) as JsonArray;
 	public JsonArray? GetArray(int index)=>Get(index) as JsonArray;
-	
-	
+
+
 	public JsonObject? GetObject()=>this as JsonObject;
 	public JsonObject? GetObject(string property)=>Get(property) as JsonObject;
 	public JsonObject? GetObject(int index)=>Get(index) as JsonObject;

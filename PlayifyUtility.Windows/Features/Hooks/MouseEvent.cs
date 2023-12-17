@@ -11,6 +11,7 @@ public class MouseEvent{
 
 	public readonly int Delta;
 	public readonly MouseButtons Button;
+
 	public MouseEvent(int x,int y,MouseButtons button,int delta=0){
 		X=x;
 		Y=y;

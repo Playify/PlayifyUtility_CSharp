@@ -9,7 +9,7 @@ namespace PlayifyUtility.Streams;
 public class MultiWriter:TextWriter{
 	private readonly List<TextWriter> _children=new();
 	public event Action? OnDispose;
-	
+
 
 	public MultiWriter(params TextWriter[] writers)=>_children.AddRange(writers);
 	public MultiWriter(IEnumerable<TextWriter> writers)=>_children.AddRange(writers);

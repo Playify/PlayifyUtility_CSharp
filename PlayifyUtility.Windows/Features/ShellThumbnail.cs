@@ -133,7 +133,7 @@ public static class ShellThumbnail{
 	private static IntPtr GetHBitmap(string fileName,int width,int height,ThumbnailOptions options,out string displayName){
 		var shellItem2Guid=new Guid(ShellItem2Guid);
 		var retCode=SHCreateItemFromParsingName(fileName,IntPtr.Zero,ref shellItem2Guid,out var nativeShellItem);
-		
+
 		if(retCode!=0) throw Marshal.GetExceptionForHR(retCode)!;
 
 		nativeShellItem.GetDisplayName(0,out displayName);
@@ -173,8 +173,8 @@ public static class ShellThumbnail{
 	private interface IShellItemImageFactory{
 		[PreserveSig]
 		int GetImage([In,MarshalAs(UnmanagedType.Struct)]NativeSize size,
-		                 [In]ThumbnailOptions flags,
-		                 [Out]out IntPtr phbm);
+		             [In]ThumbnailOptions flags,
+		             [Out]out IntPtr phbm);
 	}
 
 	[StructLayout(LayoutKind.Sequential)]

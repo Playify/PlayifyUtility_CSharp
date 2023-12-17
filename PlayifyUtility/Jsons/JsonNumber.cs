@@ -19,6 +19,7 @@ public class JsonNumber:Json{
 
 	public new static JsonNumber? ParseOrNull(string s)=>TryParse(s,out var json)?json:null;
 	public new static JsonNumber? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
+
 	public new static JsonNumber? ParseOrNull(TextReader r){
 		var c=NextRead(r);
 		if(c=='N') return r.Read()=='a'&&r.Read()=='N'?new JsonNumber(double.NaN):null;

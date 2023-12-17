@@ -17,6 +17,7 @@ public static class TaskUtils{
 			}
 		return exceptions==null?results:throw new AggregateException(exceptions);
 	}
+
 	public static ValueTask<T[]> WhenAll<T>(IEnumerable<ValueTask<T>> tasks)=>WhenAll(tasks.ToArray());
 
 	public static async ValueTask WhenAll(params ValueTask[] tasks){

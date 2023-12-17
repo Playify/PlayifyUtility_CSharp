@@ -95,5 +95,4 @@ public class CommandLineUtils{
 	public static string MakeSafeFileName(string s,char replacement='#')
 		=>Path.GetInvalidFileNameChars()
 		      .Aggregate(s,(curr,c)=>curr.Replace(c,replacement));
-
 }

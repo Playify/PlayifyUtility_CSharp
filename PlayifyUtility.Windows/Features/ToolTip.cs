@@ -38,11 +38,11 @@ public static partial class ToolTip{
 
 
 			_toolInfo=new ToolInfo();
-			_toolInfo.cbSize=(uint)Marshal.SizeOf(_toolInfo);
+			_toolInfo.cbSize=(uint) Marshal.SizeOf(_toolInfo);
 			_toolInfo.uFlags=0x120;//TTF_TRACK
 			_toolInfo.hwnd=IntPtr.Zero;
 			_toolInfo.hInst=IntPtr.Zero;
-			_toolInfo.uId=(UIntPtr)0;
+			_toolInfo.uId=(UIntPtr) 0;
 			_toolInfo.lpszText=s;
 			_toolInfo.rect=new NativeRect();
 
@@ -61,13 +61,12 @@ public static partial class ToolTip{
 		_currentToolTip.SetWindowPos(-1,0,0,0,0,0x13);
 
 		_cancel.Cancel();
-		
+
 		_cancel.Dispose();
 		_cancel=new CancellationTokenSource();
-		
+
 		_cancel.CancelAfter(timeout);
-		Task.Delay(timeout,_cancel.Token).ContinueWith(
-		                                               _=>HideToolTip(),
+		Task.Delay(timeout,_cancel.Token).ContinueWith(_=>HideToolTip(),
 		                                               TaskContinuationOptions.OnlyOnRanToCompletion);
 	}
 }

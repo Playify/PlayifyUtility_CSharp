@@ -5,11 +5,11 @@ namespace PlayifyUtility.Utils;
 
 [PublicAPI]
 public static class FunctionUtils{
-	
 	public static bool TryGetNever<T>([MaybeNullWhen(false)]out T t){
 		t=default;
 		return false;
 	}
+
 	public static T RunThenReturn<T>(Action a,T returnValue){
 		a();
 		return returnValue;

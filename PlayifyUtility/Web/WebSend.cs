@@ -105,7 +105,7 @@ public class WebSend{
 			input.Seek(start,SeekOrigin.Begin);
 			var stream=await Begin(httpCode);
 			while(start<=size&&start<=end){
-				var a=await input.ReadAsync(buffer,0,(int)Math.Min(buffer.Length,end-start+1));
+				var a=await input.ReadAsync(buffer,0,(int) Math.Min(buffer.Length,end-start+1));
 				if(a==-1) break;
 				start+=a;
 				await stream.WriteAsync(buffer,0,buffer.Length);
@@ -149,5 +149,4 @@ public class WebSend{
 		return Begin(301);
 	}
 	#endregion
-
 }

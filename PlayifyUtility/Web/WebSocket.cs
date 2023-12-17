@@ -61,7 +61,7 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 		var random=new Random();
 		const string source="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		var webSocketKey=Sequences.RepeatSelect(16,()=>source[random.Next(source.Length)])
-		                                .Join("");
+		                          .Join("");
 
 
 		var header="GET "+path+" HTTP/1.1\r\n"+
@@ -172,7 +172,7 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 						Close();
 						break;
 					case 0x9:
-						await Send(0xA,mem.GetBuffer(),0,(int)mem.Length);
+						await Send(0xA,mem.GetBuffer(),0,(int) mem.Length);
 						mem.SetLength(0);
 						break;
 					case 0xA:
@@ -221,7 +221,7 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 	#endregion
 
 	#region Connected
-	private bool IsConnected()=>_client?.Connected??((PipeStream)_output).IsConnected;
+	private bool IsConnected()=>_client?.Connected??((PipeStream) _output).IsConnected;
 
 	public void Close(){
 		_pong?.TrySetCanceled();
@@ -236,9 +236,9 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 		try{
 			var i=0;
 			if(PingCountUntilError!=0) await Task.Delay(1000);
-				
+
 			while(IsConnected()&&PingCountUntilError!=0){
-					
+
 				var s=Encoding.UTF8.GetBytes("SendPing"+DateTime.Now.Ticks);
 				var source=new TaskCompletionSource<byte[]>();
 				_pong=source;
@@ -257,7 +257,7 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 				await delay;
 			}
 		} catch(OperationCanceledException){
-		}catch(IOException){
+		} catch(IOException){
 		} finally{
 			if(PingCountUntilError!=0) Close();
 		}
@@ -276,12 +276,12 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 	private async Task Send(int op,byte[] data,int offset,int len){
 		try{
 			byte[] arr;
-			if(len<=125) arr=new[]{(byte)(128|op),(byte)len};
-			else if(len<=65536) arr=new byte[]{(byte)(128|op),126,(byte)(len>> 8),(byte)len};
+			if(len<=125) arr=new[]{(byte) (128|op),(byte) len};
+			else if(len<=65536) arr=new byte[]{(byte) (128|op),126,(byte) (len>> 8),(byte) len};
 			else
 				arr=new byte[]{
-					(byte)(128|op),127,0,0,0,0,
-					(byte)(len>> 24),(byte)(len>> 16),(byte)(len>> 8),unchecked((byte)len)
+					(byte) (128|op),127,0,0,0,0,
+					(byte) (len>> 24),(byte) (len>> 16),(byte) (len>> 8),unchecked((byte) len)
 				};
 			try{
 				await _sendSemaphore.WaitAsync();
@@ -296,5 +296,4 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 		}
 	}
 	#endregion
-
 }

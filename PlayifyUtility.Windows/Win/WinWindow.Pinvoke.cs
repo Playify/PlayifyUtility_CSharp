@@ -5,11 +5,8 @@ using PlayifyUtility.Windows.Win.Native;
 namespace PlayifyUtility.Windows.Win;
 
 public readonly partial struct WinWindow{
-
-	private delegate bool EnumWindowsDelegate(IntPtr hwnd,int lParam);
-
 	[DllImport("user32.dll")]
-	private static extern bool EnumWindows(EnumWindowsDelegate lpEnumFunc,int lParam);
+	private static extern bool EnumWindows(Func<IntPtr,int,bool> lpEnumFunc,int lParam);
 
 	[DllImport("user32.dll")]
 	private static extern bool IsWindowVisible(IntPtr hWnd);

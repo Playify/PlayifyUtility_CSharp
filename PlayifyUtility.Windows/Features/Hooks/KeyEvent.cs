@@ -8,7 +8,7 @@ public delegate void KeyEventHandler(KeyEvent e);
 public class KeyEvent{
 	public readonly int ScanCode;
 	public readonly int VkCode;
-	
+
 	public KeyEvent(Keys key,int vkCode,int scanCode){
 		Key=key;
 		VkCode=vkCode;
@@ -16,6 +16,6 @@ public class KeyEvent{
 	}
 
 	public bool Handled{get;set;}
-	
+
 	public Keys Key{get;}
 }

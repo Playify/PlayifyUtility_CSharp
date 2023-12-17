@@ -9,6 +9,7 @@ public abstract partial class Json{
 		if(!func(reader).NotNull(out json)) return false;
 		return NextPeek(reader)==-1;//Check that nothing is afterwards
 	}
+
 	protected static bool TryParseGeneric<T>(ref string s,[MaybeNullWhen(false)]out T json,Func<TextReader,T?> func) where T:Json{
 		using var reader=new StringReader(s);
 		if(!func(reader).NotNull(out json)) return false;
@@ -16,8 +17,7 @@ public abstract partial class Json{
 		s=reader.ReadToEnd();
 		return true;
 	}
-	
-	
+
 
 	protected static int NextRead(TextReader r){
 		while(true){

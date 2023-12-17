@@ -14,7 +14,7 @@
         <Description>Utilities for other Playify Projects (Windows extensions)</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
-        <Version>1.1.0</Version>
+        <Version>1.1.1</Version>
 
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -31,26 +31,26 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Features\ToolTip.Internal.cs">
-        <DependentUpon>ToolTip.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Features\CaseSensitiveDirectory.Native.cs">
-        <DependentUpon>CaseSensitiveDirectory.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Native\WinControl.Pinvoke.cs">
-        <DependentUpon>NativeControl.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Native\WinWindow.Pinvoke.cs">
-        <DependentUpon>NativeWindow.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Win\WinWindow.Pinvoke.cs">
-        <DependentUpon>WinWindow.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Win\WinCursor.Pinvoke.cs">
-        <DependentUpon>WinCursor.cs</DependentUpon>
-      </Compile>
-      <Compile Update="Win\WinControl.Pinvoke.cs">
-        <DependentUpon>WinControl.cs</DependentUpon>
-      </Compile>
+        <Compile Update="Features\ToolTip.Internal.cs">
+            <DependentUpon>ToolTip.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Features\CaseSensitiveDirectory.Native.cs">
+            <DependentUpon>CaseSensitiveDirectory.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Native\WinControl.Pinvoke.cs">
+            <DependentUpon>NativeControl.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Native\WinWindow.Pinvoke.cs">
+            <DependentUpon>NativeWindow.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Win\WinWindow.Pinvoke.cs">
+            <DependentUpon>WinWindow.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Win\WinCursor.Pinvoke.cs">
+            <DependentUpon>WinCursor.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Win\WinControl.Pinvoke.cs">
+            <DependentUpon>WinControl.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

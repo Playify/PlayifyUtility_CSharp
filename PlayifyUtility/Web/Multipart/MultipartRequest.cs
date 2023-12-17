@@ -81,5 +81,4 @@ public abstract class MultipartRequest<TThis> where TThis:class{
 
 	protected abstract void MarkFinished();
 	#endregion
-
 }

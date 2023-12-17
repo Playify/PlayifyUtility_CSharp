@@ -1,4 +1,3 @@
-
 using JetBrains.Annotations;
 #if NETFRAMEWORK
 using PlayifyUtility.Utils.Extensions;

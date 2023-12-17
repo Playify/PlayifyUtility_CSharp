@@ -37,12 +37,12 @@ public static class MathsUtils{
 	public static void RandomBytes(byte[] buffer)=>SharedRandom.NextBytes(buffer);
 
 	public static int SetBit(int value,int mask,bool to)=>to?value|mask:value&~mask;
-	public static byte SetBit(byte value,byte mask,bool to)=>(byte)(to?value|mask:value&~mask);
-	public static short SetBit(short value,short mask,bool to)=>(short)(to?value|mask:value&~mask);
+	public static byte SetBit(byte value,byte mask,bool to)=>(byte) (to?value|mask:value&~mask);
+	public static short SetBit(short value,short mask,bool to)=>(short) (to?value|mask:value&~mask);
 	public static long SetBit(long value,long mask,bool to)=>to?value|mask:value&~mask;
 	public static uint SetBit(uint value,uint mask,bool to)=>to?value|mask:value&~mask;
-	public static sbyte SetBit(sbyte value,sbyte mask,bool to)=>(sbyte)(to?value|mask:value&~mask);
-	public static ushort SetBit(ushort value,ushort mask,bool to)=>(ushort)(to?value|mask:value&~mask);
+	public static sbyte SetBit(sbyte value,sbyte mask,bool to)=>(sbyte) (to?value|mask:value&~mask);
+	public static ushort SetBit(ushort value,ushort mask,bool to)=>(ushort) (to?value|mask:value&~mask);
 	public static ulong SetBit(ulong value,ulong mask,bool to)=>to?value|mask:value&~mask;
 
 
@@ -67,7 +67,7 @@ public static class MathsUtils{
 		while(true){
 			value=BigInteger.DivRem(value,radix,out var remainder);
 
-			str.Insert(0,digits[(int)remainder]);
+			str.Insert(0,digits[(int) remainder]);
 			if(value.Sign==0) return str.ToString();
 		}
 	}
@@ -77,24 +77,24 @@ public static class MathsUtils{
 
 		var ret=0UL;
 		var radixInt=digits.Length;
-		var radixBig=(ulong)radixInt;
+		var radixBig=(ulong) radixInt;
 		foreach(var c in value){
 			ret*=radixBig;
 			var i=digits.IndexOf(c);
 			if(i<0||i>radixInt) throw new ArgumentException("Illegal Character: '"+c+"'");
-			ret+=(ulong)i;
+			ret+=(ulong) i;
 		}
 		return ret;
 	}
 
 	public static string ToString(ulong value,string digits){
 		var str=new StringBuilder();
-		var radix=(ulong)digits.Length;
+		var radix=(ulong) digits.Length;
 		while(true){
 			var remainder=value%radix;
 			value/=radix;
 
-			str.Insert(0,digits[(int)remainder]);
+			str.Insert(0,digits[(int) remainder]);
 			if(value==0) return str.ToString();
 		}
 	}

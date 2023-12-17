@@ -59,6 +59,7 @@ public class WebStream2:IWebStream{
 			n+=count;
 		}
 	}
+
 	public async Task<int> ReadAsync(byte[] buffer,int offset,int length){
 		var result=0;
 		while(length!=0)
@@ -80,6 +81,7 @@ public class WebStream2:IWebStream{
 			else return await _stream.ReadAsync(buffer,offset,length);
 		return result;
 	}
+
 	public async Task<byte[]> ReadUntilAsync(byte[] delimiter,bool withDelimiter=false){
 		var candidates=new List<int>();
 		var node=_list.First;
@@ -92,11 +94,11 @@ public class WebStream2:IWebStream{
 				node=_list.Last!;
 			}
 			var buffer=node.Value;
-			
+
 			for(var i=buffer.Start;i<buffer.End;i++){
 				var b=buffer.Bytes[i];
-				if(b==delimiter[0])candidates.Add(0);//new candidate found
-				
+				if(b==delimiter[0]) candidates.Add(0);//new candidate found
+
 				for(var j=0;j<candidates.Count;j++){
 					var candidate=candidates[j];
 					if(b!=delimiter[candidate]){//not matched fully

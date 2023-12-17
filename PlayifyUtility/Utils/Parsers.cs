@@ -7,6 +7,7 @@ namespace PlayifyUtility.Utils;
 [PublicAPI]
 public class Parsers{
 	public static bool TryParseIpEndPoint(string s,out IPEndPoint result)=>TryParseIpEndPoint(s,0,out result);
+
 	public static bool TryParseIpEndPoint(string s,int defaultPort,out IPEndPoint result){
 		var addressLength=s.Length;
 		var lastColonPos=s.LastIndexOf(':');
@@ -21,7 +22,7 @@ public class Parsers{
 
 			if(!string.IsNullOrEmpty(portSubstring)&&portSubstring[portSubstring.Length-1]!=']'){
 				if(uint.TryParse(portSubstring,NumberStyles.None,CultureInfo.InvariantCulture,out var port)&&port<=IPEndPoint.MaxPort){
-					result=new IPEndPoint(address,(int)port);
+					result=new IPEndPoint(address,(int) port);
 					return true;
 				}
 			} else if(string.IsNullOrEmpty(portSubstring)){
@@ -33,5 +34,4 @@ public class Parsers{
 		result=null!;
 		return false;
 	}
-
 }

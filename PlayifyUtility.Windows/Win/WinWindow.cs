@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Win.Native;
+
 #if NETFRAMEWORK
 using PlayifyUtility.Windows.Utils;
 #endif
@@ -17,15 +18,27 @@ public readonly partial struct WinWindow{
 
 	public WinWindow(IntPtr hwnd)=>Hwnd=hwnd;
 
-	public static List<WinWindow> GetOpenWindows(){
+	public static List<WinWindow> GetOpenWindows()=>GetOpenWindows(w=>w.IsVisible);
+
+	public static List<WinWindow> GetOpenWindows(Func<WinWindow,bool> predicate){
 		var list=new List<WinWindow>();
 		EnumWindows((hwnd,_)=>{
-			            var window=new WinWindow(hwnd);
-			            if(window.IsVisible) list.Add(window);
-			            return true;
-		            },
-		            0);
+			var window=new WinWindow(hwnd);
+			if(predicate(window)) list.Add(window);
+			return true;
+		},0);
 		return list;
+	}
+
+	public static WinWindow? FindWindow(Func<WinWindow,bool> predicate){
+		WinWindow? result=null;
+		EnumWindows((hwnd,_)=>{
+			var window=new WinWindow(hwnd);
+			if(!predicate(window)) return true;
+			result=window;
+			return false;
+		},0);
+		return result;
 	}
 
 	public static WinWindow GetWindowUnderCursor(bool detectInvisibleForeground=false){
@@ -174,7 +187,7 @@ public readonly partial struct WinWindow{
 	public byte Alpha{
 		get{
 			GetLayeredWindowAttributes(Hwnd,out _,out var alpha,out var dw);
-			return (dw&2)!=0?alpha:(byte)255;
+			return (dw&2)!=0?alpha:(byte) 255;
 		}
 		set{
 			var l=ExStyle;
@@ -251,10 +264,9 @@ public readonly partial struct WinWindow{
 	public int SendMessage(int msg,int wParam,int lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
 	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
 
-
+	
 	public override bool Equals(object? obj)=>obj is WinWindow other&&this==other;
 	public override int GetHashCode()=>Hwnd.GetHashCode();
 	public static bool operator!=(WinWindow left,WinWindow right)=>!(left==right);
 	public static bool operator==(WinWindow left,WinWindow right)=>left.Hwnd==right.Hwnd;
-
 }

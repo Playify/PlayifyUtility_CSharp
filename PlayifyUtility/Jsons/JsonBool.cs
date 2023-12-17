@@ -9,10 +9,10 @@ public class JsonBool:Json{
 	public static readonly JsonBool True=new(true);
 	public static readonly JsonBool False=new(false);
 	public static JsonBool Get(bool b)=>b?True:False;
-	
+
 	public readonly bool Value;
 
-	
+
 	private JsonBool(bool value)=>Value=value;
 
 	#region Parse
@@ -23,6 +23,7 @@ public class JsonBool:Json{
 
 	public new static JsonBool? ParseOrNull(string s)=>TryParse(s,out var json)?json:null;
 	public new static JsonBool? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
+
 	public new static JsonBool? ParseOrNull(TextReader r)
 		=>NextRead(r) switch{
 			't' when r.Read()=='r'&&r.Read()=='u'&&r.Read()=='e'=>True,
@@ -32,7 +33,6 @@ public class JsonBool:Json{
 	#endregion
 
 	#region Convert
-
 	public override Json DeepCopy()=>this;
 
 	public override double AsDouble()=>Value?1:0;
@@ -40,7 +40,7 @@ public class JsonBool:Json{
 	public override bool AsBool()=>Value;
 
 	public override string AsString()=>Value?"true":"false";
-	
+
 	public override string ToString(string? indent)=>AsString();
 	#endregion
 

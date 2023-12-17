@@ -61,6 +61,7 @@ public static class Sequences{
 		}
 		// ReSharper disable once IteratorNeverReturns
 	}
+
 	public static IEnumerable<long> IndexLong(){
 		var l=0L;
 		while(true)
@@ -74,17 +75,19 @@ public static class Sequences{
 			yield return l++;
 		// ReSharper disable once IteratorNeverReturns
 	}
+
 	public static IEnumerable<T> RepeatForever<T>(T t){
 		while(true)
 			yield return t;
 		// ReSharper disable once IteratorNeverReturns
 	}
+
 	public static IEnumerable<T> SelectForever<T>(Func<T> selector){
 		while(true)
 			yield return selector();
 		// ReSharper disable once IteratorNeverReturns
 	}
-	
+
 	public static IEnumerable<T> RepeatSelect<T>(int count,Func<T> selector){
 		while(count-->0)
 			yield return selector();
@@ -94,11 +97,11 @@ public static class Sequences{
 		while(count-->0)
 			yield return selector(arg);
 	}
-	
-	
+
+
 	public static IEnumerable<T> Concat<T>(params IEnumerable<T>[] sources)=>sources.SelectMany();
 	public static IEnumerable<T> Concat<T>(IEnumerable<IEnumerable<T>> sources)=>sources.SelectMany();
-	
+
 	public static T[] Combine<T>(T a,T[] b){
 		var arr=new T[b.Length+1];
 		arr[0]=a;

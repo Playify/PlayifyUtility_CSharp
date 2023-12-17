@@ -18,7 +18,7 @@ public static partial class ToolTip{
 		p.Y+=16;
 		_currentToolTip.SendMessage(0x412,0,((p.Y&0xffff)<<16)|(p.X&0xffff));//TTM_TRACKPOSITION
 	}
-	
+
 	[StructLayout(LayoutKind.Sequential)]
 	private struct ToolInfo{
 		public uint cbSize;

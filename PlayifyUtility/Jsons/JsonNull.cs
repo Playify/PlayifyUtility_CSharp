@@ -22,7 +22,6 @@ public class JsonNull:Json{
 	#endregion
 
 	#region Convert
-
 	public override Json DeepCopy()=>this;
 	public override string ToString(string? indent)=>"null";
 	#endregion

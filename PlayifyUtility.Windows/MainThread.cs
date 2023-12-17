@@ -3,13 +3,13 @@ namespace PlayifyUtility.Windows;
 public static class MainThread{
 	private static SynchronizationContext? _ctx;
 	public static SynchronizationContext? SynchronizationContext=>_ctx??=SynchronizationContext.Current;
-	
+
 	public static void Init(){
-		
+
 		//Initializes Singleton
 		if(SynchronizationContext==null) throw new Exception("Error getting "+nameof(SynchronizationContext));
 	}
-	
+
 
 	public static bool IsMainThread()=>SynchronizationContext.Current==SynchronizationContext;
 
@@ -22,11 +22,12 @@ public static class MainThread{
 	public static T Invoke<T>(Func<T> func){
 		var ctx=SynchronizationContext;
 		if(ctx==null) return func();
-		
+
 		T result=default!;
 		ctx.Send(_=>result=func(),null);
 		return result;
 	}
+
 	public static void Invoke(Action func){
 		var ctx=SynchronizationContext;
 		if(ctx==null) func();

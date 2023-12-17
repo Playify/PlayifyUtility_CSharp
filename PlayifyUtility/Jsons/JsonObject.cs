@@ -12,9 +12,11 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 	private readonly List<string> _order=new();
 
 	public JsonObject(){}
+
 	public JsonObject(IEnumerable<KeyValuePair<string,Json>> e){
 		foreach(var (key,value) in e) Add(key,value);
 	}
+
 	public JsonObject(IEnumerable<(string key,Json value)> e){
 		foreach(var (key,value) in e) Add(key,value);
 	}
@@ -27,6 +29,7 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 
 	public new static JsonObject? ParseOrNull(string s)=>TryParse(s,out var json)?json:null;
 	public new static JsonObject? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
+
 	public new static JsonObject? ParseOrNull(TextReader r){
 		if(NextRead(r)!='{') return null;
 		var o=new JsonObject();
@@ -57,7 +60,6 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 	#endregion
 
 	#region Convert
-
 	public override Json DeepCopy(){
 		var o=new JsonObject();
 		foreach(var (key,value) in this) o.Add(key,value.DeepCopy());
@@ -104,14 +106,14 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 	public bool EqualsIgnoreOrder(JsonObject? other)=>other!=null&&other._dictionary.Count==_dictionary.Count&&!other._dictionary.Except(_dictionary).Any();
 	public override bool Equals(object? obj)=>obj is JsonObject other&&other._order.SequenceEqual(_order)&&EqualsIgnoreOrder(other);
 	public override int GetHashCode()=>_dictionary.GetHashCode();
-	
+
 	public IEnumerator<KeyValuePair<string,Json>> GetEnumerator()=>_dictionary.GetEnumerator();
 	IEnumerator IEnumerable.GetEnumerator()=>GetEnumerator();
 	#endregion
-	
+
 	#region Accessor
 	public override int Count=>_order.Count;
-	
+
 	[AllowNull]
 	public override Json this[string property]{
 		get=>_dictionary[property];
@@ -129,6 +131,7 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 		_dictionary.Add(key,json??JsonNull.Null);//will throw if key already exists, therefore no _order.Remove is needed
 		_order.Add(key);
 	}
+
 	public bool Remove(string property){
 		if(!_dictionary.Remove(property)) return false;
 		_order.Remove(property);

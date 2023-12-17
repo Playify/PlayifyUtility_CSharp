@@ -18,9 +18,9 @@ public static class ExceptionExtensions{/*
 	[DoesNotReturn]
 	public static T Rethrow<T>(this T exception) where T:Exception{
 		ExceptionDispatchInfo.Capture(exception).Throw();
-#pragma warning disable CS8763 // A method marked [DoesNotReturn] should not return.
+#pragma warning disable CS8763// A method marked [DoesNotReturn] should not return.
 		return exception;
-#pragma warning restore CS8763 // A method marked [DoesNotReturn] should not return.
+#pragma warning restore CS8763// A method marked [DoesNotReturn] should not return.
 	}
 
 	public static T PreserveStackTrace<T>(this T e) where T:Exception{

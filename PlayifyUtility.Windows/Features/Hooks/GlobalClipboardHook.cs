@@ -7,7 +7,7 @@ namespace PlayifyUtility.Windows.Features.Hooks;
 [PublicAPI]
 // ReSharper disable CommentTypo
 public static class GlobalClipboardHook{//TODO make it so it always uses main thread
-	
+
 	public static void Hook()=>_instance??=MainThread.Invoke(()=>new HookForm());
 
 	public static Task<string> GetNextClipboard(){
@@ -34,11 +34,11 @@ public static class GlobalClipboardHook{//TODO make it so it always uses main th
 		var fileDropList=Clipboard.ContainsFileDropList()?Clipboard.GetFileDropList():null;
 
 		var task=GetNextClipboard();
-		
+
 		new Send().Hide().Mod(ModifierKeys.Control).Key(Keys.C).SendNow();//needs to be hidden to not activate other hotkeys
 
 		var s=await task;
-		
+
 		//Can only restore if successfully copied, therefore no try finally block
 		if(image!=null) Clipboard.SetImage(image);
 		else if(text!=null) Clipboard.SetText(text);
@@ -47,6 +47,7 @@ public static class GlobalClipboardHook{//TODO make it so it always uses main th
 
 		return s;
 	}
+
 	private class HookForm:Form{
 		private IntPtr _hWndNextWindow;
 

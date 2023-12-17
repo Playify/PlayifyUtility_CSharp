@@ -4,7 +4,6 @@ using System.Text;
 namespace PlayifyUtility.Windows.Win;
 
 public readonly partial struct WinControl{
-
 	[DllImport("user32.dll")]
 	private static extern bool AttachThreadInput(uint idAttach,int idAttachTo,bool fAttach);
 
@@ -22,10 +21,8 @@ public readonly partial struct WinControl{
 	private static extern IntPtr GetForegroundWindow();
 
 
-	private delegate bool EnumChildDelegate(IntPtr hwnd,int lParam);
-
 	[DllImport("user32.dll")]
-	private static extern bool EnumChildWindows(IntPtr hwndParent,EnumChildDelegate lpEnumFunc,int lParam);
+	private static extern bool EnumChildWindows(IntPtr hwndParent,Func<IntPtr,int,bool> lpEnumFunc,int lParam);
 
 
 	[DllImport("user32.dll")]

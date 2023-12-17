@@ -12,10 +12,12 @@ public struct NativeRect{
 	public override string ToString()=>$"({Left},{Top})->({Right},{Bottom})";
 
 	public static implicit operator Rectangle(NativeRect rect)=>Rectangle.FromLTRB(rect.Left,rect.Top,rect.Right,rect.Bottom);
-	public static implicit operator NativeRect(Rectangle rect)=>new(){
-		Top=rect.Top,
-		Bottom=rect.Bottom,
-		Left=rect.Left,
-		Right=rect.Right,
-	};
+
+	public static implicit operator NativeRect(Rectangle rect)
+		=>new(){
+			Top=rect.Top,
+			Bottom=rect.Bottom,
+			Left=rect.Left,
+			Right=rect.Right,
+		};
 }

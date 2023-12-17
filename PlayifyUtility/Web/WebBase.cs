@@ -75,15 +75,16 @@ public abstract class WebBase{
 			await foreach(var request in session.LoopAsync())
 				try{
 					await HandleRequest(request);
-				}catch(CloseException){
+				} catch(CloseException){
 					if(!session.Send.AlreadySent) await session.Send.Error(500);
 					return;
-				}catch(Exception e){
+				} catch(Exception e){
 					Console.WriteLine(e);
-					if(!session.Send.AlreadySent) await session.Send.Error(e switch{
-						FileNotFoundException=>404,
-						_=>500,
-					});
+					if(!session.Send.AlreadySent)
+						await session.Send.Error(e switch{
+							FileNotFoundException=>404,
+							_=>500,
+						});
 					return;
 				}
 		} catch(CloseException){
