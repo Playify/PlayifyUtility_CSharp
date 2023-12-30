@@ -29,7 +29,9 @@ public class WebDocument{
 	public async Task Send(){
 		_webSend.Session.WebBase.BeforeSend(_webSend.Session,this);
 
-		for(var match=Variables.Match(Document);match.Success;match=match.NextMatch()) Console.WriteLine("Sending Document \""+_webSend.Session.Path+"\" without replacing Variable \""+match.Groups[1].Value+"\"");
+		for(var match=Variables.Match(Document);match.Success;match=match.NextMatch())
+			Console.WriteLine("[Web|Warning] Sending Document \""+_webSend.Session.Path+"\" without replacing Variable \""+match.Groups[1].Value+"\"");
+		
 		var bytes=Encoding.UTF8.GetBytes(Document.Replace('\x04','#'));
 		if(_webSend.Caching){
 			var hash=$"\"{WebUtils.GetHash(bytes)}\"";

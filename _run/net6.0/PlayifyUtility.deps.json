@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "PlayifyUtility/1.1.1": {
+      "PlayifyUtility/1.1.2": {
         "dependencies": {
           "JetBrains.Annotations": "2023.3.0"
         },
@@ -25,7 +25,7 @@
     }
   },
   "libraries": {
-    "PlayifyUtility/1.1.1": {
+    "PlayifyUtility/1.1.2": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

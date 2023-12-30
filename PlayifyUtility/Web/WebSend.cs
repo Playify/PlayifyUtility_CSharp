@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using PlayifyUtility.Utils.Extensions;
@@ -24,8 +25,9 @@ public class WebSend{
 	public bool AlreadySent{get;internal set;}
 
 	public async Task<Stream> Begin(int code){
+		if(AlreadySent) throw new InvalidOperationException("Tried sending multiple responses to \""+Session.Path+"\"");
 		var output=Session.Stream;
-		var str=new StringBuilder("HTTP/1.1 ").Append(code).Append(" ").Append(WebUtils.GetHttpCodeName(code)).Append("\r\n");
+		var str=new StringBuilder("HTTP/1.1 ").Append(code).Append(' ').Append(WebUtils.GetHttpCodeName(code)).Append("\r\n");
 		foreach(var header in _headers) str.Append(header).Append("\r\n");
 		str.Append("\r\n");
 		var bytes=Encoding.UTF8.GetBytes(str.ToString());
@@ -36,6 +38,7 @@ public class WebSend{
 	}
 
 	public WebDocument Document()=>new(this);
+	public WebDocument Document(string s)=>new WebDocument(this).Set(s);
 
 	#region Settings
 	public WebSend Cache(bool b){

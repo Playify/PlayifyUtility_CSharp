@@ -14,7 +14,7 @@
         <Description>Utilities for other Playify Projects</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
-        <Version>1.1.1</Version>
+        <Version>1.1.2</Version>
 
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -34,12 +34,6 @@
     <ItemGroup>
         <Compile Update="Special\CaseSensitiveDirectory.Native.cs">
             <DependentUpon>CaseSensitiveDirectory.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Web\WebDocument.cs">
-            <DependentUpon>WebSend.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Web\WebSend.cs">
-            <DependentUpon>WebSession.cs</DependentUpon>
         </Compile>
         <Compile Remove="PlayifyUtils.Test\**" />
         <Compile Remove="PlayifyUtils.Windows\**" />
