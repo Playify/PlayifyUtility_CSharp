@@ -11,12 +11,12 @@ namespace PlayifyUtility.Jsons;
 public class JsonArray:Json,IEnumerable<Json>{
 	private readonly List<Json> _value=new();
 	public JsonArray(){}
-	public JsonArray(IEnumerable<Json> e){_value.AddRange(e);}
-	public JsonArray(IEnumerable<double> e):this(e.Select(el=>(Json) el)){}
-	public JsonArray(IEnumerable<int> e):this(e.Select(el=>(Json) el)){}
-	public JsonArray(IEnumerable<long> e):this(e.Select(el=>(Json) el)){}
-	public JsonArray(IEnumerable<bool> e):this(e.Select(el=>(Json) el)){}
-	public JsonArray(IEnumerable<string> e):this(e.Select(el=>(Json) el)){}
+	public JsonArray(IEnumerable<Json> e)=>AddRange(e);
+	public JsonArray(IEnumerable<double> e)=>AddRange(e);
+	public JsonArray(IEnumerable<int> e)=>AddRange(e);
+	public JsonArray(IEnumerable<long> e)=>AddRange(e);
+	public JsonArray(IEnumerable<bool> e)=>AddRange(e);
+	public JsonArray(IEnumerable<string> e)=>AddRange(e);
 
 	#region Parse
 	public static bool TryParse(string s,[MaybeNullWhen(false)]out JsonArray json)=>TryParseGeneric(s,out json,ParseOrNull);
@@ -120,5 +120,11 @@ public class JsonArray:Json,IEnumerable<Json>{
 	public void Insert(int index,Json? json)=>_value.Insert(index,json??JsonNull.Null);
 	public void Remove(Json? json)=>_value.Remove(json??JsonNull.Null);
 	public void RemoveAt(int index)=>_value.RemoveAt(index);
+	public void AddRange(IEnumerable<Json?> e)=>_value.AddRange(e.Select(j=>j??JsonNull.Null));
+	public void AddRange(IEnumerable<double> e)=>_value.AddRange(e.Select(j=>(Json)j));
+	public void AddRange(IEnumerable<int> e)=>_value.AddRange(e.Select(j=>(Json)j));
+	public void AddRange(IEnumerable<long> e)=>_value.AddRange(e.Select(j=>(Json)j));
+	public void AddRange(IEnumerable<bool> e)=>_value.AddRange(e.Select(j=>(Json)j));
+	public void AddRange(IEnumerable<string> e)=>_value.AddRange(e.Select(j=>(Json)j));
 	#endregion
 }

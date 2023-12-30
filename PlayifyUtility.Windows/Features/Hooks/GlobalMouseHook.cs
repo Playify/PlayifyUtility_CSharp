@@ -29,7 +29,7 @@ public static class GlobalMouseHook{
 
 	#region Instance Variables
 	private static IntPtr _hook=IntPtr.Zero;
-	private static MouseHookProc _proc=null!;
+	private static readonly MouseHookProc Proc=HookProc;
 	#endregion
 
 	#region Events
@@ -42,8 +42,7 @@ public static class GlobalMouseHook{
 	#region Public Methods
 	public static void Hook(){
 		if(_hook!=IntPtr.Zero) return;
-		_proc=HookProc;
-		_hook=SetWindowsHookEx(WhMouseLl,_proc,GetModuleHandle(IntPtr.Zero),0);
+		_hook=SetWindowsHookEx(WhMouseLl,Proc,GetModuleHandle(IntPtr.Zero),0);
 	}
 
 	public static void Unhook(){

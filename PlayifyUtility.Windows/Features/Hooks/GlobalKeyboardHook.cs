@@ -29,7 +29,7 @@ public static class GlobalKeyboardHook{
 
 	#region Instance Variables
 	private static IntPtr _hook=IntPtr.Zero;
-	private static KeyboardHookProc _proc=null!;
+	private static readonly KeyboardHookProc Proc=HookProc;
 	#endregion
 
 	#region Events
@@ -41,8 +41,7 @@ public static class GlobalKeyboardHook{
 	#region Public Methods
 	public static void Hook(){
 		if(_hook!=IntPtr.Zero) return;
-		_proc=HookProc;
-		_hook=SetWindowsHookEx(WhKeyboardLl,_proc,GetModuleHandle(IntPtr.Zero),0);
+		_hook=SetWindowsHookEx(WhKeyboardLl,Proc,GetModuleHandle(IntPtr.Zero),0);
 	}
 
 	public static void Unhook(){

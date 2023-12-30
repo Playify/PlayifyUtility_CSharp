@@ -1,11 +1,12 @@
-using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using JetBrains.Annotations;
 using PlayifyUtility.Utils.Extensions;
 using PlayifyUtility.Web.Utils;
 
 namespace PlayifyUtility.Web;
 
+[PublicAPI]
 public class WebSend{
 	private readonly List<string> _headers=new();
 	private readonly WebBase _webBase;

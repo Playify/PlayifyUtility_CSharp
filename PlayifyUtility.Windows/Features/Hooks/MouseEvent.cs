@@ -1,3 +1,4 @@
+
 using JetBrains.Annotations;
 
 namespace PlayifyUtility.Windows.Features.Hooks;

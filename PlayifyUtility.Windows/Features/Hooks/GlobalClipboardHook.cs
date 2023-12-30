@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Features.Interact;
+using PlayifyUtility.Windows.Win;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
@@ -8,10 +9,11 @@ namespace PlayifyUtility.Windows.Features.Hooks;
 // ReSharper disable CommentTypo
 public static class GlobalClipboardHook{//TODO make it so it always uses main thread
 
-	public static void Hook()=>_instance??=MainThread.Invoke(()=>new HookForm());
+	public static void Hook()=>_=HookForm.Instance;
 
-	public static Task<string> GetNextClipboard(){
-		var cts=new CancellationTokenSource(TimeSpan.FromSeconds(10));
+	public static Task<string> GetNextClipboard(CancellationToken cancel=default){
+		var timer=new CancellationTokenSource(TimeSpan.FromSeconds(10));
+		var cts=CancellationTokenSource.CreateLinkedTokenSource(timer.Token,cancel);
 		var tcs=new TaskCompletionSource<string>();
 
 		Hook();
@@ -48,15 +50,15 @@ public static class GlobalClipboardHook{//TODO make it so it always uses main th
 		return s;
 	}
 
-	private class HookForm:Form{
+	internal class HookForm:Form{
+		private static HookForm? _instance;
+		public static HookForm Instance=>_instance??=MainThread.Invoke(()=>new HookForm());
 		private IntPtr _hWndNextWindow;
 
 		public HookForm(){
 			Visible=false;
 			WindowState=FormWindowState.Minimized;
 			Hide();
-			_=RegisterWindowMessage("SHELLHOOK");
-			RegisterShellHookWindow(Handle);
 		}
 
 		protected override void WndProc(ref Message m){//https://github.com/magicmanam/windows-clipboard-viewer/blob/master/magicmanam.Windows.ClipboardViewer/ClipboardViewer.cs
@@ -84,20 +86,16 @@ public static class GlobalClipboardHook{//TODO make it so it always uses main th
 						SendMessage(_hWndNextWindow,m.Msg,m.WParam,m.LParam);
 						break;
 				}
+				if(m.Msg==GlobalShellHook.Msg){
+					GlobalShellHook.Invoke(ref m);
+				}
 				base.WndProc(ref m);
 			} catch(Exception e){
 				Console.WriteLine(e);
 			}
 		}
-
+		
 		#region DLL imports
-		[DllImport("user32.dll",EntryPoint="RegisterWindowMessageA",CharSet=CharSet.Unicode)]
-		private static extern int RegisterWindowMessage(string lpString);
-
-		[DllImport("user32.dll")]
-		private static extern int RegisterShellHookWindow(IntPtr hWnd);
-
-
 		[DllImport("user32.dll")]
 		private static extern IntPtr SetClipboardViewer(IntPtr hWndNewViewer);
 
@@ -110,7 +108,6 @@ public static class GlobalClipboardHook{//TODO make it so it always uses main th
 		#endregion
 	}
 
-	private static HookForm? _instance;
 	private static readonly HashSet<Action<string>> Once=new();
 	private static readonly HashSet<Action<string>> Always=new();
 }
