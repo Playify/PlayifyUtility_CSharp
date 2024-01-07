@@ -125,4 +125,6 @@ public static class TypeExtensions{
 
 		return tcs.Task;
 	}
+	
+	public static void RunClassConstructor(this Type type)=>RuntimeHelpers.RunClassConstructor(type.TypeHandle);
 }

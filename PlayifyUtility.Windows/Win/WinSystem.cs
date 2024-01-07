@@ -4,7 +4,7 @@ namespace PlayifyUtility.Windows.Win;
 
 [PublicAPI]
 public static partial class WinSystem{
-	private static int KeyboardDelayMs{
+	public static int KeyboardDelay{//Range from 0-3 (0=250ms, 3=1sec)
 		get=>SystemParametersInfo(0x0016,0,out var delay,0)
 			     ?delay
 			     :throw new Exception("Failed to retrieve keyboard repeat delay.");

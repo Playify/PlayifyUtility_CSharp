@@ -9,7 +9,7 @@ public struct NativeRect{
 	public int Right;
 	public int Bottom;
 
-	public override string ToString()=>$"({Left},{Top})->({Right},{Bottom})";
+	public override string ToString()=>$"{nameof(NativeRect)}({Left},{Top})->({Right},{Bottom})";
 
 	public static implicit operator Rectangle(NativeRect rect)=>Rectangle.FromLTRB(rect.Left,rect.Top,rect.Right,rect.Bottom);
 

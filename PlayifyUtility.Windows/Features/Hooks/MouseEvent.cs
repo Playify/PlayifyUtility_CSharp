@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
-public delegate void MouseEventHandler(MouseEvent e);
+public delegate void GlobalMouseEventHandler(MouseEvent e);
 
 [PublicAPI]
 public class MouseEvent{
@@ -31,4 +31,5 @@ public class MouseEvent{
 			MouseButtons.XButton2=>Keys.XButton2,
 			_=>Keys.None,
 		};
+	public override string ToString()=>$"{nameof(MouseEvent)}({Button},Handled={Handled},{X},{Y},Delta={Delta})";
 }

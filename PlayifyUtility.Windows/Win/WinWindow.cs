@@ -17,6 +17,7 @@ public readonly partial struct WinWindow{
 	public readonly IntPtr Hwnd;
 
 	public WinWindow(IntPtr hwnd)=>Hwnd=hwnd;
+	public override string ToString()=>$"{nameof(WinControl)}(0x{Hwnd:x})";
 
 	public static List<WinWindow> GetOpenWindows()=>GetOpenWindows(w=>w.IsVisible);
 

@@ -1,44 +1,43 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
-using PlayifyUtility.Windows.Features.Interact;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
 [PublicAPI]
-public static class GlobalEventHook{
-	#region Instance Variables
-	private static readonly List<IntPtr> Hooks=new();
-	private static readonly WinEventProc Proc=HookProc;
-	#endregion
-
+public sealed class GlobalEventHook:IDisposable{
 	#region Events
-	public static event Action<WindowEvent>? OnEvent;
+	public static IDisposable Hook(uint evt,WindowEventHandler handler)=>new GlobalEventHook(evt,evt,handler);
+	public static IDisposable Hook(uint min,uint max,WindowEventHandler handler)=>new GlobalEventHook(min,max,handler);
 	#endregion
 
+	#region Instance Variables
+	private static readonly HashSet<GlobalEventHook> Instances=new();//SingleHooks are not allowed to be GCd while hooked
+	private readonly IntPtr _hook;
+	private readonly WinEventProc _proc;
+	#endregion
 
-	#region Public Methods
-	public static void Hook(uint min,uint max){
-		Hooks.Add(SetWinEventHook(min,max,IntPtr.Zero,Proc,0,0,2));
+	#region Private Methods
+	private GlobalEventHook(uint min,uint max,WindowEventHandler handler){
+		Instances.Add(this);
+		_proc=(_,@event,hwnd,idObject,idChild,idEventThread,eventTime)=>
+			handler(new WindowEvent(@event,hwnd,idObject,idChild,idEventThread,eventTime));
+		_hook=SetWinEventHook(min,max,IntPtr.Zero,_proc,0,0,2);
 	}
 
-	public static void Unhook(){
-		foreach(var hook in Hooks) UnhookWinEvent(hook);
-		Hooks.Clear();
-	}
-
-	private static void HookProc(IntPtr _,int @event,IntPtr hwnd,int idObject,int idChild,int idEventThread,int eventTime){
-		OnEvent?.Invoke(new WindowEvent(@event,hwnd,idObject,idChild,idEventThread,eventTime));
+	public void Dispose(){
+		if(Instances.Remove(this))
+			UnhookWinEvent(_hook);
 	}
 	#endregion
 
 	#region DLL imports
-	private delegate void WinEventProc(IntPtr hWinEventHook,int iEvent,IntPtr hWnd,int idObject,int idChild,int dwEventThread,int dwmsEventTime);
+	private delegate void WinEventProc(IntPtr _,int evt,IntPtr hWnd,int idObject,int idChild,int idEventThread,int eventTime);
 
 	[DllImport("user32.dll")]
-	private static extern IntPtr SetWinEventHook(uint eventMin,uint eventMax,IntPtr hmodWinEventProc,WinEventProc lpfnWinEventProc,int idProcess,int idThread,uint dwflags);
+	private static extern IntPtr SetWinEventHook(uint evtMin,uint evtMax,IntPtr mod,WinEventProc proc,
+		int idProcess,int idThread,uint dwFlags);
 
 	[DllImport("user32.dll")]
 	private static extern IntPtr UnhookWinEvent(IntPtr hWinEventHook);
 	#endregion
-	
 }

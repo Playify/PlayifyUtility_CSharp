@@ -3,25 +3,13 @@ using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Win;
 using static System.Windows.Forms.Keys;
-using static PlayifyUtility.Windows.Features.Interact.Send.SendFlags;
 
 namespace PlayifyUtility.Windows.Features.Interact;
 
 [PublicAPI]
 public class Send{
+	#region Constants
 	public static readonly IntPtr ProcessHandle=Process.GetCurrentProcess().Handle;
-	public static SendFlags SetDown(SendFlags flags,bool down)=>(flags&~KeyPress)|(down?KeyDown:KeyUp);
-	public static SendFlags SetHidden(SendFlags flags,bool hidden)=>hidden?flags|Hidden:flags&~Hidden;
-
-	#region Variables
-	[Flags]
-	public enum SendFlags{
-		KeyDown=1,
-		KeyUp=2,
-		KeyPress=KeyDown|KeyUp,
-		Hidden=4,
-	}
-
 	private static readonly Keys[] Extended={
 		RMenu,RControlKey,Insert,Delete,Home,End,PageDown,PageUp,
 		Up,Down,Left,Right,NumLock,Pause,PrintScreen,Divide,Enter,
@@ -35,346 +23,327 @@ public class Send{
 	private static readonly Keys[] MouseButtons={
 		LButton,RButton,MButton,XButton1,XButton2,
 	};
-
-	private bool _hidden;
 	#endregion
 
-	#region Constructor,Restore
-	private bool _hasMods;
-	private Mods _startingMods;
-	private Mods _currentMods;
+	#region Hidden
+	private bool _hidden;
 
 	public Send Hide(bool hide=true){
 		_hidden=hide;
 		return this;
 	}
-
-	private void EnsureModsAreLoaded(){
-		if(_hasMods) return;
-		_hasMods=true;
-		_startingMods=_currentMods=new Mods{
-			Shift={
-				L=(GetKeyState(LShiftKey)&128)!=0,
-				R=(GetKeyState(RShiftKey)&128)!=0,
-			},
-			Ctrl={
-				L=(GetKeyState(LControlKey)&128)!=0,
-				R=(GetKeyState(RControlKey)&128)!=0,
-			},
-			Alt={
-				L=(GetKeyState(LMenu)&128)!=0,
-				R=(GetKeyState(RMenu)&128)!=0,
-			},
-			Win={
-				L=(GetKeyState(LWin)&128)!=0,
-				R=(GetKeyState(RWin)&128)!=0,
-			},
-		};
-	}
-
-	public Send Mark(Keys key,bool down=true){
-		EnsureModsAreLoaded();
-		switch(key){
-			case LWin:
-				_startingMods.Win.L=_currentMods.Win.L=down;
-				break;
-			case RWin:
-				_startingMods.Win.R=_currentMods.Win.R=down;
-				break;
-			case LControlKey:
-				_startingMods.Ctrl.L=_currentMods.Ctrl.L=down;
-				break;
-			case RControlKey:
-				_startingMods.Ctrl.R=_currentMods.Ctrl.R=down;
-				break;
-			case LMenu:
-				_startingMods.Alt.L=_currentMods.Alt.L=down;
-				break;
-			case RMenu:
-				_startingMods.Alt.R=_currentMods.Alt.R=down;
-				break;
-			case LShiftKey:
-				_startingMods.Shift.L=_currentMods.Shift.L=down;
-				break;
-			case RShiftKey:
-				_startingMods.Shift.R=_currentMods.Shift.R=down;
-				break;
-		}
-		return this;
-	}
-
-	public Mods Modifiers{
-		get{
-			EnsureModsAreLoaded();
-			return _currentMods;
-		}
-		set{
-			EnsureModsAreLoaded();
-			if(value.Win.L!=_currentMods.Win.L) Key(LWin,value.Win.L);
-			if(value.Win.R!=_currentMods.Win.R) Key(RWin,value.Win.R);
-
-			if(value.Ctrl.L!=_currentMods.Ctrl.L) Key(LControlKey,value.Ctrl.L);
-			if(value.Ctrl.R!=_currentMods.Ctrl.R) Key(RControlKey,value.Ctrl.R);
-
-			if(value.Alt.L!=_currentMods.Alt.L) Key(LMenu,value.Alt.L);
-			if(value.Alt.R!=_currentMods.Alt.R) Key(RMenu,value.Alt.R);
-
-			if(value.Shift.L!=_currentMods.Shift.L) Key(LShiftKey,value.Shift.L);
-			if(value.Shift.R!=_currentMods.Shift.R) Key(RShiftKey,value.Shift.R);
-		}
-	}
-
-	public struct LeftRight{
-		public bool L,R;
-	}
-
-	public struct Mods{
-		public LeftRight Shift,Ctrl,Alt,Win;
-	}
 	#endregion
-
 
 	#region Send
-	private Input[] _arr=new Input[1];
-	private int _length;
+	private readonly List<Input> _list=new();
 
 	private Send Add(Input input){
-		if(_length==_arr.Length) Array.Resize(ref _arr,_length+1);
-		_arr[_length++]=input;
+		_list.Add(input);
 		return this;
 	}
 
-	private void Remove(int cnt)=>Array.Copy(_arr,cnt,_arr,0,_length-=cnt);
-
+	public void SendOnMainThread()=>MainThread.Invoke(SendNow);
 
 	public void SendNow(){
-		if(_hasMods) Modifiers=_startingMods;
-		if(_length==0) return;
-		var i=0;
-		while(true){
-			if(i==_length||_arr[i].Type==-1){
-				SendInput(i,_arr,Marshal.SizeOf(typeof(Input)));
-				if(i==_length){
-					Remove(i);
-					return;
-				}
-				var time=_arr[i].InputUnion.ki.Time;
-				Remove(i+1);
-				i=0;
+		if(_startingMods.HasValue) Mods=_startingMods.Value;
+
+		while(_list.Count!=0){
+			if(_list[0].Type==-1){//Sleep node
+				var time=_list[0].InputUnion.ki.Time;
+				_list.RemoveAt(0);
 				if(time!=0) Thread.Sleep(time);
-				Application.DoEvents();
-				continue;
+				else Application.DoEvents();
+			} else{
+				var arr=_list.TakeWhile(i=>i.Type!=-1).ToArray();
+				_list.RemoveRange(0,arr.Length);
+				SendInput(arr.Length,arr,Marshal.SizeOf<Input>());//TODO throw on error
 			}
-			i++;
 		}
 	}
 	#endregion
 
-	#region Primitives
-	public Send Unicode(char c,SendFlags flags)
-		=>(flags&KeyPress)!=KeyPress
-		  ?Add(new Input{
-			  Type=1,
-			  InputUnion=new InputUnion{
-				  ki=new KeyBdInput{
-					  WVk=0,
-					  WScan=(short)c,
-					  Time=0,
-					  DwFlags=flags.HasFlag(KeyDown)?4:6,
-					  DwExtraInfo=flags.HasFlag(Hidden)||_hidden?ProcessHandle:IntPtr.Zero,
-				  },
-			  },
-		  })
-		  :Unicode(c,flags&~KeyUp).Unicode(c,flags&~KeyDown);
-
-	public Send Key(Keys key,SendFlags flags)
-		=>(flags&KeyPress)!=KeyPress
-		  ?MouseButtons.Contains(key)
-		   ?Mouse(key,flags)
-		   :Add(new Input{
-			   Type=1,
-			   InputUnion=new InputUnion{
-				   ki=new KeyBdInput{
-					   WVk=(short)key,
-					   WScan=MapVirtualKey((short)key,0),
-					   Time=0,
-					   DwFlags=(flags.HasFlag(KeyDown)?0:2)|(Extended.Contains(key)?1:0),
-					   DwExtraInfo=flags.HasFlag(Hidden)||_hidden?ProcessHandle:IntPtr.Zero,
-				   },
-			   },
-		   })
-		  :Key(key,flags&~KeyUp).Key(key,flags&~KeyDown);
-
-	private Send Mouse(Keys key,SendFlags flags)
-		=>(flags&KeyPress)!=KeyPress
-		  ?Add(new Input{
-			  Type=0,
-			  InputUnion=new InputUnion{
-				  mi=new MouseInput{
-					  Dx=0,
-					  Dy=0,
-					  MouseData=key switch{
-						  XButton1=>1,
-						  XButton2=>2,
-						  _=>0,
-					  },
-					  Time=0,
-					  DwFlags=key switch{
-						  LButton=>flags.HasFlag(KeyDown)?0x2:0x4,
-						  RButton=>flags.HasFlag(KeyDown)?0x8:0x10,
-						  MButton=>flags.HasFlag(KeyDown)?0x20:0x40,
-						  XButton1=>flags.HasFlag(KeyDown)?0x80:0x100,
-						  XButton2=>flags.HasFlag(KeyDown)?0x80:0x100,
-						  _=>throw new ArgumentOutOfRangeException(nameof(key),key,null),
-					  },
-					  DwExtraInfo=flags.HasFlag(Hidden)||_hidden?ProcessHandle:IntPtr.Zero,
-				  },
-			  },
-		  })
-		  :Mouse(key,flags&~KeyUp).Mouse(key,flags&~KeyDown);
-
-	public Send Wait(int delay=0)=>delay<0?this:Add(new Input{Type=-1,InputUnion={ki=new KeyBdInput{Time=delay}}});
-	#endregion
-
-	#region Mouse
-	public Send MouseMove(WinWindow window,(int X,int Y) delta,bool hidden=false)=>MouseMove(window,delta.X,delta.Y,hidden);
-	public Send MouseMove(WinWindow window,Point delta,bool hidden=false)=>MouseMove(window,delta.X,delta.Y,hidden);
-
-	public Send MouseMove(WinWindow window,int dx,int dy,bool hidden=false){
-		if(WinWindow.Foreground!=window) throw new Exception("Tried to click in a window that was not focused");
-		var rect=window.WindowRect;
-
-		dx=dx<0?rect.Right+dx:rect.Left+dx;
-		dy=dy<0?rect.Bottom+dy:rect.Top+dy;
-		return MouseMove(dx,dy,false,hidden);
+	#region Modifiers
+	[Flags]
+	public enum ModsEnum:byte{
+		LShift=1,
+		RShift=2,
+		LCtrl=4,
+		RCtrl=8,
+		LAlt=16,
+		RAlt=32,
+		LWin=64,
+		RWin=128,
 	}
 
-	public Send MouseMove(int x,int y,bool relative=false,bool hidden=false){
-		if(!relative)
-			(x,y)=(x*65536/GetSystemMetrics(SmCxScreen),
-			       y*65536/GetSystemMetrics(SmCyScreen));
+	private ModsEnum? _startingMods;
+	private ModsEnum? _currentMods;
 
-		/*Another way to "Normalize" Coordinates:
-		Windows.GetClientRect(Windows.GetDesktopWindow(),out var rect);
-		x=x*65536/(rect.x2-rect.x1);
-		y=y*65536/(rect.y2-rect.y1);*/
-
-		return Add(new Input{
-			Type=0,
-			InputUnion=new InputUnion{
-				mi=new MouseInput{
-					Dx=x,
-					Dy=y,
-					MouseData=0,
-					Time=0,
-					DwFlags=relative?1:0x8001,//relative ? Move : Move|Absolute
-					DwExtraInfo=hidden||_hidden?ProcessHandle:IntPtr.Zero,
-				},
-			},
-		});
+	private ModsEnum Mods{
+		get{
+			var mods=_currentMods??=((GetKeyState(LShiftKey)&128)!=0?ModsEnum.LShift:0)|
+			                        ((GetKeyState(RShiftKey)&128)!=0?ModsEnum.RShift:0)|
+			                        ((GetKeyState(LControlKey)&128)!=0?ModsEnum.LCtrl:0)|
+			                        ((GetKeyState(RControlKey)&128)!=0?ModsEnum.RCtrl:0)|
+			                        ((GetKeyState(LMenu)&128)!=0?ModsEnum.LAlt:0)|
+			                        ((GetKeyState(RMenu)&128)!=0?ModsEnum.RAlt:0)|
+			                        ((GetKeyState(LWin)&128)!=0?ModsEnum.LWin:0)|
+			                        ((GetKeyState(RWin)&128)!=0?ModsEnum.RWin:0);
+			_startingMods??=mods;
+			return mods;
+		}
+		set{
+			var changes=(_currentMods??=Mods)^value;
+			if((changes&ModsEnum.LShift)!=0) Key(LShiftKey,(value&ModsEnum.LShift)!=0);
+			if((changes&ModsEnum.RShift)!=0) Key(RShiftKey,(value&ModsEnum.RShift)!=0);
+			if((changes&ModsEnum.LCtrl)!=0) Key(LControlKey,(value&ModsEnum.LCtrl)!=0);
+			if((changes&ModsEnum.RCtrl)!=0) Key(RControlKey,(value&ModsEnum.RCtrl)!=0);
+			if((changes&ModsEnum.LAlt)!=0) Key(LMenu,(value&ModsEnum.LAlt)!=0);
+			if((changes&ModsEnum.RAlt)!=0) Key(RMenu,(value&ModsEnum.RAlt)!=0);
+			if((changes&ModsEnum.LWin)!=0) Key(LWin,(value&ModsEnum.LWin)!=0);
+			if((changes&ModsEnum.RWin)!=0) Key(RWin,(value&ModsEnum.RWin)!=0);
+			_currentMods=value;
+		}
 	}
 
-	public Send Click(Keys mouseButton,int x,int y,bool relative=false,bool hidden=false)=>MouseMove(x,y,relative,hidden).Key(mouseButton,null,hidden);
-
-	public Send Click(int x,int y,bool relative=false,bool hidden=false)=>MouseMove(x,y,relative,hidden).Key(LButton,null,hidden);
-
-	public Send ClickRight(int x,int y,bool relative=false,bool hidden=false)=>MouseMove(x,y,relative,hidden).Key(RButton,null,hidden);
-
-	public Send Click(Keys mouseButton,bool hidden=false)=>Key(mouseButton,null,hidden);
-	public Send Click(bool hidden=false)=>Key(LButton,null,hidden);
-	public Send ClickRight(bool hidden=false)=>Key(RButton,null,hidden);
-	#endregion
-
-	#region Advanced
-	public Send Text(string s,bool hidden=false){
-		var flags=SetHidden(KeyPress,hidden);
-		foreach(var c in s.Replace("\r\n","\n")) Char(c,flags);
+	public Send GetMods(out ModsEnum mods){
+		mods=Mods;
 		return this;
 	}
 
-	public Send Char(char c,SendFlags flags){
+	public Send SetMods(ModsEnum mods){
+		Mods=mods;
+		return this;
+	}
+
+	public Send Mod(ModifierKeys mod){//Sets the active modifiers
+		var mods=Mods;
+		var start=_startingMods??=mods;
+
+        
+		if((mod&ModifierKeys.Shift)==0) mods&=~(ModsEnum.LShift|ModsEnum.RShift);
+		else if((mods&(ModsEnum.LShift|ModsEnum.RShift))==0)
+			mods|=(start&ModsEnum.RShift)!=0?ModsEnum.RShift:ModsEnum.LShift;
+        
+		if((mod&ModifierKeys.Control)==0) mods&=~(ModsEnum.LCtrl|ModsEnum.RCtrl);
+		else if((mods&(ModsEnum.LCtrl|ModsEnum.RCtrl))==0)
+			mods|=(start&ModsEnum.RCtrl)!=0?ModsEnum.RCtrl:ModsEnum.LCtrl;
+        
+		if((mod&ModifierKeys.Alt)==0) mods&=~(ModsEnum.LAlt|ModsEnum.RAlt);
+		else if((mods&(ModsEnum.LAlt|ModsEnum.RAlt))==0)
+			mods|=(start&ModsEnum.LAlt)!=0||(mod&ModifierKeys.AltGr)!=ModifierKeys.AltGr?ModsEnum.LAlt:ModsEnum.RAlt;
+        
+		if((mod&ModifierKeys.Windows)==0) mods&=~(ModsEnum.LWin|ModsEnum.RWin);
+		else if((mods&(ModsEnum.LWin|ModsEnum.RWin))==0)
+			mods|=(start&ModsEnum.RWin)!=0?ModsEnum.RWin:ModsEnum.LWin;
+
+		Mods=mods;
+		return this;
+	}
+
+	public Send Mod(ModifierKeys mod,bool down){
+		var mods=Mods;
+		var start=_startingMods??=mods;
+
+		if((mod&ModifierKeys.Shift)!=0)
+			if(!down) mods&=~(ModsEnum.LShift|ModsEnum.RShift);
+			else if((mods&(ModsEnum.LShift|ModsEnum.RShift))==0)
+				mods|=(start&ModsEnum.RShift)!=0?ModsEnum.RShift:ModsEnum.LShift;
+		if((mod&ModifierKeys.Control)!=0)
+			if(!down) mods&=~(ModsEnum.LCtrl|ModsEnum.RCtrl);
+			else if((mods&(ModsEnum.LCtrl|ModsEnum.RCtrl))==0)
+				mods|=(start&ModsEnum.RCtrl)!=0?ModsEnum.RCtrl:ModsEnum.LCtrl;
+		if((mod&ModifierKeys.Alt)!=0)
+			if(!down) mods&=~(ModsEnum.LAlt|ModsEnum.RAlt);
+			else if((mods&(ModsEnum.LAlt|ModsEnum.RAlt))==0)
+				mods|=(start&ModsEnum.LAlt)!=0||(mod&ModifierKeys.AltGr)!=ModifierKeys.AltGr?ModsEnum.LAlt:ModsEnum.RAlt;
+		if((mod&ModifierKeys.Windows)!=0)
+			if(!down) mods&=~(ModsEnum.LWin|ModsEnum.RWin);
+			else if((mods&(ModsEnum.LWin|ModsEnum.RWin))==0)
+				mods|=(start&ModsEnum.RWin)!=0?ModsEnum.RWin:ModsEnum.LWin;
+
+		Mods=mods;
+		return this;
+	}
+	#endregion
+
+	#region Keyboard
+	public Send Key(Keys key,bool? down=null)
+		=>!down.HasValue
+			  ?Key(key,true).Key(key,false)
+			  :MouseButtons.Contains(key)
+				  ?_MouseButton(key,down.Value)
+				  :Add(new Input{
+					  Type=1,
+					  InputUnion=new InputUnion{
+						  ki=new KeyBdInput{
+							  WVk=(short)key,
+							  WScan=MapVirtualKey((short)key,0),
+							  Time=0,
+							  DwFlags=(down.Value?0:2)|(Extended.Contains(key)?1:0),
+							  DwExtraInfo=_hidden?ProcessHandle:IntPtr.Zero,
+						  },
+					  },
+				  });
+
+	public Send Key(Keys key,int cnt,int delayMillis=-1){
+		while(cnt-->0) Key(key).Wait(delayMillis);
+		return this;
+	}
+
+	public Send Combo(ModifierKeys mod,Keys key)=>Mod(mod,true).Key(key).Mod(mod,false);
+
+	/**Warning: Does not revert changes to modifiers*/
+	public Send Char(char c,bool? down=null){
 		if(c=='\n') c='\r';
 
 		int num1=VkKeyScan(c);
-		if(num1==-1) return Unicode(c,flags);
+		if(num1==-1) return _Unicode(c,down);
 		Mod(ModifierKeys.Shift,(num1&256)!=0);
 		Mod(ModifierKeys.Control,(num1&512)!=0);
 		Mod(ModifierKeys.Alt,(num1&1024)!=0);
 		Mod(ModifierKeys.Windows,false);
-		Key((Keys)(num1&255),flags);
+		return Key((Keys)(num1&255),down);
+	}
+
+	public Send Text(string s){
+		s=s.Replace("\r\n","\n");
+		if(s=="") return this;
+
+		var mods=Mods;
+		_startingMods??=mods;
+
+		foreach(var c in s) Char(c);
+
+		Mods=mods;
+
 		return this;
 	}
 
-	public Send Mod(ModifierKeys keys,SendFlags flags){
-		if((flags&KeyPress)==KeyPress){
-			Mod(ModifierKeys.Shift,keys.HasFlag(ModifierKeys.Shift));
-			Mod(ModifierKeys.Control,keys.HasFlag(ModifierKeys.Control));
-			Mod(ModifierKeys.Alt,keys.HasFlag(ModifierKeys.Alt));
-			Mod(ModifierKeys.Windows,keys.HasFlag(ModifierKeys.Windows));
-			return this;
-		}
-		EnsureModsAreLoaded();
-		var b=flags.HasFlag(KeyDown);
 
-		if(keys.HasFlag(ModifierKeys.Shift))
-			if(b!=(_currentMods.Shift.L||_currentMods.Shift.R))
-				if(b)
-					if(_startingMods.Shift.R) Key(RShiftKey,SetDown(flags,_currentMods.Shift.R=true));
-					else Key(LShiftKey,SetDown(flags,_currentMods.Shift.L=true));
-				else{
-					if(_currentMods.Shift.L) Key(LShiftKey,SetDown(flags,_currentMods.Shift.L=false));
-					if(_currentMods.Shift.R) Key(RShiftKey,SetDown(flags,_currentMods.Shift.R=false));
-				}
-		if(keys.HasFlag(ModifierKeys.Control))
-			if(b!=(_currentMods.Ctrl.L||_currentMods.Ctrl.R))
-				if(b)
-					if(_startingMods.Ctrl.R) Key(RControlKey,SetDown(flags,_currentMods.Ctrl.R=true));
-					else Key(LControlKey,SetDown(flags,_currentMods.Ctrl.L=true));
-				else{
-					if(_currentMods.Ctrl.L) Key(LControlKey,SetDown(flags,_currentMods.Ctrl.L=false));
-					if(_currentMods.Ctrl.R) Key(RControlKey,SetDown(flags,_currentMods.Ctrl.R=false));
-				}
-		if(keys.HasFlag(ModifierKeys.Alt))
-			if(b!=(_currentMods.Alt.L||_currentMods.Alt.R))
-				if(b)
-					if(_startingMods.Alt.L||(keys&ModifierKeys.AltGr)!=ModifierKeys.AltGr) Key(LMenu,SetDown(flags,_currentMods.Alt.L=true));
-					else Key(RMenu,SetDown(flags,_currentMods.Alt.R=true));
-				else{
-					if(_currentMods.Alt.L) Key(LMenu,SetDown(flags,_currentMods.Alt.L=false));
-					if(_currentMods.Alt.R) Key(RMenu,SetDown(flags,_currentMods.Alt.R=false));
-				}
-		if(keys.HasFlag(ModifierKeys.Windows))
-			if(b!=(_currentMods.Win.L||_currentMods.Win.R))
-				if(b)
-					if(_startingMods.Win.R) Key(RWin,SetDown(flags,_currentMods.Win.R=true));
-					else Key(LWin,SetDown(flags,_currentMods.Win.L=true));
-				else{
-					if(_currentMods.Win.L) Key(LWin,SetDown(flags,_currentMods.Win.L=false));
-					if(_currentMods.Win.R) Key(RWin,SetDown(flags,_currentMods.Win.R=false));
-				}
-
-
-		return this;
-	}
+	private Send _Unicode(char c,bool? down)
+		=>!down.HasValue
+			  ?_Unicode(c,true)._Unicode(c,false)
+			  :Add(new Input{
+				  Type=1,
+				  InputUnion=new InputUnion{
+					  ki=new KeyBdInput{
+						  WVk=0,//TODO check if packet helps
+						  WScan=(short)c,
+						  Time=0,
+						  DwFlags=down.Value?4:6,
+						  DwExtraInfo=_hidden?ProcessHandle:IntPtr.Zero,
+					  },
+				  },
+			  });
 	#endregion
 
-	#region Shortcuts
-	public Send Char(char c,bool? down=null,bool hidden=false)=>Char(c,SetHidden(down.HasValue?down.Value?KeyDown:KeyUp:KeyPress,hidden));
+	#region Mouse
+	private Send _MouseButton(Keys key,bool down)
+		=>Add(new Input{
+			Type=0,
+			InputUnion=new InputUnion{
+				mi=new MouseInput{
+					Dx=0,
+					Dy=0,
+					MouseData=key switch{
+						XButton1=>1,
+						XButton2=>2,
+						_=>0,
+					},
+					Time=0,
+					DwFlags=key switch{
+						LButton=>down?0x2:0x4,
+						RButton=>down?0x8:0x10,
+						MButton=>down?0x20:0x40,
+						XButton1=>down?0x80:0x100,
+						XButton2=>down?0x80:0x100,
+						_=>throw new ArgumentOutOfRangeException(nameof(key),key,null),
+					},
+					DwExtraInfo=_hidden?ProcessHandle:IntPtr.Zero,
+				},
+			},
+		});
 
-	public Send Key(Keys c,bool? down=null,bool hidden=false)=>Key(c,SetHidden(down.HasValue?down.Value?KeyDown:KeyUp:KeyPress,hidden));
 
-	public Send Mod(ModifierKeys c,bool? down=null,bool hidden=false)=>Mod(c,SetHidden(down.HasValue?down.Value?KeyDown:KeyUp:KeyPress,hidden));
+	public Send MouseMoveWindow(WinWindow window,(int X,int Y) delta)=>MouseMoveWindow(window,delta.X,delta.Y);
+	public Send MouseMoveWindow(WinWindow window,Point delta)=>MouseMoveWindow(window,delta.X,delta.Y);
 
-	public Send Key(Keys key,int cnt,int delay=0,bool hidden=false){
-		while(cnt-->0) Key(key,SetHidden(KeyPress,hidden)).Wait(delay);
-		return this;
+	public Send MouseMoveWindow(WinWindow window,int dx,int dy){
+		var rect=window.WindowRect;
+		if(dx>rect.Right-rect.Left) throw new OverflowException("dx coordinate is bigger than the window width");
+		if(dy>rect.Bottom-rect.Top) throw new OverflowException("dy coordinate is bigger than the window height");
+		dx=dx<0?rect.Right+dx:rect.Left+dx;
+		dy=dy<0?rect.Bottom+dy:rect.Top+dy;
+
+		return MouseMove(dx,dy);
 	}
+
+
+	public Send MouseMoveForeground(WinWindow window,(int X,int Y) delta)=>MouseMoveForeground(window,delta.X,delta.Y);
+	public Send MouseMoveForeground(WinWindow window,Point delta)=>MouseMoveForeground(window,delta.X,delta.Y);
+
+	public Send MouseMoveForeground(WinWindow window,int dx,int dy)
+		=>WinWindow.Foreground!=window
+			  ?throw new OverflowException("Window is not focused")
+			  :MouseMoveWindow(window,dx,dy);
+
+	public Send MouseMoveRelative(int dx,int dy)
+		=>Add(new Input{
+			Type=0,
+			InputUnion=new InputUnion{
+				mi=new MouseInput{
+					Dx=dx,
+					Dy=dy,
+					MouseData=0,
+					Time=0,
+					DwFlags=1,
+					DwExtraInfo=_hidden?ProcessHandle:IntPtr.Zero,
+				},
+			},
+		});
+
+	public Send MouseMove(int x,int y)
+		=>Add(new Input{
+			Type=0,
+			InputUnion=new InputUnion{
+				mi=new MouseInput{
+					Dx=x*65536/GetSystemMetrics(SmCxScreen),
+					Dy=y*65536/GetSystemMetrics(SmCyScreen),
+					MouseData=0,
+					Time=0,
+					DwFlags=0x8001,
+					DwExtraInfo=_hidden?ProcessHandle:IntPtr.Zero,
+				},
+			},
+		});
+
+	public Send MouseScroll(int downwards)
+		=>Add(new Input{
+			Type=0,
+			InputUnion=new InputUnion{
+				mi=new MouseInput{
+					Dx=0,
+					Dy=0,
+					MouseData=downwards,
+					Time=0,
+					DwFlags=0x800,
+					DwExtraInfo=_hidden?ProcessHandle:IntPtr.Zero
+				},
+			},
+		});
+
+	public Send Click(Keys mouseButton=LButton)=>Key(mouseButton);
+	public Send Click(int x,int y,Keys mouseButton=LButton)=>MouseMove(x,y).Key(mouseButton);
+	public Send ClickRelative(int x,int y,Keys mouseButton=LButton)=>MouseMoveRelative(x,y).Key(mouseButton);
 	#endregion
 
-	#region DLL Imports
+	#region Extras
+	public Send Wait(int delayMillis=0)=>delayMillis<0?this:Add(new Input{Type=-1,InputUnion={ki=new KeyBdInput{Time=delayMillis}}});
+	#endregion
+
+	#region Pinvoke
 	[DllImport("user32.dll")]
 	private static extern uint SendInput(int cInputs,Input[] pInputs,int cbSize);
-
 
 	[DllImport("user32.dll",CharSet=CharSet.Auto)]
 	private static extern short VkKeyScan(char key);
@@ -382,8 +351,8 @@ public class Send{
 	[DllImport("user32.dll",CharSet=CharSet.Auto)]
 	private static extern short MapVirtualKey(short uCode,short uMapType);
 
-
-	public struct MouseInput{
+	[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+	private struct MouseInput{
 		public int Dx;
 		public int Dy;
 		public int MouseData;
@@ -392,7 +361,8 @@ public class Send{
 		public IntPtr DwExtraInfo;
 	}
 
-	public struct KeyBdInput{
+	[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+	private struct KeyBdInput{
 		public short WVk;
 		public short WScan;
 		public int DwFlags;
@@ -400,19 +370,21 @@ public class Send{
 		public IntPtr DwExtraInfo;
 	}
 
-	public struct HardwareInput{
+	[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+	private struct HardwareInput{
 		public int UMsg;
 		public short WParamL;
 		public short WParamH;
 	}
 
-	public struct Input{
+	[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+	private struct Input{
 		public int Type;
 		public InputUnion InputUnion;
 	}
 
 	[StructLayout(LayoutKind.Explicit)]
-	public struct InputUnion{
+	private struct InputUnion{
 		[FieldOffset(0)]
 		public MouseInput mi;
 		[FieldOffset(0)]
@@ -431,5 +403,4 @@ public class Send{
 	private const int SmCxScreen=0;
 	private const int SmCyScreen=1;
 	#endregion
-
 }

@@ -63,5 +63,8 @@
         <Compile Update="Features\Hooks\WindowEvent.cs">
           <DependentUpon>GlobalEventHook.cs</DependentUpon>
         </Compile>
+        <Compile Update="Features\Hooks\ClipboardHookControl.cs">
+          <DependentUpon>GlobalClipboardHook.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

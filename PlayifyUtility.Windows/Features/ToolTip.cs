@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using PlayifyUtility.Windows.Features.Hooks;
 using PlayifyUtility.Windows.Win;
 using PlayifyUtility.Windows.Win.Native;
 
@@ -55,6 +56,10 @@ public static partial class ToolTip{
 			SendMessage(_currentToolTip.Hwnd,0x439,0,ref _toolInfo);//TTM_UPDATETIPTEXTW
 		}
 
+		if(!_hooked){
+			_hooked=true;
+			GlobalMouseHook.MouseMove+=_hookFunc;
+		}
 		CorrectToolTip(null);
 
 		SendMessage(_currentToolTip.Hwnd,0x411,1,ref _toolInfo);//TTM_TRACKACTIVATE

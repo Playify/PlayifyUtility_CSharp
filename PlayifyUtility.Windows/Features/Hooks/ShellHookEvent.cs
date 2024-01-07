@@ -1,7 +1,9 @@
+using JetBrains.Annotations;
 using PlayifyUtility.Windows.Win;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
+[PublicAPI]
 public enum ShellHookEnum:byte{
 	WindowCreated=1,
 	WindowDestroyed=2,
@@ -19,14 +21,19 @@ public enum ShellHookEnum:byte{
 	WindowReplacing=14,
 }
 
-public readonly struct ShellHookEvent{
+[PublicAPI]
+public readonly struct ShellHookEvent{//https://learn.microsoft.com/de-de/windows/win32/winmsg/shellproc
 	public readonly ShellHookEnum ShellHookEnum;
 	public readonly bool Injected;
 	public readonly WinWindow Window;
+	public readonly IntPtr ExtraData;
 
-	public ShellHookEvent(int wParam,IntPtr lParam){
-		ShellHookEnum=(ShellHookEnum)(wParam&~0x8000);
-		Injected=(wParam&0x8000)!=0;
-		Window=new WinWindow(lParam);
+	public ShellHookEvent(int code,IntPtr wParam,IntPtr lParam){
+		ShellHookEnum=(ShellHookEnum)(code&~0x8000);
+		Injected=(code&0x8000)!=0;
+		Window=new WinWindow(wParam);
+		ExtraData=lParam;
 	}
+
+	public override string ToString()=>$"{nameof(ShellHookEnum)}({ShellHookEnum},Injected={Injected},{Window})";
 }

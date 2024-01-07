@@ -6,13 +6,16 @@ using PlayifyUtility.Windows.Win.Native;
 namespace PlayifyUtility.Windows.Features;
 
 public static partial class ToolTip{
-	static ToolTip(){
-		GlobalMouseHook.Hook();
-		GlobalMouseHook.MouseMove+=CorrectToolTip;
-	}
+	private static bool _hooked;
+	private static GlobalMouseEventHandler _hookFunc=CorrectToolTip;
 
 	public static void CorrectToolTip(MouseEvent? e){//Coordinates can be out of screen, therefore, GetCursorPos is required
-		if(_toolInfo.lpszText==null) return;
+		if(_toolInfo.lpszText==null){
+			if(!_hooked) return;
+			GlobalMouseHook.MouseMove-=_hookFunc;
+			_hooked=false;
+			return;
+		}
 		if(!WinCursor.TryGetCursorPos(out var p)) return;
 		p.X+=16;
 		p.Y+=16;

@@ -9,4 +9,6 @@ public struct NativePoint{
 
 	public static implicit operator Point(NativePoint point)=>new(point.X,point.Y);
 	public static implicit operator NativePoint(Point point)=>new(){X=point.X,Y=point.Y};
+
+	public override string ToString()=>$"{nameof(NativePoint)}({X},{Y})";
 }

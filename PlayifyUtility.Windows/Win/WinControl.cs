@@ -13,6 +13,7 @@ public readonly partial struct WinControl{
 	public readonly IntPtr Hwnd;
 
 	public WinControl(IntPtr hwnd)=>Hwnd=hwnd;
+	public override string ToString()=>$"{nameof(WinControl)}(0x{Hwnd:x})";
 
 	public static WinControl GetFocused(){
 		var result=GetFocus();

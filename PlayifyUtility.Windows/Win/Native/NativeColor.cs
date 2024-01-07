@@ -22,4 +22,6 @@ public struct NativeColor{
 
 	public static implicit operator Color(NativeColor color)=>Color.FromArgb(color.A,color.R,color.G,color.B);
 	public static implicit operator NativeColor(Color color)=>new(color);
+
+	public override string ToString()=>$"{nameof(NativeColor)}(#{((Color)this).ToArgb():x8})";
 }

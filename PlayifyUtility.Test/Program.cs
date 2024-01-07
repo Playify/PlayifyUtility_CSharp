@@ -1,15 +1,31 @@
-﻿using PlayifyUtility.Windows.Features.Hooks;
+﻿using PlayifyUtility.Windows;
+using PlayifyUtility.Windows.Features.Hooks;
 
-namespace PlayifyUtils.Test;// ReSharper disable once EmptyNamespace
+namespace PlayifyUtils.Test;
 internal class Program{
+	
+	[STAThread]
 	public static void Main(string[] args){
-		GlobalKeyboardHook.Hook();
+		MainThread.Init();
+		
 
-		GlobalKeyboardHook.KeyDown+=e=>{
-			var unicode=e.GetUnicode();
-			Console.WriteLine(e.Key+" \""+unicode+"\"");
-		};
+
+		Test();
+		
+
+
 
 		Application.Run();
+	}
+
+	public static async Task Test(){
+		try{
+			Console.WriteLine("GO");
+			await Task.Delay(10);
+			Console.WriteLine("GO:"+await GlobalClipboardHook.GetNextString());
+			Console.WriteLine("GO:"+await GlobalClipboardHook.GetNextString());
+		} catch(Exception e){
+			Console.WriteLine(e);
+		}
 	}
 }

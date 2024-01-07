@@ -3,6 +3,7 @@ using PlayifyUtility.Windows.Win;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
+public delegate void WindowEventHandler(WindowEvent e);
 [PublicAPI]
 public readonly struct WindowEvent{
 	public readonly int Event;
@@ -22,4 +23,5 @@ public readonly struct WindowEvent{
 		IdEventThread=idEventThread;
 		EventTime=eventTime;
 	}
+	public override string ToString()=>$"{nameof(WindowEvent)}({Event},{Window})";
 }
