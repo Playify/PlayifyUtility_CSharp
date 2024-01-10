@@ -26,7 +26,7 @@ public static class EnumerableExtensions{
 
 	public static T? LastOrNull<T>(this IEnumerable<T> source) where T:struct=>source.AsNullable().LastOrDefault();
 	public static T? LastOrNull<T>(this IEnumerable<T> source,Func<T,bool> predicate) where T:struct=>source.Where(predicate).AsNullable().LastOrDefault();
-	public static IEnumerable<T?> AsNullable<T>(this IEnumerable<T> source) where T:struct=>source.Select(s=>(T?) s);
+	public static IEnumerable<T?> AsNullable<T>(this IEnumerable<T> source) where T:struct=>source.Select(s=>(T?)s);
 
 	public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source) where T:class=>source.Where(t=>t!=null)!;
 
@@ -39,26 +39,28 @@ public static class EnumerableExtensions{
 
 	#region Select and Zip
 	public static IEnumerable<T> SelectMany<T>(this IEnumerable<IEnumerable<T>> source)=>source.SelectMany(enumerable=>enumerable);
+	public static IOrderedEnumerable<T> Ordered<T>(this IEnumerable<T> source)=>source.OrderBy(t=>t);
+	public static IOrderedEnumerable<T> OrderedDescending<T>(this IEnumerable<T> source)=>source.OrderByDescending(t=>t);
 
 	public static IEnumerable<(T value,int index)> WithIndex<T>(this IEnumerable<T> source)=>source.Select((value,i)=>(value,i));
 
 	public static IEnumerable<(TFirst a,TSecond b,int index)> ZipWithIndex<TFirst,TSecond>(this IEnumerable<TFirst> first,
-	                                                                                       IEnumerable<TSecond> second){
+		IEnumerable<TSecond> second){
 		return first.Zip(second,(f,s,i)=>(f,s,i));
 	}
 
 	public static IEnumerable<(TFirst a,TSecond b)> Zip<TFirst,TSecond>(this IEnumerable<TFirst> first,
-	                                                                    IEnumerable<TSecond> second)
+		IEnumerable<TSecond> second)
 		=>first.Zip(second,(f,s)=>(f,s));
 
 	public static IEnumerable<TResult> Zip<TFirst,TSecond,TResult>(this IEnumerable<TFirst> first,
-	                                                               IEnumerable<TSecond> second,
-	                                                               Func<TFirst,TSecond,int,TResult> resultSelector){
+		IEnumerable<TSecond> second,
+		Func<TFirst,TSecond,int,TResult> resultSelector){
 		return first.Zip(second).Select((tuple,i)=>resultSelector(tuple.a,tuple.b,i));
 	}
 
 	public static IEnumerable<TResult> TryParseAll<TSource,TResult>(this IEnumerable<TSource> source,
-	                                                                TryParseFunction<TSource,TResult> tryParse){
+		TryParseFunction<TSource,TResult> tryParse){
 		foreach(var e in source)
 			if(tryParse(e,out var result))
 				yield return result;
@@ -97,6 +99,13 @@ public static class EnumerableExtensions{
 
 	#region Type specific
 	public static string Join<T>(this IEnumerable<T> source,string sep)=>string.Join(sep,source);
+
+	public static Dictionary<TKey,TValue> ToDictionary<TKey,TValue>(this IEnumerable<(TKey key,TValue value)> source)
+	where TKey:notnull
+		=>source.ToDictionary(t=>t.key,t=>t.value);
+	public static IEnumerable<(TKey key,TValue value)> ToTuples<TKey,TValue>(this IEnumerable<KeyValuePair<TKey,TValue>> source)
+	where TKey:notnull
+		=>source.Select(pair=>(pair.Key,pair.Value));
 
 	public static Task<Task<T>> WhenAny<T>(this IEnumerable<Task<T>> source)=>Task.WhenAny(source);
 	public static Task<Task> WhenAny(this IEnumerable<Task> source)=>Task.WhenAny(source);
