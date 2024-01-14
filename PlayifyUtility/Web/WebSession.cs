@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -115,9 +116,18 @@ public class WebSession:MultipartRequest<WebSession>{
 
 
 	public bool WantsWebSocket()=>Headers.TryGetValue("Upgrade",out var s)&&s.Equals("websocket",StringComparison.OrdinalIgnoreCase);
+	public bool WantsWebSocket([MaybeNullWhen(false)]out Func<Task<WebSocket>> createWebSocket){
+		var b=WantsWebSocket();
+		createWebSocket=b?CreateWebSocketWithoutChecking:null;
+		return b;
+	}
 
 	public async Task<WebSocket?> CreateWebSocket(){
 		if(!WantsWebSocket()) return null;
+		return await CreateWebSocketWithoutChecking();
+	}
+
+	private async Task<WebSocket> CreateWebSocketWithoutChecking(){
 		var key=Headers["Sec-WebSocket-Key"];
 		key+="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 		var hash=WebUtils.Sha1(Encoding.ASCII.GetBytes(key));
