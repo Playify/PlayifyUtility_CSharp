@@ -1,31 +1,24 @@
 ﻿using PlayifyUtility.Windows;
 using PlayifyUtility.Windows.Features.Hooks;
+using PlayifyUtility.Windows.Win;
 
 namespace PlayifyUtils.Test;
-internal class Program{
-	
+
+internal static class Program{
 	[STAThread]
 	public static void Main(string[] args){
 		MainThread.Init();
-		
 
 
-		Test();
-		
-
+		GlobalKeyboardHook.KeyDown+=e=>{
+			if(e.Key==Keys.NumPad5){
+				Console.WriteLine("NumPad5");
+				e.Handled=true;
+				WinWindow.Foreground.PostSysCommand(WinWindow.SysCommand.WindowsMenu);
+			}
+		};
 
 
 		Application.Run();
-	}
-
-	public static async Task Test(){
-		try{
-			Console.WriteLine("GO");
-			await Task.Delay(10);
-			Console.WriteLine("GO:"+await GlobalClipboardHook.GetNextString());
-			Console.WriteLine("GO:"+await GlobalClipboardHook.GetNextString());
-		} catch(Exception e){
-			Console.WriteLine(e);
-		}
 	}
 }

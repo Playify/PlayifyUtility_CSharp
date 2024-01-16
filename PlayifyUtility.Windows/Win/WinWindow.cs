@@ -188,7 +188,7 @@ public readonly partial struct WinWindow{
 	public byte Alpha{
 		get{
 			GetLayeredWindowAttributes(Hwnd,out _,out var alpha,out var dw);
-			return (dw&2)!=0?alpha:(byte) 255;
+			return (dw&2)!=0?alpha:(byte)255;
 		}
 		set{
 			var l=ExStyle;
@@ -258,6 +258,23 @@ public readonly partial struct WinWindow{
 
 	public Dictionary<string,WinControl> GetControls()=>WinControl.GetControls(Hwnd);
 
+		
+	public enum SysCommand{
+		Close=0xF060,//Closes the window.
+		Maximize=0xF030,//Maximizes the window.
+		Minimize=0xF020,//Minimizes the window.
+		Restore=0xF120,//Restores the window to its normal position and size.
+		
+		NextWindow=0xF040,//Moves to the next window. (Mostly useless)
+		PrevWindow=0xF050,//Moves to the previous window. (Mostly useless)
+		
+		AltMenu=0xF100,//KeyMenu  //Retrieves the window menu as a result of a keystroke. (Similar to pressing Alt to get the menu)
+		WindowsMenu=0xF130,//TaskList  //Activates the Start menu. (Similar to pressing Win to get the Windows Menu)
+	}
+	public void SendSysCommand(SysCommand cmd,int lParam=0)=>SendMessage(0x112,(int)cmd,lParam);
+	public void PostSysCommand(SysCommand cmd,int lParam=0)=>PostMessage(0x112,(int)cmd,lParam);
+	
+	
 
 	public bool MoveWindow(int x,int y,int width,int height,bool redraw)=>MoveWindow(Hwnd,x,y,width,height,redraw);
 	public bool SetWindowPos(int hwndInsertAfter,int x,int y,int cx,int cy,uint uFlags)=>SetWindowPos(Hwnd,hwndInsertAfter,x,y,cx,cy,uFlags);
@@ -265,7 +282,7 @@ public readonly partial struct WinWindow{
 	public int SendMessage(int msg,int wParam,int lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
 	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
 
-	
+
 	public override bool Equals(object? obj)=>obj is WinWindow other&&this==other;
 	public override int GetHashCode()=>Hwnd.GetHashCode();
 	public static bool operator!=(WinWindow left,WinWindow right)=>!(left==right);

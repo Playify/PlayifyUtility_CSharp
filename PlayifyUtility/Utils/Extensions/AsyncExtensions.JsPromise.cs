@@ -133,9 +133,10 @@ public static partial class AsyncExtensions{
 		}
 	}
 
-
+	[Obsolete("Use .Background() instead, or .Catch()")]
 	public static Task TryCatch(this Task task)=>TryCatch(task,Console.Error.WriteLine);
 
+	[Obsolete("Use .Background() instead, or .Catch()")]
 	public static async Task TryCatch(this Task task,Action<Exception> @catch){
 		try{
 			await task;
@@ -144,14 +145,26 @@ public static partial class AsyncExtensions{
 		}
 	}
 
+	[Obsolete("Use .Background() instead, or .Catch()")]
 	public static Task<T> TryCatch<T>(this Task<T> task,T def)=>TryCatch(task,Console.Error.WriteLine,def);
 
+	[Obsolete("Use .Background() instead, or .Catch()")]
 	public static async Task<T> TryCatch<T>(this Task<T> task,Action<Exception> @catch,T def){
 		try{
 			return await task;
 		} catch(Exception e){
 			@catch(e);
 			return def;
+		}
+	}
+
+
+	public static async void Background(this Task task,Action<Exception>? @catch=null){
+		try{
+			await task.ConfigureAwait(false);
+		} catch(Exception e){
+			if(@catch.NotNull(out var c)) c(e);
+			else Console.Error.WriteLine(e);
 		}
 	}
 }

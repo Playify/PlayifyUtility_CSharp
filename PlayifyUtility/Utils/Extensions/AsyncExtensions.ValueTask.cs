@@ -24,8 +24,10 @@ public static partial class AsyncExtensions{
 		}
 	}
 
+	[Obsolete("Use .Background() instead, or .Catch()")]
 	public static ValueTask TryCatch<T>(this ValueTask<T> task)=>TryCatch(task,Console.Error.WriteLine);
 
+	[Obsolete("Use .Background() instead, or .Catch()")]
 	public static async ValueTask TryCatch<T>(this ValueTask<T> task,Action<Exception> @catch){
 		try{
 			await task;
@@ -34,8 +36,10 @@ public static partial class AsyncExtensions{
 		}
 	}
 
+	[Obsolete("Use .Background() instead, or .Catch()")]
 	public static ValueTask<T> TryCatch<T>(this ValueTask<T> task,T def)=>TryCatch(task,Console.Error.WriteLine,def);
 
+	[Obsolete("Use .Background() instead, or .Catch()")]
 	public static async ValueTask<T> TryCatch<T>(this ValueTask<T> task,Action<Exception> @catch,T def){
 		try{
 			return await task;
@@ -44,4 +48,7 @@ public static partial class AsyncExtensions{
 			return def;
 		}
 	}
+
+	public static void Background(this ValueTask task)=>Background(task.IsCompleted?Task.CompletedTask:task.AsTask());
+	public static void Background<T>(this ValueTask<T> task)=>Background(task.IsCompleted?Task.CompletedTask:task.AsTask());
 }
