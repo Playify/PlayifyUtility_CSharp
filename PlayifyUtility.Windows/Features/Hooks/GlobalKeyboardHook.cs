@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Xml;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Features.Interact;
 
@@ -9,6 +10,9 @@ public static class GlobalKeyboardHook{
 	#region Events
 	public static event GlobalKeyEventHandler KeyDown{add=>Hook(ref _down,value);remove=>Unhook(ref _down,value);}
 	public static event GlobalKeyEventHandler KeyUp{add=>Hook(ref _up,value);remove=>Unhook(ref _up,value);}
+
+	public static readonly Dictionary<Keys,Keys?> OnRelease=new();
+	public static bool AutoHandleUpWhenHandledDown{get;set;}=true;
 	#endregion
 
 	#region Instance Variables
@@ -44,9 +48,21 @@ public static class GlobalKeyboardHook{
 					case WmKeydown:
 					case WmSysKeyDown:
 						_down.evt?.Invoke(evt);
+						if(evt.Handled&&AutoHandleUpWhenHandledDown&&!OnRelease.ContainsKey(key)){
+							OnRelease.Add(key,null);
+						}
 						break;
 					case WmKeyup:
 					case WmSysKeyUp:
+						if(OnRelease.TryGetValue(key,out var onRelease)){
+							OnRelease.Remove(key);
+							if(key!=onRelease){
+								evt.Handled=true;
+								if(onRelease.HasValue)
+									new Send().Key(onRelease.GetValueOrDefault(),false).SendNow();
+							}
+						}
+						
 						_up.evt?.Invoke(evt);
 						break;
 				}

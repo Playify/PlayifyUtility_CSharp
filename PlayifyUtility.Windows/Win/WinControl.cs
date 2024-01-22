@@ -105,6 +105,9 @@ public readonly partial struct WinControl{
 		if(opensWindow) PostMessage(Hwnd,0x202,0,0);//WM_LBUTTONUP
 		else SendMessage(Hwnd,0x202,0,0);//WM_LBUTTONUP
 	}
+	public void Click2(){
+		SendMessage(Hwnd,0xF5,0,0);//BM_CLICK
+	}
 
 	public void DoubleClick()=>SendMessage(Hwnd,0x203,0,0);//WM_LBUTTONDBLCLK
 

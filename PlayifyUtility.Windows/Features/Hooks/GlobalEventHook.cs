@@ -6,6 +6,7 @@ namespace PlayifyUtility.Windows.Features.Hooks;
 [PublicAPI]
 public sealed class GlobalEventHook:IDisposable{
 	#region Events
+	// https://learn.microsoft.com/en-us/windows/win32/winauto/event-constants
 	public static IDisposable Hook(uint evt,WindowEventHandler handler)=>new GlobalEventHook(evt,evt,handler);
 	public static IDisposable Hook(uint min,uint max,WindowEventHandler handler)=>new GlobalEventHook(min,max,handler);
 	#endregion
