@@ -66,5 +66,8 @@
         <Compile Update="Features\Hooks\ClipboardHookControl.cs">
           <DependentUpon>GlobalClipboardHook.cs</DependentUpon>
         </Compile>
+        <Compile Update="Win\WinConsole.PInvoke.cs">
+            <DependentUpon>WinConsole.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

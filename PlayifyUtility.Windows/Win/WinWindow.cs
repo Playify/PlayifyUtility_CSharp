@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Win.Native;
-
 #if NETFRAMEWORK
 using PlayifyUtility.Windows.Utils;
 #endif
@@ -11,13 +10,13 @@ using PlayifyUtility.Windows.Utils;
 namespace PlayifyUtility.Windows.Win;
 
 [PublicAPI]
-public readonly partial struct WinWindow{
+public partial struct WinWindow{
 	static WinWindow()=>AppDomain.CurrentDomain.ProcessExit+=(_,_)=>RestoreAll();
 
 	public readonly IntPtr Hwnd;
 
 	public WinWindow(IntPtr hwnd)=>Hwnd=hwnd;
-	public override string ToString()=>$"{nameof(WinControl)}(0x{Hwnd:x})";
+	public override string ToString()=>$"{nameof(WinWindow)}(0x{Hwnd:x})";
 
 	public static List<WinWindow> GetOpenWindows()=>GetOpenWindows(w=>w.IsVisible);
 
@@ -58,18 +57,7 @@ public readonly partial struct WinWindow{
 
 	public static WinWindow FindWindow(string? @class,string? windowName)=>new(FindWindow_Hwnd(@class,windowName));
 
-	public static WinWindow? ConsoleWindow{
-		get{
-			var ptr=GetConsoleWindow();
-			return ptr!=IntPtr.Zero?new WinWindow(ptr):null;
-		}
-	}
-	public static WinWindow? DesktopWindow{
-		get{
-			var ptr=GetDesktopWindow();
-			return ptr!=IntPtr.Zero?new WinWindow(ptr):null;
-		}
-	}
+	public static WinWindow DesktopWindow=>new(GetDesktopWindow());
 
 	public static WinWindow Foreground{
 		get=>new(GetForegroundWindow());
@@ -86,7 +74,10 @@ public readonly partial struct WinWindow{
 		get=>GetWindowLong(Hwnd,-16);
 		set=>SetWindowLong(Hwnd,-16,value);
 	}
-	public bool IsVisible=>IsWindowVisible(Hwnd);
+	public bool IsVisible{
+		get=>IsWindowVisible(Hwnd);
+		set=>ShowWindowCommand=value?ShowWindowCommands.Show:ShowWindowCommands.Hide;
+	}
 	public bool Exists=>IsWindow(Hwnd);
 	public NativeRect WindowRect{
 		get{
@@ -149,6 +140,11 @@ public readonly partial struct WinWindow{
 	}
 
 
+	public bool Maximized{
+		get=>ShowWindowCommand==ShowWindowCommands.Maximized;
+		set=>ShowWindowCommand=value?ShowWindowCommands.Maximized:ShowWindowCommands.Normal;
+	}
+
 	public ShowWindowCommands ShowWindowCommand{
 		get{
 			var placement=new WindowPlacement{length=Marshal.SizeOf<WindowPlacement>()};
@@ -157,26 +153,29 @@ public readonly partial struct WinWindow{
 		}
 		set=>ShowWindow(Hwnd,value);
 	}
-	public bool Maximized{
-		get=>ShowWindowCommand==ShowWindowCommands.Maximized;
-		set=>ShowWindowCommand=value?ShowWindowCommands.Maximized:ShowWindowCommands.Normal;
-	}
 
-	private static readonly Stack<WinWindow> Hidden=new();
 
-	public void Hide(){
-		Hidden.Push(this);
+	private static readonly Stack<WinWindow> _hidden=new();
+
+
+	public void HidePush(){
+		_hidden.Push(this);
 		ShowWindowCommand=ShowWindowCommands.Hide;
 	}
 
 	public static void RestoreLast(){
-		if(Hidden.TryPop(out var restore))
+		if(_hidden.TryPop(out var restore))
 			restore.ShowWindowCommand=ShowWindowCommands.Show;
 	}
 
 	public static void RestoreAll(){
-		while(Hidden.TryPop(out var restore))
+		while(_hidden.TryPop(out var restore))
 			restore.ShowWindowCommand=ShowWindowCommands.Show;
+	}
+
+	public bool Hidden{
+		get=>!IsVisible;
+		set=>IsVisible=!value;
 	}
 
 
@@ -254,37 +253,50 @@ public readonly partial struct WinWindow{
 		}
 	}
 	public string? Class=>new WinControl(Hwnd).Class;
+
+
+	public PropMap Props=>new(this);
 	#endregion
 
+
+	#region Commands
 	public Dictionary<string,WinControl> GetControls()=>WinControl.GetControls(Hwnd);
 
-		
+
 	public enum SysCommand{
 		Close=0xF060,//Closes the window.
 		Maximize=0xF030,//Maximizes the window.
 		Minimize=0xF020,//Minimizes the window.
 		Restore=0xF120,//Restores the window to its normal position and size.
-		
+
 		NextWindow=0xF040,//Moves to the next window. (Mostly useless)
 		PrevWindow=0xF050,//Moves to the previous window. (Mostly useless)
-		
+
 		AltMenu=0xF100,//KeyMenu  //Retrieves the window menu as a result of a keystroke. (Similar to pressing Alt to get the menu)
 		WindowsMenu=0xF130,//TaskList  //Activates the Start menu. (Similar to pressing Win to get the Windows Menu)
 	}
+
 	public void SendSysCommand(SysCommand cmd,int lParam=0)=>SendMessage(0x112,(int)cmd,lParam);
 	public void PostSysCommand(SysCommand cmd,int lParam=0)=>PostMessage(0x112,(int)cmd,lParam);
-	
-	
 
 	public bool MoveWindow(int x,int y,int width,int height,bool redraw)=>MoveWindow(Hwnd,x,y,width,height,redraw);
 	public bool SetWindowPos(int hwndInsertAfter,int x,int y,int cx,int cy,uint uFlags)=>SetWindowPos(Hwnd,hwndInsertAfter,x,y,cx,cy,uFlags);
 	public bool DestroyWindow()=>DestroyWindow(Hwnd);
 	public int SendMessage(int msg,int wParam,int lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
 	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
+	#endregion
 
-
+	#region Operators
 	public override bool Equals(object? obj)=>obj is WinWindow other&&this==other;
 	public override int GetHashCode()=>Hwnd.GetHashCode();
 	public static bool operator!=(WinWindow left,WinWindow right)=>!(left==right);
 	public static bool operator==(WinWindow left,WinWindow right)=>left.Hwnd==right.Hwnd;
+	public static implicit operator bool(WinWindow win)=>win.Hwnd!=IntPtr.Zero;
+	public bool NonZero()=>Hwnd!=IntPtr.Zero;
+
+	public bool NonZero(out WinWindow win){
+		win=this;
+		return NonZero();
+	}
+	#endregion
 }
