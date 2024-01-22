@@ -23,17 +23,17 @@ public enum ShellHookEnum:byte{
 
 [PublicAPI]
 public readonly struct ShellHookEvent{//https://learn.microsoft.com/de-de/windows/win32/winmsg/shellproc
-	public readonly ShellHookEnum ShellHookEnum;
+	public readonly ShellHookEnum Event;
 	public readonly bool Injected;
 	public readonly WinWindow Window;
 	public readonly IntPtr ExtraData;
 
 	public ShellHookEvent(int code,IntPtr wParam,IntPtr lParam){
-		ShellHookEnum=(ShellHookEnum)(code&~0x8000);
+		Event=(ShellHookEnum)(code&~0x8000);
 		Injected=(code&0x8000)!=0;
 		Window=new WinWindow(wParam);
 		ExtraData=lParam;
 	}
 
-	public override string ToString()=>$"{nameof(ShellHookEnum)}({ShellHookEnum},Injected={Injected},{Window})";
+	public override string ToString()=>$"{nameof(ShellHookEvent)}({Event},Injected={Injected},{Window})";
 }

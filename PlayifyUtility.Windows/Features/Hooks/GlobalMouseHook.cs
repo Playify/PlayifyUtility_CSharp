@@ -1,13 +1,15 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using PlayifyUtility.Windows.Features.Interact;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
 [PublicAPI]
 public static class GlobalMouseHook{
 	#region Events
-	public static event GlobalMouseEventHandler KeyDown{add=>Hook(ref _down,value);remove=>Unhook(ref _down,value);}
-	public static event GlobalMouseEventHandler KeyUp{add=>Hook(ref _up,value);remove=>Unhook(ref _up,value);}
+	public static event GlobalMouseEventHandler MouseDown{add=>Hook(ref _down,value);remove=>Unhook(ref _down,value);}
+	public static event GlobalMouseEventHandler MouseUp{add=>Hook(ref _up,value);remove=>Unhook(ref _up,value);}
+	public static bool AutoHandleUpWhenHandledDown{get;set;}=true;
 	public static event GlobalMouseEventHandler MouseMove{add=>Hook(ref _move,value);remove=>Unhook(ref _move,value);}
 	public static event GlobalMouseEventHandler MouseScroll{add=>Hook(ref _scroll,value);remove=>Unhook(ref _scroll,value);}
 	#endregion
@@ -20,7 +22,6 @@ public static class GlobalMouseHook{
 	private static (GlobalMouseEventHandler? evt,List<GlobalMouseEventHandler> lst) _move=(null,new List<GlobalMouseEventHandler>());
 	private static (GlobalMouseEventHandler? evt,List<GlobalMouseEventHandler> lst) _scroll=(null,new List<GlobalMouseEventHandler>());
 	#endregion
-
 
 	#region Private Methods
 	private static void Hook(ref (GlobalMouseEventHandler? evt,List<GlobalMouseEventHandler> lst) tuple,GlobalMouseEventHandler value){
@@ -41,36 +42,57 @@ public static class GlobalMouseHook{
 	private static int HookProc(int code,int wParam,ref MsLlHookStruct lParam){
 		try{
 			if(code>=0){
-				if(wParam==512){
-					var mouseEvent=new MouseEvent(lParam.pt.x,lParam.pt.y,MouseButtons.None);
-					_move.evt?.Invoke(mouseEvent);
-					if(mouseEvent.Handled) return 1;
-				} else if(wParam==522){
-					var mouseEvent=new MouseEvent(lParam.pt.x,lParam.pt.y,MouseButtons.None,Math.Sign(lParam.mouseData));
-					_scroll.evt?.Invoke(mouseEvent);
-					if(mouseEvent.Handled) return 1;
-				} else{
-					var (button,down)=
-						wParam switch{
-							513=>(MouseButtons.Left,true),
-							514=>(MouseButtons.Left,false),
-							516=>(MouseButtons.Right,true),
-							517=>(MouseButtons.Right,false),
-							519=>(MouseButtons.Middle,true),
-							520=>(MouseButtons.Middle,false),
-							523=>(lParam.mouseData==0x10000?MouseButtons.XButton1:MouseButtons.XButton2,true),
-							524=>(lParam.mouseData==0x10000?MouseButtons.XButton1:MouseButtons.XButton2,false),
-							_=>(MouseButtons.None,false),
-						};
-					var mouseEvent=new MouseEvent(lParam.pt.x,lParam.pt.y,button);
-					(down?_down:_up).evt?.Invoke(mouseEvent);
-					if(mouseEvent.Handled) return 1;
-				}
+				if(wParam switch{
+					   512=>HandleEvent(_move.evt,new MouseEvent(lParam.pt.x,lParam.pt.y,MouseButtons.None)),
+					   522=>HandleEvent(_scroll.evt,new MouseEvent(lParam.pt.x,lParam.pt.y,MouseButtons.None,Math.Sign(lParam.mouseData))),
+					   513=>HandleDown(ref lParam,MouseButtons.Left),
+					   514=>HandleUp(ref lParam,MouseButtons.Left),
+					   516=>HandleDown(ref lParam,MouseButtons.Right),
+					   517=>HandleUp(ref lParam,MouseButtons.Right),
+					   519=>HandleDown(ref lParam,MouseButtons.Middle),
+					   520=>HandleUp(ref lParam,MouseButtons.Middle),
+					   523=>HandleDown(ref lParam,lParam.mouseData==0x10000?MouseButtons.XButton1:MouseButtons.XButton2),
+					   524=>HandleUp(ref lParam,lParam.mouseData==0x10000?MouseButtons.XButton1:MouseButtons.XButton2),
+					   _=>false,
+				   }) return 1;
 			}
 		} catch(Exception e){
 			Console.WriteLine($"Error in {nameof(GlobalMouseHook)}: {e}");
 		}
 		return CallNextHookEx(_hook,code,wParam,ref lParam);
+	}
+
+	private static bool HandleEvent(GlobalMouseEventHandler? handler,MouseEvent evt){
+		handler?.Invoke(evt);
+		return evt.Handled;
+	}
+
+	private static bool HandleDown(ref MsLlHookStruct lParam,MouseButtons button){
+		var evt=new MouseEvent(lParam.pt.x,lParam.pt.y,button);
+		var key=evt.Key;
+
+		_down.evt?.Invoke(evt);
+
+		if(evt.Handled&&AutoHandleUpWhenHandledDown&&!GlobalKeyboardHook.OnRelease.ContainsKey(key))
+			GlobalKeyboardHook.OnRelease.Add(key,null);
+		return evt.Handled;
+	}
+
+	private static bool HandleUp(ref MsLlHookStruct lParam,MouseButtons button){
+		var evt=new MouseEvent(lParam.pt.x,lParam.pt.y,button);
+		var key=evt.Key;
+
+		if(GlobalKeyboardHook.OnRelease.TryGetValue(key,out var onRelease)){
+			GlobalKeyboardHook.OnRelease.Remove(key);
+			if(key!=onRelease){
+				evt.Handled=true;
+				if(onRelease.HasValue)
+					new Send().Key(onRelease.GetValueOrDefault(),false).SendNow();
+			}
+		}
+
+		_up.evt?.Invoke(evt);
+		return evt.Handled;
 	}
 	#endregion
 
