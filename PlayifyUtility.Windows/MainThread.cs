@@ -7,6 +7,7 @@ public static class MainThread{
 	public static SynchronizationContext? SynchronizationContext=>_ctx??=SynchronizationContext.Current;
 
 	public static void Init(bool winForms=true){
+		Application.EnableVisualStyles();
 		//Initializes Singleton
 		if(SynchronizationContext==null)
 			SynchronizationContext.SetSynchronizationContext(_ctx??=winForms

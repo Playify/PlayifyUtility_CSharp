@@ -6,7 +6,7 @@ namespace PlayifyUtils.Test;
 internal static class Program{
 	[STAThread]
 	public static void Main(string[] args){
-		WinConsole.CreateHideAbleConsole();
+		WinConsole.CreateHiddenConsole();
 
 
 		new Thread(()=>{

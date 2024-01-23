@@ -27,8 +27,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Update="Features\ToolTip.Internal.cs">
-            <DependentUpon>ToolTip.cs</DependentUpon>
+        <Compile Update="Features\MouseToolTip.Internal.cs">
+            <DependentUpon>MouseToolTip.cs</DependentUpon>
         </Compile>
         <Compile Update="Features\CaseSensitiveDirectory.Native.cs">
             <DependentUpon>CaseSensitiveDirectory.cs</DependentUpon>

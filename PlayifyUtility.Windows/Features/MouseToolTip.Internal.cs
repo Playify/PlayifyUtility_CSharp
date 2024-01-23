@@ -5,11 +5,11 @@ using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Features;
 
-public static partial class ToolTip{
+public static partial class MouseToolTip{
 	private static bool _hooked;
 	private static GlobalMouseEventHandler _hookFunc=CorrectToolTip;
 
-	public static void CorrectToolTip(MouseEvent? e){//Coordinates can be out of screen, therefore, GetCursorPos is required
+	private static void CorrectToolTip(MouseEvent? e){//Coordinates can be out of screen, therefore, GetCursorPos is required
 		if(_toolInfo.lpszText==null){
 			if(!_hooked) return;
 			GlobalMouseHook.MouseMove-=_hookFunc;

@@ -8,6 +8,8 @@ public struct NativeRect{
 	public int Top;
 	public int Right;
 	public int Bottom;
+	public int Width=>Right-Left;
+	public int Height=>Bottom-Top;
 
 	public override string ToString()=>$"{nameof(NativeRect)}({Left},{Top})->({Right},{Bottom})";
 

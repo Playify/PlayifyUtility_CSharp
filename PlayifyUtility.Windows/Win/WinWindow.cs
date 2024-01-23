@@ -280,10 +280,29 @@ public partial struct WinWindow{
 	public void PostSysCommand(SysCommand cmd,int lParam=0)=>PostMessage(0x112,(int)cmd,lParam);
 
 	public bool MoveWindow(int x,int y,int width,int height,bool redraw)=>MoveWindow(Hwnd,x,y,width,height,redraw);
+	public bool MoveWindow(NativeRect rect,bool redraw)=>MoveWindow(Hwnd,rect.Left,rect.Top,rect.Width,rect.Height,redraw);
 	public bool SetWindowPos(int hwndInsertAfter,int x,int y,int cx,int cy,uint uFlags)=>SetWindowPos(Hwnd,hwndInsertAfter,x,y,cx,cy,uFlags);
 	public bool DestroyWindow()=>DestroyWindow(Hwnd);
 	public int SendMessage(int msg,int wParam,int lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
+	public int SendMessage(int msg,int wParam,IntPtr lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
+	
+	public int SendMessage<T>(int msg,int wParam,ref T lParam){
+		var handle=GCHandle.Alloc(lParam,GCHandleType.Pinned);
+		var result=SendMessage(msg,wParam,handle.AddrOfPinnedObject());
+		lParam=(T)handle.Target!;
+		handle.Free();
+		return result;
+	}
 	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
+	public bool PostMessage(int msg,int wParam,IntPtr lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
+	
+	public bool PostMessage<T>(int msg,int wParam,ref T lParam){
+		var handle=GCHandle.Alloc(lParam,GCHandleType.Pinned);
+		var result=PostMessage(msg,wParam,handle.AddrOfPinnedObject());
+		lParam=(T)handle.Target!;
+		handle.Free();
+		return result;
+	}
 	#endregion
 
 	#region Operators
@@ -292,11 +311,9 @@ public partial struct WinWindow{
 	public static bool operator!=(WinWindow left,WinWindow right)=>!(left==right);
 	public static bool operator==(WinWindow left,WinWindow right)=>left.Hwnd==right.Hwnd;
 	public static implicit operator bool(WinWindow win)=>win.Hwnd!=IntPtr.Zero;
-	public bool NonZero()=>Hwnd!=IntPtr.Zero;
-
-	public bool NonZero(out WinWindow win){
-		win=this;
-		return NonZero();
-	}
+	
+	
+	public static readonly WinWindow Zero;
+	public bool NonZero(out WinWindow win)=>win=this;
 	#endregion
 }

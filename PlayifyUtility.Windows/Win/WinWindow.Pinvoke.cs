@@ -50,9 +50,13 @@ public readonly partial struct WinWindow{
 
 	[DllImport("user32.dll",CharSet=CharSet.Auto)]
 	private static extern int SendMessage(IntPtr hWnd,int msg,int wParam,int lParam);
+	[DllImport("user32.dll",CharSet=CharSet.Auto)]
+	private static extern int SendMessage(IntPtr hWnd,int msg,int wParam,IntPtr lParam);
 
 	[DllImport("user32.dll",SetLastError=true,CharSet=CharSet.Auto)]
 	private static extern bool PostMessage(IntPtr hWnd,int msg,int wParam,int lParam);
+	[DllImport("user32.dll",SetLastError=true,CharSet=CharSet.Auto)]
+	private static extern bool PostMessage(IntPtr hWnd,int msg,int wParam,IntPtr lParam);
 
 	[Serializable,StructLayout(LayoutKind.Sequential)]
 	private struct WindowPlacement{

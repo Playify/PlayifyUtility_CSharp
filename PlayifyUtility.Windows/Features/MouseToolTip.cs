@@ -9,7 +9,7 @@ namespace PlayifyUtility.Windows.Features;
 
 [SuppressMessage("ReSharper","CommentTypo")]
 [PublicAPI]
-public static partial class ToolTip{
+public static partial class MouseToolTip{
 	public static void HideToolTip(){
 		_cancel.Cancel();
 		if(_toolInfo.lpszText==null) return;
@@ -21,6 +21,7 @@ public static partial class ToolTip{
 
 	public static void ShowToolTip(string s,TimeSpan timeout){
 		if(_currentToolTip==default){
+			
 			var hwnd=CreateWindowEx(0x28,//WS_EX_TRANSPARENT|WS_EX_TOPMOST
 			                        "tooltips_class32",//TOOLTIPS_CLASS
 			                        null,
@@ -65,13 +66,16 @@ public static partial class ToolTip{
 		SendMessage(_currentToolTip.Hwnd,0x411,1,ref _toolInfo);//TTM_TRACKACTIVATE
 		_currentToolTip.SetWindowPos(-1,0,0,0,0,0x13);
 
-		_cancel.Cancel();
+		CancellationToken token;
+		lock(typeof(MouseToolTip)){
+			_cancel.Cancel();
 
-		_cancel.Dispose();
-		_cancel=new CancellationTokenSource();
+			_cancel.Dispose();
+			_cancel=new CancellationTokenSource();
+			token=_cancel.Token;
+		}
 
-		_cancel.CancelAfter(timeout);
-		Task.Delay(timeout,_cancel.Token).ContinueWith(_=>HideToolTip(),
+		Task.Delay(timeout,token).ContinueWith(_=>HideToolTip(),
 		                                               TaskContinuationOptions.OnlyOnRanToCompletion);
 	}
 }
