@@ -32,15 +32,11 @@ public static partial class MouseToolTip{
 		public IntPtr hInst;
 		[MarshalAs(UnmanagedType.LPWStr)]
 		public string? lpszText;
-		// ReSharper disable once MemberCanBePrivate.Global
 		public IntPtr lParam;
 	}
 
 	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
 	private static extern IntPtr CreateWindowEx(int dwExStyle,string lpClassName,string? lpWindowName,uint dwStyle,int x,int y,int nWidth,int nHeight,IntPtr hWndParent,IntPtr hMenu,IntPtr hInstance,IntPtr lpParam);
-
-	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
-	private static extern bool SendMessage(IntPtr hWnd,uint msg,uint wParam,ref ToolInfo lParam);
 
 	private static WinWindow _currentToolTip;
 	private static ToolInfo _toolInfo;

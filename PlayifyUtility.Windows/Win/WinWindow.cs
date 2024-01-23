@@ -286,22 +286,30 @@ public partial struct WinWindow{
 	public int SendMessage(int msg,int wParam,int lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
 	public int SendMessage(int msg,int wParam,IntPtr lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
 	
-	public int SendMessage<T>(int msg,int wParam,ref T lParam){
-		var handle=GCHandle.Alloc(lParam,GCHandleType.Pinned);
-		var result=SendMessage(msg,wParam,handle.AddrOfPinnedObject());
-		lParam=(T)handle.Target!;
-		handle.Free();
-		return result;
+	public int SendMessage<T>(int msg,int wParam,ref T lParam) where T:struct{
+		var ptr=Marshal.AllocHGlobal(Marshal.SizeOf<T>());
+		try{
+			Marshal.StructureToPtr(lParam,ptr,false);
+			var result=SendMessage(msg,wParam,ptr);
+			lParam=Marshal.PtrToStructure<T>(ptr);
+			return result;
+		} finally{
+			Marshal.FreeHGlobal(ptr);
+		}
 	}
 	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
 	public bool PostMessage(int msg,int wParam,IntPtr lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
 	
 	public bool PostMessage<T>(int msg,int wParam,ref T lParam){
-		var handle=GCHandle.Alloc(lParam,GCHandleType.Pinned);
-		var result=PostMessage(msg,wParam,handle.AddrOfPinnedObject());
-		lParam=(T)handle.Target!;
-		handle.Free();
-		return result;
+		var ptr=Marshal.AllocHGlobal(Marshal.SizeOf<T>());
+		try{
+			Marshal.StructureToPtr(lParam,ptr,false);
+			var result=PostMessage(msg,wParam,ptr);
+			lParam=Marshal.PtrToStructure<T>(ptr);
+			return result;
+		} finally{
+			Marshal.FreeHGlobal(ptr);
+		}
 	}
 	#endregion
 

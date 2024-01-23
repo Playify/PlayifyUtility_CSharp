@@ -14,7 +14,7 @@ public static partial class MouseToolTip{
 		_cancel.Cancel();
 		if(_toolInfo.lpszText==null) return;
 		_toolInfo.lpszText=null;
-		SendMessage(_currentToolTip.Hwnd,0x411,0,ref _toolInfo);//TTM_TRACKACTIVATE
+		_currentToolTip.SendMessage(0x411,0,ref _toolInfo);//TTM_TRACKACTIVATE
 	}
 
 	public static void ShowToolTip(string s)=>ShowToolTip(s,TimeSpan.FromSeconds(1));
@@ -48,13 +48,13 @@ public static partial class MouseToolTip{
 			_toolInfo.lpszText=s;
 			_toolInfo.rect=new NativeRect();
 
-			SendMessage(_currentToolTip.Hwnd,0x432,0,ref _toolInfo);//TTM_ADDTOOLW
+			_currentToolTip.SendMessage(0x432,0,ref _toolInfo);//TTM_ADDTOOLW
 
 			_currentToolTip.SendMessage(0x418,0,0);//TTM_SETMAXTIPWIDTH
 		}
 		if(_toolInfo.lpszText!=s){
 			_toolInfo.lpszText=s;
-			SendMessage(_currentToolTip.Hwnd,0x439,0,ref _toolInfo);//TTM_UPDATETIPTEXTW
+			_currentToolTip.SendMessage(0x439,0,ref _toolInfo);//TTM_UPDATETIPTEXTW
 		}
 
 		if(!_hooked){
@@ -63,7 +63,7 @@ public static partial class MouseToolTip{
 		}
 		CorrectToolTip(null);
 
-		SendMessage(_currentToolTip.Hwnd,0x411,1,ref _toolInfo);//TTM_TRACKACTIVATE
+		_currentToolTip.SendMessage(0x411,1,ref _toolInfo);//TTM_TRACKACTIVATE
 		_currentToolTip.SetWindowPos(-1,0,0,0,0,0x13);
 
 		CancellationToken token;

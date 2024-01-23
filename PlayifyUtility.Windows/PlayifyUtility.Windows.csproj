@@ -20,6 +20,8 @@
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
         <UseWindowsForms>true</UseWindowsForms>
+
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
