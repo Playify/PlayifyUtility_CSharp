@@ -97,27 +97,12 @@ public readonly partial struct WinWindow{
 	private static extern bool DestroyWindow(IntPtr hwnd);
 
 	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
-	private static extern IntPtr GetProp(IntPtr hwnd,string s);
+	private static extern int GetProp(IntPtr hwnd,string s);
 
 	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
-	private static extern bool SetProp(IntPtr hwnd,string s,IntPtr value);
+	private static extern bool SetProp(IntPtr hwnd,string s,int value);
 
 	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
-	private static extern IntPtr RemoveProp(IntPtr hwnd,string s);
+	private static extern int RemoveProp(IntPtr hwnd,string s);
 
-	public struct PropMap{
-		private readonly WinWindow _win;
-
-		internal PropMap(WinWindow win)=>_win=win;
-
-		public IntPtr this[string s]{
-			get=>Get(s);
-			set{
-				if(!Set(s,value)) throw new Win32Exception();
-			}
-		}
-		public IntPtr Get(string s)=>GetProp(_win.Hwnd,s);
-		public bool Set(string s,IntPtr value)=>SetProp(_win.Hwnd,s,value);
-		public IntPtr Remove(string s)=>RemoveProp(_win.Hwnd,s);
-	}
 }

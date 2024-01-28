@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
-using System.Xml;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Features.Interact;
+using PlayifyUtility.Windows.Utils;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
@@ -15,9 +15,32 @@ public static class GlobalKeyboardHook{
 	public static bool AutoHandleUpWhenHandledDown{get;set;}=true;
 	#endregion
 
+	#region Pause
+	private static bool _paused;
+	public static bool Paused{
+		get=>_paused;
+		set{
+			if(_paused==value) return;
+			if(_thread?.IsCurrent??false) return;//Unhooking would not work
+			_paused=value;
+
+			if(value){
+				if(_thread==null) return;
+				var thread=_thread;
+				_thread=null;
+				thread.Exit(()=>UnhookWindowsHookEx(_hook));
+			} else if(_thread==null&&(_up.lst.Any()||_down.lst.Any())){
+				_thread=UiThread.Create(nameof(GlobalKeyboardHook));
+				_hook=_thread.Invoke(()=>SetWindowsHookEx(WhKeyboardLl,Proc,GetModuleHandle(IntPtr.Zero),0));
+			}
+		}
+	}
+	#endregion
+
 	#region Instance Variables
-	private static IntPtr _hook=IntPtr.Zero;
 	private static readonly KeyboardHookProc Proc=HookProc;
+	private static UiThread? _thread;
+	private static IntPtr _hook;
 	private static (GlobalKeyEventHandler? evt,List<GlobalKeyEventHandler> lst) _down=(null,new List<GlobalKeyEventHandler>());
 	private static (GlobalKeyEventHandler? evt,List<GlobalKeyEventHandler> lst) _up=(null,new List<GlobalKeyEventHandler>());
 	#endregion
@@ -26,16 +49,18 @@ public static class GlobalKeyboardHook{
 	private static void Hook(ref (GlobalKeyEventHandler? evt,List<GlobalKeyEventHandler> lst) tuple,GlobalKeyEventHandler value){
 		tuple.lst.Add(value);
 		tuple.evt+=value;
-		if(_hook!=IntPtr.Zero) return;
-		_hook=SetWindowsHookEx(WhKeyboardLl,Proc,GetModuleHandle(IntPtr.Zero),0);
+		if(_thread!=null||Paused) return;
+		_thread=UiThread.Create(nameof(GlobalKeyboardHook));
+		_hook=_thread.Invoke(()=>SetWindowsHookEx(WhKeyboardLl,Proc,GetModuleHandle(IntPtr.Zero),0));
 	}
 
 	private static void Unhook(ref (GlobalKeyEventHandler? evt,List<GlobalKeyEventHandler> lst) tuple,GlobalKeyEventHandler value){
 		if(!tuple.lst.Remove(value)) return;
 		tuple.evt-=value;
-		if(_up.lst.Any()||_down.lst.Any()||_hook==IntPtr.Zero) return;
-		UnhookWindowsHookEx(_hook);
-		_hook=IntPtr.Zero;
+		if(_up.lst.Any()||_down.lst.Any()||_thread==null) return;
+		var thread=_thread;
+		_thread=null;
+		thread.Exit(()=>UnhookWindowsHookEx(_hook));
 	}
 
 
@@ -58,11 +83,11 @@ public static class GlobalKeyboardHook{
 							OnRelease.Remove(key);
 							if(key!=onRelease){
 								evt.Handled=true;
-								if(onRelease.HasValue)
-									new Send().Key(onRelease.GetValueOrDefault(),false).SendNow();
+								if(onRelease.TryGet(out var release))
+									new Send().Key(release,false).SendNow();
 							}
 						}
-						
+
 						_up.evt?.Invoke(evt);
 						break;
 				}

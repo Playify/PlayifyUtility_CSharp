@@ -10,8 +10,9 @@ public static class GlobalShellHook{
 	#endregion
 
 	#region Instance Variables
-	private static IntPtr _hook=IntPtr.Zero;
 	private static readonly ShellHookProc Proc=HookProc;
+	private static UiThread? _thread;
+	private static IntPtr _hook;
 	private static (Action<ShellHookEvent>? evt,List<Action<ShellHookEvent>> lst) _shell=(null,new List<Action<ShellHookEvent>>());
 	#endregion
 
@@ -19,16 +20,18 @@ public static class GlobalShellHook{
 	private static void Hook(Action<ShellHookEvent> value){
 		_shell.lst.Add(value);
 		_shell.evt+=value;
-		if(_hook!=IntPtr.Zero) return;
-		_hook=SetWindowsHookEx(WhShell,Proc,GetModuleHandle(IntPtr.Zero),0);
+		if(_thread!=null) return;
+		_thread=UiThread.Create(nameof(GlobalShellHook));
+		_hook=_thread.Invoke(()=>SetWindowsHookEx(WhShell,Proc,GetModuleHandle(IntPtr.Zero),0));
 	}
 
 	private static void Unhook(Action<ShellHookEvent> value){
 		if(!_shell.lst.Remove(value)) return;
 		_shell.evt-=value;
-		if(_shell.lst.Any()||_hook==IntPtr.Zero) return;
-		UnhookWindowsHookEx(_hook);
-		_hook=IntPtr.Zero;
+		if(_shell.lst.Any()||_thread==null) return;
+		var thread=_thread;
+		_thread=null;
+		thread.Exit(()=>UnhookWindowsHookEx(_hook));
 	}
 
 	private static int HookProc(int code,IntPtr wParam,IntPtr lParam){

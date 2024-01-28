@@ -3,20 +3,16 @@ using System.Runtime.InteropServices;
 namespace PlayifyUtility.Windows.Features.Hooks;
 
 internal class ClipboardHookControl:Control{
+	private static UiThread? _thread;
 	private static ClipboardHookControl? _initialized;
 	private IntPtr _nextClipboardViewer;
 
-	public static void Init()=>_initialized??=MainThread.Invoke(()=>new ClipboardHookControl());
+	internal static UiThread UiThread=>_thread??=UiThread.Create(nameof(GlobalClipboardHook));
+	public static void Init()=>_initialized??=UiThread.Invoke(()=>new ClipboardHookControl());
 
-	public ClipboardHookControl(){
-		if(Thread.CurrentThread.GetApartmentState()!=ApartmentState.STA){
-			throw new ThreadStateException($"{nameof(GlobalClipboardHook)} only works when the MainThread is initialized and an STA-Thread.\n"+
-			                               $"* Add the [STAThread] Attribute to the Main method.\n"+
-			                               $"* Make sure it's return type is not 'async Task'.\n"+
-			                               $"* Call {nameof(MainThread)}.{nameof(MainThread.Init)} inside the Main method.");
-
-
-		}
+	private ClipboardHookControl(){
+		if(Thread.CurrentThread.GetApartmentState()!=ApartmentState.STA)
+			throw new ThreadStateException("Not running on STA Thread");
 		Visible=false;
 		_nextClipboardViewer=SetClipboardViewer(Handle);
 	}

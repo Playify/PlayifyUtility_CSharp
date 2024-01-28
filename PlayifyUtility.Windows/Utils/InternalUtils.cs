@@ -1,9 +1,16 @@
-#if NETFRAMEWORK
+
 using System.Text;
 
 namespace PlayifyUtility.Windows.Utils;
 
 internal static class InternalUtils{
+
+	public static bool TryGet<T>(this T? t,out T result) where T:struct{
+		result=t.GetValueOrDefault();
+		return t.HasValue;
+	}
+	
+#if NETFRAMEWORK
 	public static bool TryPop<T>(this Stack<T> t,/*[MaybeNullWhen(false)]*/out T pop){
 		if(t.Count==0){
 			pop=default!;
@@ -61,5 +68,5 @@ internal static class InternalUtils{
 
 		return idx;
 	}
-}
 #endif
+}

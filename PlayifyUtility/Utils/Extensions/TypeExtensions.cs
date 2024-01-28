@@ -10,9 +10,15 @@ namespace PlayifyUtility.Utils.Extensions;
 
 [PublicAPI]
 public static class TypeExtensions{
+	#region Numbers
 	public static bool HasFlags(this int t,int flags)=>(t&flags)==flags;
 	public static int WithFlags(this int t,int flags,bool? set)=>set.TryGet(out var setBool)?WithFlags(t,flags,setBool):t^flags;
 	public static int WithFlags(this int t,int flags,bool set)=>set?t|flags:t&~flags;
+	
+	#endregion
+
+	#region Strings
+	
 
 	public static IEnumerable<string> Split(this string str,Predicate<char> controller){
 		var nextPiece=0;
@@ -25,6 +31,14 @@ public static class TypeExtensions{
 		yield return str.Substring(nextPiece);
 	}
 
+	public static bool IsSuccess(this Match t,out Match result){
+		result=t;
+		return t.Success;
+	}
+	#endregion
+
+	#region Collections
+	
 
 	public static void Deconstruct<TKey,TValue>(this KeyValuePair<TKey,TValue> pair,out TKey key,out TValue value){
 		key=pair.Key;
@@ -68,7 +82,11 @@ public static class TypeExtensions{
 		result=t.GetValues(key)!;
 		return result!=null!;
 	}
+	public static IDisposable AddTemporary<T>(this ISet<T> set,T t)=>new TemporarySetValue<T>(set,t);
+	#endregion
 
+	#region Streams
+	
 	public static async Task<byte[]> ReadFullyAsync(this Stream stream,int length,CancellationToken cancel=new()){
 		var bytes=new byte[length];
 		await stream.ReadFullyAsync(bytes,cancel);
@@ -84,7 +102,10 @@ public static class TypeExtensions{
 			if(offset==array.Length) break;
 		}
 	}
+	#endregion
 
+	#region Process
+	
 	public static Task WaitForExitAsync(this Process process,
 	                                    CancellationToken cancellationToken=default){
 		if(process.HasExited) return Task.CompletedTask;
@@ -97,13 +118,10 @@ public static class TypeExtensions{
 
 		return process.HasExited?Task.CompletedTask:tcs.Task;
 	}
+	#endregion
 
-	public static bool IsSuccess(this Match t,out Match result){
-		result=t;
-		return t.Success;
-	}
-
-	public static IDisposable AddTemporary<T>(this ISet<T> set,T t)=>new TemporarySetValue<T>(set,t);
+	#region C# internal
+	
 
 	public static TaskAwaiter GetAwaiter(this WaitHandle handle)=>handle.ToTask().GetAwaiter();
 
@@ -127,4 +145,5 @@ public static class TypeExtensions{
 	}
 	
 	public static void RunClassConstructor(this Type type)=>RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+	#endregion
 }

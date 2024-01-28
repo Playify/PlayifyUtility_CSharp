@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -11,12 +12,11 @@ namespace PlayifyUtility.Windows.Win;
 
 [PublicAPI]
 public partial struct WinWindow{
-	static WinWindow()=>AppDomain.CurrentDomain.ProcessExit+=(_,_)=>RestoreAll();
 
 	public readonly IntPtr Hwnd;
 
 	public WinWindow(IntPtr hwnd)=>Hwnd=hwnd;
-	public override string ToString()=>$"{nameof(WinWindow)}(0x{Hwnd:x})";
+	public override string ToString()=>$"{nameof(WinWindow)}(0x{Hwnd.ToInt64():x})";
 
 	public static List<WinWindow> GetOpenWindows()=>GetOpenWindows(w=>w.IsVisible);
 
@@ -30,8 +30,8 @@ public partial struct WinWindow{
 		return list;
 	}
 
-	public static WinWindow? FindWindow(Func<WinWindow,bool> predicate){
-		WinWindow? result=null;
+	public static WinWindow FindWindow(Func<WinWindow,bool> predicate){
+		WinWindow result=default;
 		EnumWindows((hwnd,_)=>{
 			var window=new WinWindow(hwnd);
 			if(!predicate(window)) return true;
@@ -66,13 +66,13 @@ public partial struct WinWindow{
 	public void SetForeground()=>Foreground=this;
 
 	#region Rendering
-	public int ExStyle{
-		get=>GetWindowLong(Hwnd,-20);
-		set=>SetWindowLong(Hwnd,-20,value);
+	public ExStyle ExStyle{
+		get=>(ExStyle)GetWindowLong(Hwnd,-20);
+		set=>SetWindowLong(Hwnd,-20,(int)value);
 	}
-	public int GwlStyle{
-		get=>GetWindowLong(Hwnd,-16);
-		set=>SetWindowLong(Hwnd,-16,value);
+	public GwlStyle GwlStyle{
+		get=>(GwlStyle)GetWindowLong(Hwnd,-16);
+		set=>SetWindowLong(Hwnd,-16,(int)value);
 	}
 	public bool IsVisible{
 		get=>IsWindowVisible(Hwnd);
@@ -88,12 +88,12 @@ public partial struct WinWindow{
 
 
 	public bool ClickThrough{
-		get=>(ExStyle&0x20)!=0;
+		get=>(ExStyle&ExStyle.Transparent)!=0;
 		set{
 			var l=ExStyle;
-			l|=0x80000;
-			if(value) l|=0x20;
-			else l&=~0x20;
+			l|=ExStyle.Layered;
+			if(value) l|=ExStyle.Transparent;
+			else l&=~ExStyle.Transparent;
 			ExStyle=l;
 		}
 	}
@@ -105,7 +105,7 @@ public partial struct WinWindow{
 			if(FullScreened.TryGetValue(Hwnd,out var rect)){
 				if(value) return;
 				//Disable fullscreen
-				GwlStyle|=0xc40000;//0xC40000=WS_CAPTION|WS_THICKFRAME
+				GwlStyle|=GwlStyle.Caption|GwlStyle.Thickframe;
 
 				SetWindowPos(Hwnd,0,rect.Left,rect.Top,rect.Right-rect.Left,rect.Bottom-rect.Top,0x4);
 				GetClientRect(Hwnd,out rect);
@@ -117,7 +117,7 @@ public partial struct WinWindow{
 				var screen=Screen.FromRectangle(new Rectangle(rect.Left,rect.Top,rect.Right-rect.Left,rect.Bottom-rect.Top));
 				var bnd=screen.Bounds;
 
-				GwlStyle&=~0xc40000;//0xC40000=WS_CAPTION|WS_THICKFRAME
+				GwlStyle&=~GwlStyle.Caption|GwlStyle.Thickframe;
 
 				FullScreened.Add(Hwnd,rect);
 				SetWindowPos(Hwnd,0,bnd.X,bnd.Y,bnd.Width,bnd.Height,0);
@@ -128,11 +128,13 @@ public partial struct WinWindow{
 	}
 
 	public bool Borderless{
-		get=>(GwlStyle&0xC40000)==0;
+		get=>(GwlStyle&(GwlStyle.Caption|GwlStyle.Thickframe))==0;
 		set{
-			var l=GetWindowLong(Hwnd,-16);//-16=GWL_STYLE
-			l=value?l&~0xc40000:l|0xc40000;//0xC40000=WS_CAPTION|WS_THICKFRAME
-			SetWindowLong(Hwnd,-16,l);
+			const GwlStyle style=GwlStyle.Caption|GwlStyle.Thickframe;
+			
+			var l=GwlStyle;
+			l=value?l&~style:l|style;
+			GwlStyle=l;
 			SetWindowPos(Hwnd,0,0,0,0,0,0x27);
 			GetClientRect(Hwnd,out var rect);
 			PostMessage(Hwnd,5,0,((rect.Bottom-rect.Top)<<16)|((rect.Right-rect.Left)&0xffff));
@@ -155,21 +157,24 @@ public partial struct WinWindow{
 	}
 
 
-	private static readonly Stack<WinWindow> _hidden=new();
-
+	private static Stack<WinWindow>? _hiddenWindows;
 
 	public void HidePush(){
-		_hidden.Push(this);
+		if(_hiddenWindows==null){
+			_hiddenWindows=new Stack<WinWindow>();
+			AppDomain.CurrentDomain.ProcessExit+=(_,_)=>RestoreAll();
+		}
+		_hiddenWindows.Push(this);
 		ShowWindowCommand=ShowWindowCommands.Hide;
 	}
 
 	public static void RestoreLast(){
-		if(_hidden.TryPop(out var restore))
+		if(_hiddenWindows?.TryPop(out var restore)??false)
 			restore.ShowWindowCommand=ShowWindowCommands.Show;
 	}
 
 	public static void RestoreAll(){
-		while(_hidden.TryPop(out var restore))
+		while(_hiddenWindows?.TryPop(out var restore)??false)
 			restore.ShowWindowCommand=ShowWindowCommands.Show;
 	}
 
@@ -180,7 +185,7 @@ public partial struct WinWindow{
 
 
 	public bool AlwaysOnTop{
-		get=>(ExStyle&8)!=0;
+		get=>(ExStyle&ExStyle.TopMost)!=0;
 		set=>SetWindowPos(Hwnd,value?-1:-2,0,0,0,0,3);
 	}
 
@@ -191,7 +196,7 @@ public partial struct WinWindow{
 		}
 		set{
 			var l=ExStyle;
-			if((l&0x80000)==0) ExStyle=l|0x80000;
+			if((l&ExStyle.Layered)==0) ExStyle=l|ExStyle.Layered;
 
 			GetLayeredWindowAttributes(Hwnd,out var color,out _,out var dw);
 			SetLayeredWindowAttributes(Hwnd,color,value,dw|2);
@@ -205,7 +210,7 @@ public partial struct WinWindow{
 		}
 		set{
 			var l=ExStyle;
-			if((l&0x80000)==0) ExStyle=l|0x80000;
+			if((l&ExStyle.Layered)==0) ExStyle=l|ExStyle.Layered;
 
 			GetLayeredWindowAttributes(Hwnd,out var c,out var alpha,out var dw);
 			SetLayeredWindowAttributes(Hwnd,value??c,alpha,value.HasValue?dw|1:dw&2);
@@ -256,6 +261,24 @@ public partial struct WinWindow{
 
 
 	public PropMap Props=>new(this);
+	
+	public struct PropMap{
+		private readonly WinWindow _win;
+
+		internal PropMap(WinWindow win)=>_win=win;
+
+		public int this[string s]{
+			get=>Get(s);
+			set{
+				if(!Set(s,value)) throw new Win32Exception();
+			}
+		}
+		public int Get(string s)=>GetProp(_win.Hwnd,s);
+		public bool Set(string s,int value)=>SetProp(_win.Hwnd,s,value);
+		public int Remove(string s)=>RemoveProp(_win.Hwnd,s);
+
+		public bool TryOverride(string s,int value)=>GetProp(_win.Hwnd,s)!=value&&SetProp(_win.Hwnd,s,value);
+	}
 	#endregion
 
 
@@ -300,7 +323,7 @@ public partial struct WinWindow{
 	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
 	public bool PostMessage(int msg,int wParam,IntPtr lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
 	
-	public bool PostMessage<T>(int msg,int wParam,ref T lParam){
+	public bool PostMessage<T>(int msg,int wParam,ref T lParam) where T:struct{
 		var ptr=Marshal.AllocHGlobal(Marshal.SizeOf<T>());
 		try{
 			Marshal.StructureToPtr(lParam,ptr,false);
@@ -314,11 +337,14 @@ public partial struct WinWindow{
 	#endregion
 
 	#region Operators
+	public WinControl AsControl=>new(Hwnd);
+	
 	public override bool Equals(object? obj)=>obj is WinWindow other&&this==other;
 	public override int GetHashCode()=>Hwnd.GetHashCode();
 	public static bool operator!=(WinWindow left,WinWindow right)=>!(left==right);
 	public static bool operator==(WinWindow left,WinWindow right)=>left.Hwnd==right.Hwnd;
 	public static implicit operator bool(WinWindow win)=>win.Hwnd!=IntPtr.Zero;
+	public static implicit operator IntPtr(WinWindow win)=>win.Hwnd;
 	
 	
 	public static readonly WinWindow Zero;

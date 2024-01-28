@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using PlayifyUtility.Windows.Utils;
 
 namespace PlayifyUtility.Windows.Features;
 
@@ -76,7 +77,7 @@ public static partial class CaseSensitiveDirectory{
 	}
 
 	public static bool IsDirectoryCaseSensitivitySupported(){
-		if(_isSupported.HasValue) return _isSupported.Value;
+		if(_isSupported.TryGet(out var isSupported)) return isSupported;
 
 		// Make sure the directory exists
 		Directory.CreateDirectory(TempDirectory);

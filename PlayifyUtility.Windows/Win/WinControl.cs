@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using JetBrains.Annotations;
+using PlayifyUtility.Windows.Win.Native;
 #if NETFRAMEWORK
 using PlayifyUtility.Windows.Utils;
 #endif
@@ -85,6 +86,10 @@ public readonly partial struct WinControl{
 			}
 		}
 	}
+
+	public NativeRect Rect=>AsWindow.WindowRect;
+	
+	
 	#endregion
 
 	#region Actions
@@ -105,9 +110,7 @@ public readonly partial struct WinControl{
 		if(opensWindow) PostMessage(Hwnd,0x202,0,0);//WM_LBUTTONUP
 		else SendMessage(Hwnd,0x202,0,0);//WM_LBUTTONUP
 	}
-	public void Click2(){
-		SendMessage(Hwnd,0xF5,0,0);//BM_CLICK
-	}
+	public void ClickAsync()=>PostMessage(Hwnd,0xF5,0,0);//BM_CLICK
 
 	public void DoubleClick()=>SendMessage(Hwnd,0x203,0,0);//WM_LBUTTONDBLCLK
 
@@ -117,8 +120,33 @@ public readonly partial struct WinControl{
 	}
 	#endregion
 
+	#region Mesage
+
+	public int SendMessage(int msg,int wParam,int lParam)=>AsWindow.SendMessage(msg,wParam,lParam);
+
+	public int SendMessage(int msg,int wParam,IntPtr lParam)=>AsWindow.SendMessage(msg,wParam,lParam);
+
+	public int SendMessage<T>(int msg,int wParam,ref T lParam) where T:struct=>AsWindow.SendMessage(msg,wParam,ref lParam);
+	public bool PostMessage(int msg,int wParam,int lParam)=>AsWindow.PostMessage(msg,wParam,lParam);
+
+	public bool PostMessage(int msg,int wParam,IntPtr lParam)=>AsWindow.PostMessage(msg,wParam,lParam);
+
+	public bool PostMessage<T>(int msg,int wParam,ref T lParam) where T:struct=>AsWindow.PostMessage(msg,wParam,ref lParam);
+
+	#endregion
+
+	#region Operators
+	public WinWindow AsWindow=>new(Hwnd);
+	
 	public override bool Equals(object? obj)=>obj is WinControl other&&this==other;
 	public override int GetHashCode()=>Hwnd.GetHashCode();
 	public static bool operator!=(WinControl left,WinControl right)=>!(left==right);
 	public static bool operator==(WinControl left,WinControl right)=>left.Hwnd==right.Hwnd;
+	public static implicit operator bool(WinControl win)=>win.Hwnd!=IntPtr.Zero;
+	public static implicit operator IntPtr(WinControl win)=>win.Hwnd;
+	
+	
+	public static readonly WinControl Zero;
+	public bool NonZero(out WinControl win)=>win=this;
+	#endregion
 }

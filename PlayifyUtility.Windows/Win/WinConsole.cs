@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using JetBrains.Annotations;
 using Microsoft.Win32.SafeHandles;
 using PlayifyUtility.Windows.Features.Hooks;
 using PlayifyUtility.Windows.Features.Interact;
@@ -7,6 +8,7 @@ using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Win;
 
+[PublicAPI]
 public static partial class WinConsole{
 	public static WinWindow ConsoleWindow=>new(GetConsoleWindow());
 
@@ -63,6 +65,8 @@ public static partial class WinConsole{
 		else (console=ConsoleWindow).HidePush();
 
 		GlobalKeyboardHook.KeyDown+=e=>{
+			if(e.Handled) return;
+			
 			switch(e.Key){
 				case Keys.M when Modifiers.Win&&Modifiers.Alt:{
 					if(console.IsVisible&&WinWindow.Foreground==console){

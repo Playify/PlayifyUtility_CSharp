@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace PlayifyUtility.Windows;
 
+[Obsolete]
 public static class MainThread{
 	private static SynchronizationContext? _ctx;
 	public static SynchronizationContext? SynchronizationContext=>_ctx??=SynchronizationContext.Current;
@@ -14,6 +15,8 @@ public static class MainThread{
 				                                                        ?new WindowsFormsSynchronizationContext()
 				                                                        :new SynchronizationContext());
 	}
+	
+	public static UiThread UiThread=>UiThread.From(SynchronizationContext)??throw new ThreadStateException("MainThread has wrong "+nameof(SynchronizationContext));
 
 
 	public static bool IsMainThread()=>SynchronizationContext is {} notnull&&SynchronizationContext.Current==notnull;

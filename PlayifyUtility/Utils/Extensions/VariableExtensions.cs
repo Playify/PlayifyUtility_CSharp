@@ -7,7 +7,7 @@ namespace PlayifyUtility.Utils.Extensions;
 public static class VariableExtensions{
 	public static T Push<T>(this T t,out T to)=>to=t;
 
-	public static bool SetCheck<T>(this ref T t,T to) where T:struct{
+	public static bool TryOverride<T>(this ref T t,T to) where T:struct{
 		if(Equals(t,to)) return false;
 		t=to;
 		return true;

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using PlayifyUtility.Windows.Utils;
 using PlayifyUtility.Windows.Win;
 using static System.Windows.Forms.Keys;
 
@@ -42,10 +43,13 @@ public class Send{
 		return this;
 	}
 
+	public void SendOn(UiThread thread)=>thread.Invoke(SendNow);
+	public void SendOn(SynchronizationContext ctx)=>ctx.Invoke(SendNow);
+	[Obsolete]
 	public void SendOnMainThread()=>MainThread.Invoke(SendNow);
 
 	public void SendNow(){
-		if(_startingMods.HasValue) Mods=_startingMods.Value;
+		if(_startingMods.TryGet(out var startingMods)) Mods=startingMods;
 
 		while(_list.Count!=0){
 			if(_list[0].Type==-1){//Sleep node
@@ -56,7 +60,7 @@ public class Send{
 			} else{
 				var arr=_list.TakeWhile(i=>i.Type!=-1).ToArray();
 				_list.RemoveRange(0,arr.Length);
-				SendInput(arr.Length,arr,Marshal.SizeOf<Input>());//TODO throw on error
+				SendInput(arr.Length,arr,Marshal.SizeOf<Input>());
 			}
 		}
 	}
@@ -168,10 +172,10 @@ public class Send{
 
 	#region Keyboard
 	public Send Key(Keys key,bool? down=null)
-		=>!down.HasValue
+		=>!down.TryGet(out var d)
 			  ?Key(key,true).Key(key,false)
 			  :MouseButtons.Contains(key)
-				  ?_MouseButton(key,down.Value)
+				  ?_MouseButton(key,d)
 				  :Add(new Input{
 					  Type=1,
 					  InputUnion=new InputUnion{
@@ -179,7 +183,7 @@ public class Send{
 							  WVk=(short)key,
 							  WScan=MapVirtualKey((short)key,0),
 							  Time=0,
-							  DwFlags=(down.Value?0:2)|(Extended.Contains(key)?1:0),
+							  DwFlags=(d?0:2)|(Extended.Contains(key)?1:0),
 							  DwExtraInfo=_hidden?ProcessHandle:IntPtr.Zero,
 						  },
 					  },
@@ -190,10 +194,15 @@ public class Send{
 		return this;
 	}
 
-	public Send Combo(ModifierKeys mod,Keys key)=>Mod(mod,true).Key(key).Mod(mod,false);
+	public Send Combo(ModifierKeys mod,Keys key,int repeat=1){
+		var mods=Mods;
+		Mod(mod).Key(key,repeat);
+		Mods=mods;
+		return this;
+	}
 
 	/**Warning: Does not revert changes to modifiers*/
-	public Send Char(char c,bool? down=null){
+	private Send Char(char c,bool? down=null){
 		if(c=='\n') c='\r';
 
 		int num1=VkKeyScan(c);
@@ -210,7 +219,6 @@ public class Send{
 		if(s=="") return this;
 
 		var mods=Mods;
-		_startingMods??=mods;
 
 		foreach(var c in s) Char(c);
 
@@ -221,16 +229,16 @@ public class Send{
 
 
 	private Send _Unicode(char c,bool? down)
-		=>!down.HasValue
+		=>!down.TryGet(out var d)
 			  ?_Unicode(c,true)._Unicode(c,false)
 			  :Add(new Input{
 				  Type=1,
 				  InputUnion=new InputUnion{
 					  ki=new KeyBdInput{
-						  WVk=0,//TODO check if packet helps
+						  WVk=0,
 						  WScan=(short)c,
 						  Time=0,
-						  DwFlags=down.Value?4:6,
+						  DwFlags=d?4:6,
 						  DwExtraInfo=_hidden?ProcessHandle:IntPtr.Zero,
 					  },
 				  },
@@ -370,14 +378,14 @@ public class Send{
 		public IntPtr DwExtraInfo;
 	}
 
-	[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+#pragma warning disable CS0649
 	private struct HardwareInput{
 		public int UMsg;
 		public short WParamL;
 		public short WParamH;
 	}
+#pragma warning restore CS0649
 
-	[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 	private struct Input{
 		public int Type;
 		public InputUnion InputUnion;

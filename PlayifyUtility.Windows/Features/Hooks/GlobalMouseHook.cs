@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Features.Interact;
+using PlayifyUtility.Windows.Utils;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
@@ -14,9 +15,32 @@ public static class GlobalMouseHook{
 	public static event GlobalMouseEventHandler MouseScroll{add=>Hook(ref _scroll,value);remove=>Unhook(ref _scroll,value);}
 	#endregion
 
+	#region Pause
+	private static bool _paused;
+	public static bool Paused{
+		get=>_paused;
+		set{
+			if(_paused==value) return;
+			if(_thread?.IsCurrent??false) return;//Unhooking would not work
+			_paused=value;
+
+			if(value){
+				if(_thread==null) return;
+				var thread=_thread;
+				_thread=null;
+				thread.Exit(()=>UnhookWindowsHookEx(_hook));
+			} else if(_thread==null&&(_up.lst.Any()||_down.lst.Any()||_move.lst.Any()||_scroll.lst.Any())){
+				_thread=UiThread.Create(nameof(GlobalMouseHook));
+				_hook=_thread.Invoke(()=>SetWindowsHookEx(WhMouseLl,Proc,GetModuleHandle(IntPtr.Zero),0));
+			}
+		}
+	}
+	#endregion
+	
 	#region Instance Variables
-	private static IntPtr _hook=IntPtr.Zero;
 	private static readonly MouseHookProc Proc=HookProc;
+	private static UiThread? _thread;
+	private static IntPtr _hook;
 	private static (GlobalMouseEventHandler? evt,List<GlobalMouseEventHandler> lst) _down=(null,new List<GlobalMouseEventHandler>());
 	private static (GlobalMouseEventHandler? evt,List<GlobalMouseEventHandler> lst) _up=(null,new List<GlobalMouseEventHandler>());
 	private static (GlobalMouseEventHandler? evt,List<GlobalMouseEventHandler> lst) _move=(null,new List<GlobalMouseEventHandler>());
@@ -27,19 +51,21 @@ public static class GlobalMouseHook{
 	private static void Hook(ref (GlobalMouseEventHandler? evt,List<GlobalMouseEventHandler> lst) tuple,GlobalMouseEventHandler value){
 		tuple.lst.Add(value);
 		tuple.evt+=value;
-		if(_hook!=IntPtr.Zero) return;
-		_hook=SetWindowsHookEx(WhMouseLl,Proc,GetModuleHandle(IntPtr.Zero),0);
+		if(_thread!=null||Paused) return;
+		_thread=UiThread.Create(nameof(GlobalMouseHook));
+		_hook=_thread.Invoke(()=>SetWindowsHookEx(WhMouseLl,Proc,GetModuleHandle(IntPtr.Zero),0));
 	}
 
 	private static void Unhook(ref (GlobalMouseEventHandler? evt,List<GlobalMouseEventHandler> lst) tuple,GlobalMouseEventHandler value){
 		if(!tuple.lst.Remove(value)) return;
 		tuple.evt-=value;
-		if(_up.lst.Any()||_down.lst.Any()||_move.lst.Any()||_scroll.lst.Any()||_hook==IntPtr.Zero) return;
-		UnhookWindowsHookEx(_hook);
-		_hook=IntPtr.Zero;
+		if(_up.lst.Any()||_down.lst.Any()||_move.lst.Any()||_scroll.lst.Any()||_thread==null) return;
+		var thread=_thread;
+		_thread=null;
+		thread.Exit(()=>UnhookWindowsHookEx(_hook));
 	}
 
-	private static int HookProc(int code,int wParam,ref MsLlHookStruct lParam){
+	private static int HookProc(int code,int wParam,ref MouseHookStruct lParam){
 		try{
 			if(code>=0){
 				if(wParam switch{
@@ -67,7 +93,7 @@ public static class GlobalMouseHook{
 		return evt.Handled;
 	}
 
-	private static bool HandleDown(ref MsLlHookStruct lParam,MouseButtons button){
+	private static bool HandleDown(ref MouseHookStruct lParam,MouseButtons button){
 		var evt=new MouseEvent(lParam.pt.x,lParam.pt.y,button);
 		var key=evt.Key;
 
@@ -78,7 +104,7 @@ public static class GlobalMouseHook{
 		return evt.Handled;
 	}
 
-	private static bool HandleUp(ref MsLlHookStruct lParam,MouseButtons button){
+	private static bool HandleUp(ref MouseHookStruct lParam,MouseButtons button){
 		var evt=new MouseEvent(lParam.pt.x,lParam.pt.y,button);
 		var key=evt.Key;
 
@@ -86,8 +112,8 @@ public static class GlobalMouseHook{
 			GlobalKeyboardHook.OnRelease.Remove(key);
 			if(key!=onRelease){
 				evt.Handled=true;
-				if(onRelease.HasValue)
-					new Send().Key(onRelease.GetValueOrDefault(),false).SendNow();
+				if(onRelease.TryGet(out var release))
+					new Send().Key(release,false).SendNow();
 			}
 		}
 
@@ -104,14 +130,14 @@ public static class GlobalMouseHook{
 	private static extern bool UnhookWindowsHookEx(IntPtr hInstance);
 
 	[DllImport("user32.dll")]
-	private static extern int CallNextHookEx(IntPtr idHook,int nCode,int wParam,ref MsLlHookStruct lParam);
+	private static extern int CallNextHookEx(IntPtr idHook,int nCode,int wParam,ref MouseHookStruct lParam);
 
 	[DllImport("kernel32.dll")]
 	private static extern IntPtr GetModuleHandle(IntPtr zero);
 	#endregion
 
 	#region Constant, Structure and Delegate Definitions
-	private delegate int MouseHookProc(int code,int wParam,ref MsLlHookStruct lParam);
+	private delegate int MouseHookProc(int code,int wParam,ref MouseHookStruct lParam);
 
 	private const int WhMouseLl=14;
 
@@ -123,7 +149,7 @@ public static class GlobalMouseHook{
 
 
 	[StructLayout(LayoutKind.Sequential)]
-	private struct MsLlHookStruct{
+	private struct MouseHookStruct{
 		public Point pt;
 		public int mouseData;
 		public uint flags;

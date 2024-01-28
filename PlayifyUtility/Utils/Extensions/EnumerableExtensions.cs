@@ -99,6 +99,7 @@ public static class EnumerableExtensions{
 
 	#region Type specific
 	public static string Join<T>(this IEnumerable<T> source,string sep)=>string.Join(sep,source);
+	public static string ConcatString<T>(this IEnumerable<T> source)=>string.Concat(source);
 
 	public static Dictionary<TKey,TValue> ToDictionary<TKey,TValue>(this IEnumerable<(TKey key,TValue value)> source)
 	where TKey:notnull

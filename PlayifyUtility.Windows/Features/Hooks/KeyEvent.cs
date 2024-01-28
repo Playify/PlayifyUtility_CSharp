@@ -24,24 +24,28 @@ public class KeyEvent{
 
 	private static readonly byte[] KeyboardState=new byte[256];
 
-	public string GetUnicode(){
-		if(Key==Keys.Packet) return ((char)ScanCode).ToString();//char.ConvertFromUtf32(ScanCode);
+	public string GetUnicode()=>GetUnicode(out _);
+	public string GetUnicode(out int i){
+		if(Key==Keys.Packet){
+			i=1;
+			return ((char) ScanCode).ToString();//char.ConvertFromUtf32(ScanCode);
+		}
 
 		var str=new StringBuilder(10);
 
-		KeyboardState[(int)Keys.LControlKey]=(byte)(Modifiers.IsKeyDown(Keys.LControlKey)?0x80:0);
-		KeyboardState[(int)Keys.RControlKey]=(byte)(Modifiers.IsKeyDown(Keys.RControlKey)?0x80:0);
-		KeyboardState[(int)Keys.ControlKey]=(byte)(KeyboardState[(int)Keys.LControlKey]|KeyboardState[(int)Keys.RControlKey]);
-		KeyboardState[(int)Keys.LMenu]=(byte)(Modifiers.IsKeyDown(Keys.LMenu)?0x80:0);
-		KeyboardState[(int)Keys.RMenu]=(byte)(Modifiers.IsKeyDown(Keys.RMenu)?0x80:0);
-		KeyboardState[(int)Keys.Menu]=(byte)(KeyboardState[(int)Keys.LMenu]|KeyboardState[(int)Keys.RMenu]);
+		KeyboardState[(int) Keys.LControlKey]=(byte) (Modifiers.IsKeyDown(Keys.LControlKey)?0x80:0);
+		KeyboardState[(int) Keys.RControlKey]=(byte) (Modifiers.IsKeyDown(Keys.RControlKey)?0x80:0);
+		KeyboardState[(int) Keys.ControlKey]=(byte) (KeyboardState[(int) Keys.LControlKey]|KeyboardState[(int) Keys.RControlKey]);
+		KeyboardState[(int) Keys.LMenu]=(byte) (Modifiers.IsKeyDown(Keys.LMenu)?0x80:0);
+		KeyboardState[(int) Keys.RMenu]=(byte) (Modifiers.IsKeyDown(Keys.RMenu)?0x80:0);
+		KeyboardState[(int) Keys.Menu]=(byte) (KeyboardState[(int) Keys.LMenu]|KeyboardState[(int) Keys.RMenu]);
 
-		KeyboardState[(int)Keys.LShiftKey]=(byte)(Modifiers.IsKeyDown(Keys.LShiftKey)?0x80:0);
-		KeyboardState[(int)Keys.RShiftKey]=(byte)(Modifiers.IsKeyDown(Keys.RShiftKey)?0x80:0);
-		KeyboardState[(int)Keys.ShiftKey]=(byte)(KeyboardState[(int)Keys.LShiftKey]|KeyboardState[(int)Keys.RShiftKey]);
-		KeyboardState[(int)Keys.CapsLock]=(byte)(Modifiers.IsCapsLock?0x80:0);
-		KeyboardState[(int)Keys.NumLock]=(byte)(Modifiers.IsNumLock?0x80:0);
-		var i=ToUnicode(VkCode,ScanCode,KeyboardState,str,str.Capacity,4);
+		KeyboardState[(int) Keys.LShiftKey]=(byte) (Modifiers.IsKeyDown(Keys.LShiftKey)?0x80:0);
+		KeyboardState[(int) Keys.RShiftKey]=(byte) (Modifiers.IsKeyDown(Keys.RShiftKey)?0x80:0);
+		KeyboardState[(int) Keys.ShiftKey]=(byte) (KeyboardState[(int) Keys.LShiftKey]|KeyboardState[(int) Keys.RShiftKey]);
+		KeyboardState[(int) Keys.CapsLock]=(byte) (Modifiers.IsCapsLock?0x80:0);
+		KeyboardState[(int) Keys.NumLock]=(byte) (Modifiers.IsNumLock?0x80:0);
+		i=ToUnicode(VkCode,ScanCode,KeyboardState,str,str.Capacity,4);
 		if(i>0) return str.ToString();
 		//i will be 0 for empty, and negative for dead keys
 		return "";
@@ -54,4 +58,13 @@ public class KeyEvent{
 
 	[DllImport("user32.dll")]
 	private static extern bool GetKeyboardState(byte[] lpKeyState);
+
+
+	public static void CancelDeadKeys(){
+		var str=new StringBuilder(10);
+		//flag 0 to consume all dead keys
+		ToUnicode(0,0,KeyboardState,str,str.Capacity,0);
+	}
+
+	public static void CancelWindowsKey()=>new Send().Hide().Key((Keys) 0xFF).SendNow();//Optionally, use RShiftKey
 }
