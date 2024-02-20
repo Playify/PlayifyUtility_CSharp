@@ -42,12 +42,13 @@ public partial struct WinWindow{
 	}
 
 	public static WinWindow GetWindowUnderCursor(bool detectInvisibleForeground=false){
-		var cursor=WinCursor.CursorPos;
-		if(detectInvisibleForeground){
-			var foreground=Foreground;
-			var rect=foreground.WindowRect;
-			if(rect.Left<=cursor.X&&cursor.Y<=rect.Right&&rect.Top<=cursor.Y&&cursor.Y<=rect.Bottom) return foreground;
-		}
+		if(!WinCursor.TryGetCursorPos(out var cursor)) return Zero;
+		
+		if(!detectInvisibleForeground) return GetWindowAt(cursor.X,cursor.Y);
+		
+		var foreground=Foreground;
+		var rect=foreground.WindowRect;
+		if(rect.Left<=cursor.X&&cursor.Y<=rect.Right&&rect.Top<=cursor.Y&&cursor.Y<=rect.Bottom) return foreground;
 		return GetWindowAt(cursor.X,cursor.Y);
 	}
 
@@ -111,18 +112,18 @@ public partial struct WinWindow{
 				GetClientRect(Hwnd,out rect);
 				PostMessage(Hwnd,5,0,((rect.Bottom-rect.Top)<<16)|((rect.Right-rect.Left)&0xffff));//5=WM_SIZE
 				FullScreened.Remove(Hwnd);
-			} else if(!value){
+			} else if(value){
 				//Enable fullscreen
 				GetWindowRect(Hwnd,out rect);
-				var screen=Screen.FromRectangle(new Rectangle(rect.Left,rect.Top,rect.Right-rect.Left,rect.Bottom-rect.Top));
+				var screen=Screen.FromRectangle(rect);
 				var bnd=screen.Bounds;
 
-				GwlStyle&=~GwlStyle.Caption|GwlStyle.Thickframe;
+				GwlStyle&=~(GwlStyle.Caption|GwlStyle.Thickframe);
 
 				FullScreened.Add(Hwnd,rect);
-				SetWindowPos(Hwnd,0,bnd.X,bnd.Y,bnd.Width,bnd.Height,0);
+				SetWindowPos(0,bnd,0);
 				GetClientRect(Hwnd,out rect);
-				PostMessage(Hwnd,5,0,((rect.Bottom-rect.Top)<<16)|((rect.Right-rect.Left)&0xffff));//5=WM_SIZE
+				PostMessage(Hwnd,5,0,(rect.Height<<16)|(rect.Width&0xffff));//5=WM_SIZE
 			}
 		}
 	}
@@ -137,7 +138,7 @@ public partial struct WinWindow{
 			GwlStyle=l;
 			SetWindowPos(Hwnd,0,0,0,0,0,0x27);
 			GetClientRect(Hwnd,out var rect);
-			PostMessage(Hwnd,5,0,((rect.Bottom-rect.Top)<<16)|((rect.Right-rect.Left)&0xffff));
+			PostMessage(Hwnd,5,0,(rect.Height<<16)|(rect.Width&0xffff));
 		}
 	}
 
@@ -216,8 +217,14 @@ public partial struct WinWindow{
 			SetLayeredWindowAttributes(Hwnd,value??c,alpha,value.HasValue?dw|1:dw&2);
 		}
 	}
-	#endregion
 
+	public void SetDarkMode(bool? dark){
+		var val=dark??WinSystem.DarkMode?1:0;
+		//https://gist.github.com/valinet/6afb524426635df9dbe2a9035701fcf4
+		if(DwmSetWindowAttribute(Hwnd,19,ref val,4)!=0)//check if 19 works
+			DwmSetWindowAttribute(Hwnd,20,ref val,4);//if not, then use 20
+	}
+	#endregion
 
 	#region Info
 	public Process? Process{
@@ -281,7 +288,6 @@ public partial struct WinWindow{
 	}
 	#endregion
 
-
 	#region Commands
 	public Dictionary<string,WinControl> GetControls()=>WinControl.GetControls(Hwnd);
 
@@ -305,6 +311,7 @@ public partial struct WinWindow{
 	public bool MoveWindow(int x,int y,int width,int height,bool redraw)=>MoveWindow(Hwnd,x,y,width,height,redraw);
 	public bool MoveWindow(NativeRect rect,bool redraw)=>MoveWindow(Hwnd,rect.Left,rect.Top,rect.Width,rect.Height,redraw);
 	public bool SetWindowPos(int hwndInsertAfter,int x,int y,int cx,int cy,uint uFlags)=>SetWindowPos(Hwnd,hwndInsertAfter,x,y,cx,cy,uFlags);
+	public bool SetWindowPos(int hwndInsertAfter,NativeRect rect,uint uFlags)=>SetWindowPos(Hwnd,hwndInsertAfter,rect.X,rect.Y,rect.Width,rect.Height,uFlags);
 	public bool DestroyWindow()=>DestroyWindow(Hwnd);
 	public int SendMessage(int msg,int wParam,int lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
 	public int SendMessage(int msg,int wParam,IntPtr lParam)=>SendMessage(Hwnd,msg,wParam,lParam);

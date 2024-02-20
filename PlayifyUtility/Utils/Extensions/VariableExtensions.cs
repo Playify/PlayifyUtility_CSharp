@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
+using PlayifyUtility.HelperClasses;
 
 namespace PlayifyUtility.Utils.Extensions;
 
@@ -22,4 +23,7 @@ public static class VariableExtensions{
 		result=t.GetValueOrDefault();
 		return t.HasValue;
 	}
+	
+	//Helper function if the user wants to write 'new StructType(args).Value=true;'
+	public static ref T AsInlineEditable<T>(this T t) where T:struct=>ref new ReferenceTo<T>(t).Value;
 }

@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 using PlayifyUtility.Windows.Win.Native;
@@ -95,6 +94,10 @@ public readonly partial struct WinWindow{
 
 	[DllImport("user32.dll")]
 	private static extern bool DestroyWindow(IntPtr hwnd);
+	
+	
+	[DllImport("dwmapi.dll")]
+	private static extern int DwmSetWindowAttribute(IntPtr hwnd,int attr,ref int attrValue,int attrSize);
 
 	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
 	private static extern int GetProp(IntPtr hwnd,string s);

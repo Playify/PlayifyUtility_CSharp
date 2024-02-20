@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Microsoft.Win32;
 
 namespace PlayifyUtility.Windows.Win;
 
@@ -14,4 +15,15 @@ public static partial class WinSystem{
 	}
 
 	public static bool IsSystemShuttingDown=>GetSystemMetrics(0x2000)!=0;
+	
+	public static bool DarkMode{
+		get{
+			try{
+				using var key=Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+				return ((int?)key?.GetValue("AppsUseLightTheme",1)??1)==0;
+			} catch(Exception){
+				return false;
+			}
+		}
+	}
 }

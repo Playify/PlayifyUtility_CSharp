@@ -60,4 +60,10 @@ public class UiThread{
 		});
 		thread.Join();
 	}
+	public void BeginExit(Action? a=null){
+		BeginInvoke(()=>{
+			a?.Invoke();
+			Application.ExitThread();
+		});
+	}
 }

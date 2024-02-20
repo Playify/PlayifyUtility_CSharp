@@ -39,7 +39,7 @@ public sealed class GlobalEventHook:IDisposable{
 		if(!Instances.Remove(this)) return;
 		_thread.BeginInvoke(()=>UnhookWinEvent(_hook));
 		
-		if(Instances.Count!=0&&_thread==_defaultThread) return;
+		if(Instances.Count!=0&&_thread==_defaultThread) return;//TODO this is not correct, last could be nondefault, but would not be cleared
 		var defaultThread=_defaultThread;
 		_defaultThread=null;
 		defaultThread?.Exit();

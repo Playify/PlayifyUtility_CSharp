@@ -1,5 +1,4 @@
-﻿using PlayifyUtility.Windows.Features.Hooks;
-using PlayifyUtility.Windows.Features.Interact;
+﻿using PlayifyUtility.Windows.Features.Interact;
 
 namespace PlayifyUtils.Test;
 

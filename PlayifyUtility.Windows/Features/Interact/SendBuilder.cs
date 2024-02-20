@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Net;
-using System.Security.Permissions;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Utils;
@@ -83,16 +82,29 @@ public class SendBuilder{
 		key=default;
 		return false;
 	}
+
+	public static string GetSingleKey(Keys key)=>"{"+KeyToString(key)+"}";
+	
+	
+
+	public static SendBuilder Parse(string s,bool throwOnError=false)=>new(s,throwOnError);
 	#endregion
+
+	#region ToString
+	private const string Cyan="\u001b[96m";
+	private const string DarkCyan="\u001b[36m";
+	private const string Reset="\u001b[0m";
+	private const string Italic="\u001b[3m";
+
+	private const string Opening=DarkCyan+"{"+Cyan;
+	private const string Closing=Reset+DarkCyan+"}"+Reset;
+	private const string Plus=DarkCyan+"+"+Cyan;
+
 
 	private static readonly Regex AnsiPattern=new("\u001b\\[\\d+m");
 	private static readonly Regex HtmlItalic=new($"{Regex.Escape(Italic)}(.*?)(?={Regex.Escape(Reset)})");
 	private static readonly Regex HtmlCyan=new($"({Regex.Escape(Cyan)})(.*?)(?=\u001b\\[\\d+m)");
 	private static readonly Regex HtmlDarkCyan=new($"({Regex.Escape(DarkCyan)})(.*?)(?={AnsiPattern})");
-
-	private readonly List<(Action<Send> apply,string str)> _tuples=new();
-	public SendBuilder(){}
-	public SendBuilder(string s)=>Parse(s);
 
 	public override string ToString()=>AnsiPattern.Replace(ToConsoleString(),"");
 	public string ToConsoleString()=>string.Join("",_tuples.Select(t=>t.str));
@@ -108,9 +120,11 @@ public class SendBuilder{
 
 		return s;
 	}
+	#endregion
 
-	public Send ToSend(){
-		var send=new Send();
+
+	public Send ToSend()=>ToSend(new Send());
+	public Send ToSend(Send send){
 		foreach(var tuple in _tuples) tuple.apply(send);
 		return send;
 	}
@@ -119,98 +133,105 @@ public class SendBuilder{
 	public void SendOn(SynchronizationContext ctx)=>ToSend().SendOn(ctx);
 	public void SendOn(UiThread thread)=>ToSend().SendOn(thread);
 
-	private void Add(Action<Send> apply,string console)=>_tuples.Add((apply,console));
 
-	private const string Cyan="\u001b[96m";
-	private const string DarkCyan="\u001b[36m";
-	private const string Reset="\u001b[0m";
-	private const string Italic="\u001b[3m";
-
-	private const string Opening=DarkCyan+"{"+Cyan;
-	private const string Closing=Reset+DarkCyan+"}"+Reset;
-	private const string Plus=DarkCyan+"+"+Cyan;
-	
 	//TODO Mouse move, click, scroll
 
-	public SendBuilder Parse(string s){
+	private readonly List<(Action<Send> apply,string str)> _tuples=new();
+
+	public SendBuilder(string s,bool throwOnError=false){
+		//{Raw}
 		if(s.StartsWith("{raw}",StringComparison.OrdinalIgnoreCase)){
-			Add(send=>send.Text(s.Substring(5)),$"{Opening}{Italic}Raw{Closing}{s.Substring(5)}");
-			return this;
+			_tuples.Add((
+				            send=>send.Text(s.Substring(5)),
+				            $"{Opening}{Italic}Raw{Closing}{s.Substring(5)}"
+			            ));
+			return;
 		}
 
 		while(s.Length!=0){
-			if(s[0]!='{'){
+			if(s[0]!='{'){//Normal text, up until {brackets} or end
 				var nextToken=s.IndexOf('{');
 				if(nextToken==-1) nextToken=s.Length;
 				var part=s.Substring(0,nextToken);
-				Add(send=>send.Text(part),part);
+				_tuples.Add((send=>send.Text(part),part));
 				s=s.Substring(nextToken);
 				continue;
 			}
-			var i=s.Length<2?-1:s.IndexOf('}',2);
-			if(i==-1){//Fix error instead of throwing
-				Add(send=>send.Text("{"),Opening+"{"+Closing);
+			
+			
+			//Find full {bracket}
+			var i=s.Length<2?-1:s.IndexOf('}',1);
+			if(i==-1){//If '{' is last char of string, or no '}' is found in general
+				if(throwOnError) throw new ArgumentException("Unmatched '{'");
+				_tuples.Add((
+					            send=>send.Text("{"),
+					            Opening+"{"+Closing
+				            ));
 				s=s.Substring(1);
 				continue;
 			}
 			var inner=s.Substring(1,i-1).Trim();
 			s=s.Substring(i+1);
 
-			if(inner.Contains('\n')&&string.IsNullOrWhiteSpace(inner)){
-				Add(_=>{},Opening+Italic+"\n"+Closing);
-				continue;
-			}
+			
+			//Handle {#comments}
 			if(inner.StartsWith("#")){
-				Add(_=>{},Opening+Italic+inner+Closing);
+				_tuples.Add((_=>{},Opening+Italic+inner+Closing));
 				continue;
 			}
-			var args=inner.Trim().Split(new[]{' '},StringSplitOptions.RemoveEmptyEntries);
 
+
+			var args=inner.Split(Array.Empty<char>(),StringSplitOptions.RemoveEmptyEntries);
 			switch(args.Length){
-				case 0:throw new Exception("Invalid state reached");
-				case 1:{
+				case 0:{//if bracket is empty or everything inside the bracket is whitespace
+					if(throwOnError) throw new ArgumentException($"Empty bracket is not allowed: {{{inner}}}");
+					goto default;
+				}
+				case 1:{//Handle e.g. {Key} and {Shift+Key}
 					if(!ParseCombo(args[0])) goto default;
 					break;
 				}
-				case 2:{
+				case 2:{//Handle e.g. {Key down} or {Key 5} (repeats Key 5 times)
 					switch(args[1].ToLowerInvariant()){
 						case "down":{
-							var maybeKey=TryConvertStringToKey(args[0]);
-							if(!maybeKey.TryGet(out var key)) break;
-							var keyString=KeyToString(key);
-							Add(send=>send.Key(key,true),
-							    Opening+keyString+" down"+Closing
-							);
+							if(TryConvertStringToKey(args[0]).TryGet(out var key)){
+								_tuples.Add((
+									            send=>send.Key(key,true),
+									            Opening+KeyToString(key)+" down"+Closing
+								            ));
+								continue;
+							}
 							break;
 						}
 						case "up":{
-							var maybeKey=TryConvertStringToKey(args[0]);
-							if(!maybeKey.TryGet(out var key)) break;
-							var keyString=KeyToString(key);
-							Add(send=>send.Key(key,false),
-							    Opening+keyString+" up"+Closing
-							);
+							if(TryConvertStringToKey(args[0]).TryGet(out var key)){
+								_tuples.Add((
+									            send=>send.Key(key,false),
+									            Opening+KeyToString(key)+" up"+Closing
+								            ));
+								continue;
+							}
 							break;
 						}
 						case var arg1 when int.TryParse(arg1,out var repeat):{
-							if(!ParseCombo(args[0],repeat)) goto default;
+							if(ParseCombo(args[0],repeat))
+								continue;
 							break;
 						}
-						default://Fix instead of throwing
-							Add(send=>send.Text("{"),Opening+"{"+Closing);
-							s+=inner+"}";
-							break;
 					}
-					break;
+					goto default;
 				}
 
-				default://Fix instead of throwing
-					Add(send=>send.Text("{"),Opening+"{"+Closing);
+				default://Unknown bracket argument count
+					if(throwOnError) throw new ArgumentException($"Invalid Bracket: {{{inner}}}");
+					_tuples.Add((
+						            send=>send.Text("{"),
+						            Opening+"{"+Closing
+					            ));
 					s+=inner+"}";
 					break;
 			}
 		}
-		return this;
 	}
 
 	private static ModifierKeys ModsOf(ref string s){
@@ -236,9 +257,10 @@ public class SendBuilder{
 		var mods=ModsOf(ref arg);
 		if(!TryConvertStringToKey(arg).TryGet(out var key))
 			if(new StringInfo(arg).LengthInTextElements==1){
-				Add(
-					send=>send.Text(repeat!=1?string.Join("",Enumerable.Repeat(arg,repeat)):arg),
-					Opening+arg+(repeat!=1?" "+repeat:"")+Closing);
+				_tuples.Add((
+					            send=>send.Text(repeat!=1?string.Join("",Enumerable.Repeat(arg,repeat)):arg),
+					            Opening+arg+(repeat!=1?" "+repeat:"")+Closing
+				            ));
 				return true;
 			} else return false;
 
@@ -252,10 +274,10 @@ public class SendBuilder{
 		parts.Add(KeyToString(key));
 
 
-		Add(
-			send=>send.Combo(mods,key,repeat),
-			Opening+string.Join(Plus,parts)+(repeat!=1?" "+repeat:"")+Closing
-		);
+		_tuples.Add((
+			            send=>send.Combo(mods,key,repeat),
+			            Opening+string.Join(Plus,parts)+(repeat!=1?" "+repeat:"")+Closing
+		            ));
 		return true;
 	}
 }

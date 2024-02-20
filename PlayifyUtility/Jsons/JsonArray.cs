@@ -11,6 +11,7 @@ namespace PlayifyUtility.Jsons;
 public class JsonArray:Json,IEnumerable<Json>{
 	private readonly List<Json> _value=new();
 	public JsonArray(){}
+	public JsonArray(params Json[] e)=>AddRange(e);
 	public JsonArray(IEnumerable<Json> e)=>AddRange(e);
 	public JsonArray(IEnumerable<double> e)=>AddRange(e);
 	public JsonArray(IEnumerable<int> e)=>AddRange(e);

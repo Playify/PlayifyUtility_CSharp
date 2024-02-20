@@ -66,6 +66,8 @@ public static class WebUtils{
 			"txt"=>"text/plain; charset=UTF-8",
 			"html"=>"text/html; charset=UTF-8",
 			"ico"=>"image/x-icon",
+			"png"=>"image/png",
+			"jpg" or "jpeg"=>"image/jpeg",
 			"json"=>"application/json; charset=UTF-8",
 			"css"=>"text/css; charset=UTF-8",
 			"js"=>"text/javascript; charset=UTF-8",
@@ -88,9 +90,11 @@ public static class WebUtils{
 			"otf"=>"font/otf",
 			"fbx"=>"application/octet-stream",
 			""=>"application/octet-stream",
-			_=>null
+			_=>null,
 		};
 		if(mime!=null) return mime;
+		
+		
 
 		Console.WriteLine("Unknown Mime-Type for "+ext);
 		return "application/octet-stream";

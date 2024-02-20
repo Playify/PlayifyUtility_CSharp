@@ -137,7 +137,8 @@ public class JsonString:Json{
 								    }).TryGet(out var hex)) return null;
 							cp|=hex;
 						}
-						str.Append(char.ConvertFromUtf32(cp));
+						if(cp is >=55296 and <=57343)str.Append(char.ToString((char)cp));//Surrogate codepoint value
+						else str.Append(char.ConvertFromUtf32(cp));
 						break;
 					default:return null;
 				}

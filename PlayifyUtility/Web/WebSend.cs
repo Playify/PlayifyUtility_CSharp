@@ -35,7 +35,7 @@ public class WebSend{
 		await output.WriteAsync(bytes,0,bytes.Length);
 		await output.FlushAsync();
 		AlreadySent=true;
-		return Session.Type==RequestType.Head?Stream.Null:output;
+		return Session.Type==RequestType.Head?System.IO.Stream.Null:output;
 	}
 
 	public WebDocument Document()=>new(this);
@@ -128,11 +128,67 @@ public class WebSend{
 			Header("Content-Length",length.ToString());
 
 			var stream=await Begin(200);
-			if(stream==Stream.Null) return;
+			if(stream==System.IO.Stream.Null) return;
 			using var fileStream=new FileStream(path,FileMode.Open,FileAccess.Read);
 
 			await fileStream.CopyToAsync(stream);
 			fileStream.Close();
+			await stream.FlushAsync();
+		}
+	}
+	public async Task Stream(Stream input,string fileName,bool download=false){
+		
+		if(download) Header("Content-Disposition","attachment; filename=\""+Path.GetFileName(fileName).Replace("\"","\\\"")+"\"");
+		var length=input.Length;
+		if(length>10*1024*1024){//bigger than 10MB => send ranges
+			var start=0L;
+			var size=length;
+			var end=length-1;
+			Header("Content-Type",WebUtils.MimeType(Path.GetExtension(fileName)));
+			Header("Accept-Ranges","bytes");
+			var httpCode=200;
+			if(Session.Headers.TryGetValue("Range",out var range)){
+				range=range.Substring(range.IndexOf('=')+1);
+				if(range.Contains(',')){
+					Header("Content-Range","bytes "+start+"-"+end+"/"+size);
+					await Begin(416);
+					return;
+				}
+				var dash=range.IndexOf('-');
+				var cStart=long.Parse(range.Substring(0,dash));
+				if(!long.TryParse(range.Substring(dash+1),out var cEnd)) cEnd=size;
+				cEnd=Math.Min(cEnd,end);
+				if(cStart>cEnd||cStart>size-1||cEnd>=size){
+					Header("Content-Range","bytes "+start+"-"+end+"/"+size);
+					await Begin(416);
+					return;
+				}
+				start=cStart;
+				end=cEnd;
+				length=end-start+1;
+				httpCode=206;
+			}
+			Header("Content-Range","bytes "+start+"-"+end+"/"+size);
+			Header("Content-Length",length.ToString());
+
+			var buffer=new byte[1024*1024];
+			input.Seek(start,SeekOrigin.Current);
+			var outStream=await Begin(httpCode);
+			while(start<=size&&start<=end){
+				var a=await input.ReadAsync(buffer,0,(int) Math.Min(buffer.Length,end-start+1));
+				if(a==-1) break;
+				start+=a;
+				await outStream.WriteAsync(buffer,0,buffer.Length);
+			}
+			input.Close();
+		} else{
+			Header("Content-Type",WebUtils.MimeType(Path.GetExtension(fileName)));
+			Header("Content-Length",length.ToString());
+
+			var stream=await Begin(200);
+			if(stream==System.IO.Stream.Null) return;
+			await input.CopyToAsync(stream);
+			input.Close();
 			await stream.FlushAsync();
 		}
 	}

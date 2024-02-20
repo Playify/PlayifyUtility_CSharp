@@ -36,6 +36,8 @@ public class Send{
 	#endregion
 
 	#region Send
+	public bool IsEmpty=>_list.Count==0;
+
 	private readonly List<Input> _list=new();
 
 	private Send Add(Input input){
@@ -43,10 +45,18 @@ public class Send{
 		return this;
 	}
 
-	public void SendOn(UiThread thread)=>thread.Invoke(SendNow);
-	public void SendOn(SynchronizationContext ctx)=>ctx.Invoke(SendNow);
+	public void SendOn(UiThread thread){
+		if(!IsEmpty) thread.Invoke(SendNow);
+	}
+
+	public void SendOn(SynchronizationContext ctx){
+		if(!IsEmpty) ctx.Invoke(SendNow);
+	}
+
 	[Obsolete]
-	public void SendOnMainThread()=>MainThread.Invoke(SendNow);
+	public void SendOnMainThread(){
+		if(!IsEmpty) MainThread.Invoke(SendNow);
+	}
 
 	public void SendNow(){
 		if(_startingMods.TryGet(out var startingMods)) Mods=startingMods;
@@ -82,7 +92,7 @@ public class Send{
 	private ModsEnum? _startingMods;
 	private ModsEnum? _currentMods;
 
-	private ModsEnum Mods{
+	public ModsEnum Mods{
 		get{
 			var mods=_currentMods??=((GetKeyState(LShiftKey)&128)!=0?ModsEnum.LShift:0)|
 			                        ((GetKeyState(RShiftKey)&128)!=0?ModsEnum.RShift:0)|
@@ -123,19 +133,19 @@ public class Send{
 		var mods=Mods;
 		var start=_startingMods??=mods;
 
-        
+
 		if((mod&ModifierKeys.Shift)==0) mods&=~(ModsEnum.LShift|ModsEnum.RShift);
 		else if((mods&(ModsEnum.LShift|ModsEnum.RShift))==0)
 			mods|=(start&ModsEnum.RShift)!=0?ModsEnum.RShift:ModsEnum.LShift;
-        
+
 		if((mod&ModifierKeys.Control)==0) mods&=~(ModsEnum.LCtrl|ModsEnum.RCtrl);
 		else if((mods&(ModsEnum.LCtrl|ModsEnum.RCtrl))==0)
 			mods|=(start&ModsEnum.RCtrl)!=0?ModsEnum.RCtrl:ModsEnum.LCtrl;
-        
+
 		if((mod&ModifierKeys.Alt)==0) mods&=~(ModsEnum.LAlt|ModsEnum.RAlt);
 		else if((mods&(ModsEnum.LAlt|ModsEnum.RAlt))==0)
 			mods|=(start&ModsEnum.LAlt)!=0||(mod&ModifierKeys.AltGr)!=ModifierKeys.AltGr?ModsEnum.LAlt:ModsEnum.RAlt;
-        
+
 		if((mod&ModifierKeys.Windows)==0) mods&=~(ModsEnum.LWin|ModsEnum.RWin);
 		else if((mods&(ModsEnum.LWin|ModsEnum.RWin))==0)
 			mods|=(start&ModsEnum.RWin)!=0?ModsEnum.RWin:ModsEnum.LWin;
