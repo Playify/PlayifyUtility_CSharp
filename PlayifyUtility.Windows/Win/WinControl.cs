@@ -37,21 +37,21 @@ public readonly partial struct WinControl{
 		var controls=new Dictionary<string,WinControl>();
 		var counter=new Dictionary<string,int>();
 		EnumChildWindows(window,
-		                 (child,_)=>{
-			                 var control=new WinControl(child);
-			                 var controlClass=control.Class??"";
+			(child,_)=>{
+				var control=new WinControl(child);
+				var controlClass=control.Class??"";
 
-			                 var count=counter.TryGetValue(controlClass,out var already)?already+1:1;
-			                 counter[controlClass]=count;
+				var count=counter.TryGetValue(controlClass,out var already)?already+1:1;
+				counter[controlClass]=count;
 
 
-			                 controls[controlClass+count]=control;
-			                 return true;
-		                 },
-		                 0);
+				controls[controlClass+count]=control;
+				return true;
+			},
+			0);
 		return controls;
 	}
-	
+
 	public bool Enabled{
 		get=>AsWindow.Enabled;
 		set{
@@ -114,13 +114,30 @@ public readonly partial struct WinControl{
 		throw new Exception("Error setting combobox to "+text);
 	}
 
-	public void SendChar(char c)=>SendMessage(WindowMessage.WM_CHAR,c,0);
+	public void SendChar(char c,bool sync=true){//async doesn't make much sense here
+		if(sync) SendMessage(WindowMessage.WM_CHAR,c,0);
+		else PostMessage(WindowMessage.WM_CHAR,c,0);
+	}
 
-	public void Click()=>PostMessage(WindowMessage.BM_CLICK,0,0);
-	public void Click(MouseButtons buttons)=>Click(0,0,buttons);
-	public void Click(Point point,MouseButtons buttons=MouseButtons.Left)=>Click(point.X,point.Y,buttons);
+	public void SendKey(Keys keys,bool sync=false){
+		if(sync){
+			SendMessage(WindowMessage.WM_KEYDOWN,(int)keys,0);
+			SendMessage(WindowMessage.WM_KEYUP,(int)keys,0);
+		} else{
+			PostMessage(WindowMessage.WM_KEYDOWN,(int)keys,0);
+			PostMessage(WindowMessage.WM_KEYUP,(int)keys,0);
+		}
+	}
 
-	public void Click(int x,int y,MouseButtons buttons=MouseButtons.Left){
+	public void Click(bool sync=false){
+		if(sync) SendMessage(WindowMessage.BM_CLICK,0,0);
+		else PostMessage(WindowMessage.BM_CLICK,0,0);
+	}
+
+	public void Click(MouseButtons buttons,bool sync=false)=>Click(0,0,buttons,sync);
+	public void Click(Point point,MouseButtons buttons=MouseButtons.Left,bool sync=false)=>Click(point.X,point.Y,buttons,sync);
+
+	public void Click(int x,int y,MouseButtons buttons=MouseButtons.Left,bool sync=false){
 		var lParam=(y<<16)|x;
 
 		var wParam=buttons switch{
@@ -130,7 +147,7 @@ public readonly partial struct WinControl{
 		};
 
 		var down=buttons switch{
-			MouseButtons.None=>throw new Exception("Can't click none button"),
+			MouseButtons.None=>throw new Exception("Can't click None button"),
 			MouseButtons.Left=>WindowMessage.WM_LBUTTONDOWN,
 			MouseButtons.Right=>WindowMessage.WM_RBUTTONDOWN,
 			MouseButtons.Middle=>WindowMessage.WM_MBUTTONDOWN,
@@ -139,7 +156,7 @@ public readonly partial struct WinControl{
 			_=>throw new ArgumentOutOfRangeException(nameof(buttons),buttons,null),
 		};
 		var up=buttons switch{
-			MouseButtons.None=>throw new Exception("Can't click none button"),
+			MouseButtons.None=>throw new Exception("Can't click None button"),
 			MouseButtons.Left=>WindowMessage.WM_LBUTTONUP,
 			MouseButtons.Right=>WindowMessage.WM_RBUTTONUP,
 			MouseButtons.Middle=>WindowMessage.WM_MBUTTONUP,
@@ -148,22 +165,24 @@ public readonly partial struct WinControl{
 			_=>throw new ArgumentOutOfRangeException(nameof(buttons),buttons,null),
 		};
 
-		SendMessage(WindowMessage.WM_NULL,0,0);
-		PostMessage(down,wParam,lParam);
-		PostMessage(up,wParam,lParam);
+		if(sync){
+			SendMessage(down,wParam,lParam);
+			SendMessage(up,wParam,lParam);
+		} else{
+			SendMessage(WindowMessage.WM_NULL,0,0);//At least try to synchronize a bit
+			PostMessage(down,wParam,lParam);
+			PostMessage(up,wParam,lParam);
+		}
 	}
 
-	public void DoubleClick()=>DoubleClick(0,0);
-	public void DoubleClick(Point point)=>DoubleClick(point.X,point.Y);
-	public void DoubleClick(int x,int y){
+	public void DoubleClick(bool sync=false)=>DoubleClick(0,0,sync);
+	public void DoubleClick(Point point,bool sync=false)=>DoubleClick(point.X,point.Y,sync);
+
+	public void DoubleClick(int x,int y,bool sync=false){
 		var lParam=(y<<16)|x;
 		SendMessage(WindowMessage.WM_NULL,0,0);
-		PostMessage(WindowMessage.WM_LBUTTONDBLCLK,0,lParam);
-	}
-
-	public void SendKey(Keys keys){
-		PostMessage(WindowMessage.WM_KEYDOWN,(int)keys,0);
-		PostMessage(WindowMessage.WM_KEYUP,(int)keys,0);
+		if(sync) SendMessage(WindowMessage.WM_LBUTTONDBLCLK,0,lParam);
+		else PostMessage(WindowMessage.WM_LBUTTONDBLCLK,0,lParam);
 	}
 
 	public WinComboBox AsComboBox=>new(this);
@@ -177,7 +196,7 @@ public readonly partial struct WinControl{
 	public int SendMessage(int msg,int wParam,IntPtr lParam)=>SendMessage((WindowMessage)msg,wParam,lParam);
 
 	[Obsolete("Use the overload with WindowMessage enum instead")]
-	public int SendMessage<T>(int msg,int wParam,ref T lParam) where T:struct=>SendMessage((WindowMessage)msg,wParam,ref lParam);
+	public int SendMessage<T>(int msg,int wParam,ref T lParam) where T : struct=>SendMessage((WindowMessage)msg,wParam,ref lParam);
 
 	[Obsolete("Use the overload with WindowMessage enum instead")]
 	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage((WindowMessage)msg,wParam,lParam);
@@ -186,7 +205,7 @@ public readonly partial struct WinControl{
 	public bool PostMessage(int msg,int wParam,IntPtr lParam)=>PostMessage((WindowMessage)msg,wParam,lParam);
 
 	[Obsolete("Use the overload with WindowMessage enum instead")]
-	public bool PostMessage<T>(int msg,int wParam,ref T lParam) where T:struct=>PostMessage((WindowMessage)msg,wParam,ref lParam);
+	public bool PostMessage<T>(int msg,int wParam,ref T lParam) where T : struct=>PostMessage((WindowMessage)msg,wParam,ref lParam);
 
 
 	public void SendNull()=>AsWindow.SendNull();
@@ -200,12 +219,12 @@ public readonly partial struct WinControl{
 	public int SendMessage(WindowMessage msg,int wParam,StringBuilder lParam)=>AsWindow.SendMessage(msg,wParam,lParam);
 	public int SendMessage(WindowMessage msg,int wParam,string lParam)=>AsWindow.SendMessage(msg,wParam,lParam);
 
-	public int SendMessage<T>(WindowMessage msg,int wParam,ref T lParam) where T:struct=>AsWindow.SendMessage(msg,wParam,ref lParam);
+	public int SendMessage<T>(WindowMessage msg,int wParam,ref T lParam) where T : struct=>AsWindow.SendMessage(msg,wParam,ref lParam);
 	public bool PostMessage(WindowMessage msg,int wParam,int lParam)=>AsWindow.PostMessage(msg,wParam,lParam);
 
 	public bool PostMessage(WindowMessage msg,int wParam,IntPtr lParam)=>AsWindow.PostMessage(msg,wParam,lParam);
 
-	public bool PostMessage<T>(WindowMessage msg,int wParam,ref T lParam) where T:struct=>AsWindow.PostMessage(msg,wParam,ref lParam);
+	public bool PostMessage<T>(WindowMessage msg,int wParam,ref T lParam) where T : struct=>AsWindow.PostMessage(msg,wParam,ref lParam);
 	#endregion
 
 	#region Operators
@@ -213,8 +232,8 @@ public readonly partial struct WinControl{
 
 	public override bool Equals(object? obj)=>obj is WinControl other&&this==other;
 	public override int GetHashCode()=>Hwnd.GetHashCode();
-	public static bool operator!=(WinControl left,WinControl right)=>!(left==right);
-	public static bool operator==(WinControl left,WinControl right)=>left.Hwnd==right.Hwnd;
+	public static bool operator !=(WinControl left,WinControl right)=>!(left==right);
+	public static bool operator ==(WinControl left,WinControl right)=>left.Hwnd==right.Hwnd;
 	public static implicit operator bool(WinControl win)=>win.Hwnd!=IntPtr.Zero;
 	public static implicit operator IntPtr(WinControl win)=>win.Hwnd;
 
@@ -222,4 +241,5 @@ public readonly partial struct WinControl{
 	public static readonly WinControl Zero;
 	public bool NonZero(out WinControl win)=>win=this;
 	#endregion
+
 }
