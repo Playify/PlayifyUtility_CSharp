@@ -1,7 +1,9 @@
+using JetBrains.Annotations;
 using PlayifyUtility.Windows.Utils;
 
 namespace PlayifyUtility.Windows;
 
+[PublicAPI]
 public class UiThread{
 	public static UiThread Create(string name){
 		TaskCompletionSource<WindowsFormsSynchronizationContext> ctx=new();

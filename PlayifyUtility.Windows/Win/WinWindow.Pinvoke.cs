@@ -17,6 +17,12 @@ public readonly partial struct WinWindow{
 	private static extern bool IsWindow(IntPtr hWnd);
 
 	[DllImport("user32.dll")]
+	private static extern bool IsWindowEnabled(IntPtr hWnd);
+
+	[DllImport("user32.dll")]
+	private static extern bool EnableWindow(IntPtr hWnd,bool b);
+
+	[DllImport("user32.dll")]
 	private static extern IntPtr GetDesktopWindow();
 
 	[DllImport("user32.dll",CharSet=CharSet.Unicode,EntryPoint="FindWindow")]
@@ -48,14 +54,18 @@ public readonly partial struct WinWindow{
 	private static extern bool MoveWindow(IntPtr handle,int x,int y,int width,int height,bool redraw);
 
 	[DllImport("user32.dll",CharSet=CharSet.Auto)]
-	private static extern int SendMessage(IntPtr hWnd,int msg,int wParam,int lParam);
+	private static extern int SendMessage(IntPtr hWnd,WindowMessage msg,int wParam,int lParam);
 	[DllImport("user32.dll",CharSet=CharSet.Auto)]
-	private static extern int SendMessage(IntPtr hWnd,int msg,int wParam,IntPtr lParam);
+	private static extern int SendMessage(IntPtr hWnd,WindowMessage msg,int wParam,IntPtr lParam);
+	[DllImport("user32.dll",CharSet=CharSet.Auto)]
+	private static extern int SendMessage(IntPtr hWnd,WindowMessage msg,int wParam,StringBuilder lParam);
+	[DllImport("user32.dll",CharSet=CharSet.Auto)]
+	private static extern int SendMessage(IntPtr hWnd,WindowMessage msg,int wParam,string lParam);
 
 	[DllImport("user32.dll",SetLastError=true,CharSet=CharSet.Auto)]
-	private static extern bool PostMessage(IntPtr hWnd,int msg,int wParam,int lParam);
+	private static extern bool PostMessage(IntPtr hWnd,WindowMessage msg,int wParam,int lParam);
 	[DllImport("user32.dll",SetLastError=true,CharSet=CharSet.Auto)]
-	private static extern bool PostMessage(IntPtr hWnd,int msg,int wParam,IntPtr lParam);
+	private static extern bool PostMessage(IntPtr hWnd,WindowMessage msg,int wParam,IntPtr lParam);
 
 	[Serializable,StructLayout(LayoutKind.Sequential)]
 	private struct WindowPlacement{

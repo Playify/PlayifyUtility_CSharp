@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace PlayifyUtility.Windows.Win.Native;
 
+[PublicAPI]
 public enum ShowWindowCommands{// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-showwindow
 	Hide=0,
 	Normal=1,

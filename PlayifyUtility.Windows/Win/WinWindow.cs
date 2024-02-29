@@ -56,6 +56,14 @@ public partial struct WinWindow{
 
 	public static WinWindow GetWindowAt(int x,int y)=>new WinControl(WindowFromPoint(new Point(x,y))).Window;
 
+	public static WinWindow FindWindow(string? windowName)=>FindWindow(null,windowName);
+	public static WinWindow FindAnyWindow(params string[] windowNames){
+		foreach(var windowName in windowNames)
+			if(FindWindow(windowName).NonZero(out var win))
+				return win;
+		return Zero;
+	}
+
 	public static WinWindow FindWindow(string? @class,string? windowName)=>new(FindWindow_Hwnd(@class,windowName));
 
 	public static WinWindow DesktopWindow=>new(GetDesktopWindow());
@@ -80,6 +88,11 @@ public partial struct WinWindow{
 		set=>ShowWindowCommand=value?ShowWindowCommands.Show:ShowWindowCommands.Hide;
 	}
 	public bool Exists=>IsWindow(Hwnd);
+
+	public bool Enabled{
+		get=>IsWindowEnabled(Hwnd);
+		set=>EnableWindow(Hwnd,value);
+	}
 	public NativeRect WindowRect{
 		get{
 			GetWindowRect(Hwnd,out var rect);
@@ -110,7 +123,7 @@ public partial struct WinWindow{
 
 				SetWindowPos(Hwnd,0,rect.Left,rect.Top,rect.Right-rect.Left,rect.Bottom-rect.Top,0x4);
 				GetClientRect(Hwnd,out rect);
-				PostMessage(Hwnd,5,0,((rect.Bottom-rect.Top)<<16)|((rect.Right-rect.Left)&0xffff));//5=WM_SIZE
+				PostMessage(WindowMessage.WM_SIZE,0,((rect.Bottom-rect.Top)<<16)|((rect.Right-rect.Left)&0xffff));
 				FullScreened.Remove(Hwnd);
 			} else if(value){
 				//Enable fullscreen
@@ -123,7 +136,7 @@ public partial struct WinWindow{
 				FullScreened.Add(Hwnd,rect);
 				SetWindowPos(0,bnd,0);
 				GetClientRect(Hwnd,out rect);
-				PostMessage(Hwnd,5,0,(rect.Height<<16)|(rect.Width&0xffff));//5=WM_SIZE
+				PostMessage(WindowMessage.WM_SIZE,0,(rect.Height<<16)|(rect.Width&0xffff));
 			}
 		}
 	}
@@ -138,7 +151,7 @@ public partial struct WinWindow{
 			GwlStyle=l;
 			SetWindowPos(Hwnd,0,0,0,0,0,0x27);
 			GetClientRect(Hwnd,out var rect);
-			PostMessage(Hwnd,5,0,(rect.Height<<16)|(rect.Width&0xffff));
+			PostMessage(WindowMessage.WM_SIZE,0,(rect.Height<<16)|(rect.Width&0xffff));
 		}
 	}
 
@@ -304,19 +317,53 @@ public partial struct WinWindow{
 		AltMenu=0xF100,//KeyMenu  //Retrieves the window menu as a result of a keystroke. (Similar to pressing Alt to get the menu)
 		WindowsMenu=0xF130,//TaskList  //Activates the Start menu. (Similar to pressing Win to get the Windows Menu)
 	}
-
-	public void SendSysCommand(SysCommand cmd,int lParam=0)=>SendMessage(0x112,(int)cmd,lParam);
-	public void PostSysCommand(SysCommand cmd,int lParam=0)=>PostMessage(0x112,(int)cmd,lParam);
+	
+	public void SendSysCommand(SysCommand cmd,int lParam=0)=>SendMessage(WindowMessage.WM_SYSCOMMAND,(int)cmd,lParam);
+	public void PostSysCommand(SysCommand cmd,int lParam=0)=>PostMessage(WindowMessage.WM_SYSCOMMAND,(int)cmd,lParam);
 
 	public bool MoveWindow(int x,int y,int width,int height,bool redraw)=>MoveWindow(Hwnd,x,y,width,height,redraw);
 	public bool MoveWindow(NativeRect rect,bool redraw)=>MoveWindow(Hwnd,rect.Left,rect.Top,rect.Width,rect.Height,redraw);
 	public bool SetWindowPos(int hwndInsertAfter,int x,int y,int cx,int cy,uint uFlags)=>SetWindowPos(Hwnd,hwndInsertAfter,x,y,cx,cy,uFlags);
 	public bool SetWindowPos(int hwndInsertAfter,NativeRect rect,uint uFlags)=>SetWindowPos(Hwnd,hwndInsertAfter,rect.X,rect.Y,rect.Width,rect.Height,uFlags);
 	public bool DestroyWindow()=>DestroyWindow(Hwnd);
-	public int SendMessage(int msg,int wParam,int lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
-	public int SendMessage(int msg,int wParam,IntPtr lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
+	#endregion
 	
-	public int SendMessage<T>(int msg,int wParam,ref T lParam) where T:struct{
+	#region Message
+
+	[Obsolete("Use the overload with WindowMessage enum instead")]
+	public int SendMessage(int msg,int wParam,int lParam)=>SendMessage((WindowMessage)msg,wParam,lParam);
+
+	[Obsolete("Use the overload with WindowMessage enum instead")]
+	public int SendMessage(int msg,int wParam,IntPtr lParam)=>SendMessage((WindowMessage)msg,wParam,lParam);
+
+	[Obsolete("Use the overload with WindowMessage enum instead")]
+	public int SendMessage<T>(int msg,int wParam,ref T lParam) where T:struct=>SendMessage((WindowMessage)msg,wParam,ref lParam);
+	[Obsolete("Use the overload with WindowMessage enum instead")]
+	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage((WindowMessage)msg,wParam,lParam);
+
+	[Obsolete("Use the overload with WindowMessage enum instead")]
+	public bool PostMessage(int msg,int wParam,IntPtr lParam)=>PostMessage((WindowMessage)msg,wParam,lParam);
+
+	[Obsolete("Use the overload with WindowMessage enum instead")]
+	public bool PostMessage<T>(int msg,int wParam,ref T lParam) where T:struct=>PostMessage((WindowMessage)msg,wParam,ref lParam);
+
+	
+	public void SendNull()=>SendMessage(WindowMessage.WM_NULL,0,0);
+	public void SendNull(int count)=>SendNull(count,TimeSpan.FromMilliseconds(100));
+	public void SendNull(int count,TimeSpan delay){
+		while(count-->0){
+			SendNull();
+			Thread.Sleep(delay);
+		}
+	}
+	
+	
+	public int SendMessage(WindowMessage msg,int wParam,int lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
+	public int SendMessage(WindowMessage msg,int wParam,IntPtr lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
+	public int SendMessage(WindowMessage msg,int wParam,StringBuilder lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
+	public int SendMessage(WindowMessage msg,int wParam,string lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
+	
+	public int SendMessage<T>(WindowMessage msg,int wParam,ref T lParam) where T:struct{
 		var ptr=Marshal.AllocHGlobal(Marshal.SizeOf<T>());
 		try{
 			Marshal.StructureToPtr(lParam,ptr,false);
@@ -327,10 +374,10 @@ public partial struct WinWindow{
 			Marshal.FreeHGlobal(ptr);
 		}
 	}
-	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
-	public bool PostMessage(int msg,int wParam,IntPtr lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
+	public bool PostMessage(WindowMessage msg,int wParam,int lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
+	public bool PostMessage(WindowMessage msg,int wParam,IntPtr lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
 	
-	public bool PostMessage<T>(int msg,int wParam,ref T lParam) where T:struct{
+	public bool PostMessage<T>(WindowMessage msg,int wParam,ref T lParam) where T:struct{
 		var ptr=Marshal.AllocHGlobal(Marshal.SizeOf<T>());
 		try{
 			Marshal.StructureToPtr(lParam,ptr,false);

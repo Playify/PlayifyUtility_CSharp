@@ -19,7 +19,7 @@ public static partial class MouseToolTip{
 		if(!WinCursor.TryGetCursorPos(out var p)) return;
 		p.X+=16;
 		p.Y+=16;
-		_currentToolTip.SendMessage(0x412,0,((p.Y&0xffff)<<16)|(p.X&0xffff));//TTM_TRACKPOSITION
+		_currentToolTip.SendMessage(WindowMessage.TTM_TRACKPOSITION,0,((p.Y&0xffff)<<16)|(p.X&0xffff));
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
