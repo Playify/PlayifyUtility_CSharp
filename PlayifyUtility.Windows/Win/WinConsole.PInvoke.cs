@@ -23,4 +23,14 @@ public static partial class WinConsole{
 
 	[DllImport("Kernel32.dll",SetLastError=true,CharSet=CharSet.Auto)]
 	private static extern bool SetStdHandle(int nStdHandle,IntPtr hHandle);
+
+	[DllImport("kernel32.dll",SetLastError=true)]
+	private static extern IntPtr GetStdHandle(int nStdHandle);
+
+
+	[DllImport("kernel32.dll")]
+	private static extern bool GetConsoleMode(IntPtr hConsoleHandle,out uint lpMode);
+
+	[DllImport("kernel32.dll")]
+	private static extern bool SetConsoleMode(IntPtr hConsoleHandle,uint dwMode);
 }

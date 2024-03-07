@@ -9,6 +9,7 @@ namespace PlayifyUtility.Windows.Features.Interact;
 
 [PublicAPI]
 public class Send{
+
 	#region Constants
 	public static readonly IntPtr ProcessHandle=Process.GetCurrentProcess().Handle;
 	private static readonly Keys[] Extended={
@@ -51,11 +52,6 @@ public class Send{
 
 	public void SendOn(SynchronizationContext ctx){
 		if(!IsEmpty) ctx.Invoke(SendNow);
-	}
-
-	[Obsolete]
-	public void SendOnMainThread(){
-		if(!IsEmpty) MainThread.Invoke(SendNow);
 	}
 
 	public void SendNow(){
@@ -403,12 +399,9 @@ public class Send{
 
 	[StructLayout(LayoutKind.Explicit)]
 	private struct InputUnion{
-		[FieldOffset(0)]
-		public MouseInput mi;
-		[FieldOffset(0)]
-		public KeyBdInput ki;
-		[FieldOffset(0)]
-		public HardwareInput hi;
+		[FieldOffset(0)]public MouseInput mi;
+		[FieldOffset(0)]public KeyBdInput ki;
+		[FieldOffset(0)]public HardwareInput hi;
 	}
 
 	[DllImport("USER32.dll")]
@@ -421,4 +414,5 @@ public class Send{
 	private const int SmCxScreen=0;
 	private const int SmCyScreen=1;
 	#endregion
+
 }

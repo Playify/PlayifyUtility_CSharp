@@ -21,8 +21,20 @@ public static partial class WinConsole{
 		}
 	}
 
+	public static bool EnableAnsi(){
+		var iStdOut=GetStdHandle(-11);//STD_OUTPUT_HANDLE
+		if(!GetConsoleMode(iStdOut,out var outConsoleMode)) return false;
+		outConsoleMode|=0x0004|0x0008;//ENABLE_VIRTUAL_TERMINAL_PROCESSING|DISABLE_NEWLINE_AUTO_RETURN
+		return SetConsoleMode(iStdOut,outConsoleMode);
+	}
 
+	//TODO keyboard interaction should probably be a separate method
+
+
+	/**Can be hidden using Win+Alt+M and shown using Win+Alt+N*/
 	public static void CreateConsole()=>CreateHideAbleConsole(false);
+
+	/**Can be hidden using Win+Alt+M and shown using Win+Alt+N*/
 	public static void CreateHiddenConsole()=>CreateHideAbleConsole(true);
 
 	private static void CreateHideAbleConsole(bool hidden){
@@ -31,23 +43,23 @@ public static partial class WinConsole{
 
 			var conIn=CreateFile("CONIN$",GenericRead,FileShareRead,0,OpenExisting,0,0);
 			Console.SetIn(new StreamReader(
-				              new FileStream(
-					              new SafeFileHandle(
-						              conIn,
-						              true),
-					              FileAccess.Read),
-				              Encoding.Default));
+				new FileStream(
+					new SafeFileHandle(
+						conIn,
+						true),
+					FileAccess.Read),
+				Encoding.Default));
 
 			var conOut=CreateFile("CONOUT$",GenericWrite,FileShareWrite,0,OpenExisting,0,0);
 			Console.SetOut(new StreamWriter(
-				               new FileStream(
-					               new SafeFileHandle(
-						               conOut,
-						               true),
-					               FileAccess.Write),
-				               Encoding.Default){
-				               AutoFlush=true,
-			               });
+				new FileStream(
+					new SafeFileHandle(
+						conOut,
+						true),
+					FileAccess.Write),
+				Encoding.Default){
+				AutoFlush=true,
+			});
 			Console.SetError(Console.Out);
 
 
@@ -66,7 +78,7 @@ public static partial class WinConsole{
 
 		GlobalKeyboardHook.KeyDown+=e=>{
 			if(e.Handled) return;
-			
+
 			switch(e.Key){
 				case Keys.M when Modifiers.Win&&Modifiers.Alt:{
 					if(console.IsVisible&&WinWindow.Foreground==console){

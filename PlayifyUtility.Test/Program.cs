@@ -5,6 +5,7 @@ namespace PlayifyUtils.Test;
 internal static class Program{
 	[STAThread]
 	public static void Main(string[] args){
+
 		//WinConsole.CreateHiddenConsole();
 		Thread.CurrentThread.Name="Main";
 
@@ -14,7 +15,7 @@ internal static class Program{
 				Console.WriteLine("ReadLine: ");
 				var line=Console.ReadLine();
 				var builder=new SendBuilder(line!);
-				Console.WriteLine("C=> " + builder.ToConsoleString() + "\nH=> " + builder.ToHtmlString());
+				Console.WriteLine("C=> "+builder.ToConsoleString()+"\nH=> "+builder.ToHtmlString());
 			}
 		}).Start();
 
