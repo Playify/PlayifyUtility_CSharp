@@ -1,4 +1,5 @@
-﻿using PlayifyUtility.Windows.Features.Interact;
+﻿using PlayifyUtility.Loggers;
+using PlayifyUtility.Windows.Features.Interact;
 
 namespace PlayifyUtils.Test;
 
@@ -8,6 +9,14 @@ internal static class Program{
 
 		//WinConsole.CreateHiddenConsole();
 		Thread.CurrentThread.Name="Main";
+		
+		foreach(ConsoleColor color in Enum.GetValues(typeof(ConsoleColor))){
+			Console.ForegroundColor=color;
+			Console.WriteLine(color+": "+color.Ansi()+"XXX"+AnsiColors.Reset);
+		}
+		foreach(AnsiColor color in Enum.GetValues(typeof(AnsiColor))){
+			Console.WriteLine(color+": "+color.Get()+"XXX"+color.Get(AnsiStyle.Bright)+"XXX"+AnsiColors.Reset);
+		}
 
 
 		new Thread(()=>{

@@ -58,5 +58,32 @@ public static class AnsiColors{
 		return str.ToString();
 	}
 
+	public static string Ansi(this ConsoleColor color,AnsiStyle style=default){
+		var (ansiColor,bright)=ToAnsiColor(color);
+		if(bright) style|=AnsiStyle.Bright;
+		return Get(ansiColor,style);
+	}
+
+	private static (AnsiColor color,bool bright) ToAnsiColor(ConsoleColor color)=>color switch{
+		ConsoleColor.Black=>(AnsiColor.Black,false),
+		ConsoleColor.DarkBlue=>(AnsiColor.Blue,false),
+		ConsoleColor.DarkGreen=>(AnsiColor.Green,false),
+		ConsoleColor.DarkCyan=>(AnsiColor.Cyan,false),
+		ConsoleColor.DarkRed=>(AnsiColor.Red,false),
+		ConsoleColor.DarkMagenta=>(AnsiColor.Magenta,false),
+		ConsoleColor.DarkYellow=>(AnsiColor.Yellow,false),
+		ConsoleColor.Gray=>(AnsiColor.White,false),
+			
+		ConsoleColor.DarkGray=>(AnsiColor.Black,true),
+		ConsoleColor.Blue=>(AnsiColor.Blue,true),
+		ConsoleColor.Green=>(AnsiColor.Green,true),
+		ConsoleColor.Cyan=>(AnsiColor.Cyan,true),
+		ConsoleColor.Red=>(AnsiColor.Red,true),
+		ConsoleColor.Magenta=>(AnsiColor.Magenta,true),
+		ConsoleColor.Yellow=>(AnsiColor.Yellow,true),
+		ConsoleColor.White=>(AnsiColor.White,true),
+		_=>throw new ArgumentOutOfRangeException(nameof(color),color,null)
+	};
+
 	public const string Reset="\u001b[0;0m";
 }
