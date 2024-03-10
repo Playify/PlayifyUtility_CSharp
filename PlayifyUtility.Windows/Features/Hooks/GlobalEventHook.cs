@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
@@ -21,13 +22,14 @@ public sealed class GlobalEventHook:IDisposable{
 	private static UiThread? _defaultThread;
 	private readonly UiThread _thread;
 	private static readonly HashSet<GlobalEventHook> Instances=new();//Single hooks are not allowed to be GCd while still hooked
+	private static readonly HashSet<GlobalEventHook> InstancesOnDefault=new();//Single hooks are not allowed to be GCd while still hooked
 	private readonly IntPtr _hook;
 	private readonly WinEventProc _proc;
 	#endregion
 
 	#region Private Methods
 	private GlobalEventHook(UiThread thread,uint min,uint max,WindowEventHandler handler){
-		Instances.Add(this);
+		(thread==_defaultThread?InstancesOnDefault:Instances).Add(this);
 		_thread=thread;
 
 		_proc=(_,@event,hwnd,idObject,idChild,idEventThread,eventTime)=>
@@ -36,13 +38,18 @@ public sealed class GlobalEventHook:IDisposable{
 	}
 
 	public void Dispose(){
-		if(!Instances.Remove(this)) return;
+		if(_thread!=_defaultThread){
+			if(Instances.Remove(this))
+				_thread.BeginInvoke(()=>UnhookWinEvent(_hook));
+			return;
+		}
+		if(!InstancesOnDefault.Remove(this)) return;
 		_thread.BeginInvoke(()=>UnhookWinEvent(_hook));
-		
-		if(Instances.Count!=0&&_thread==_defaultThread) return;//TODO this is not correct, last could be nondefault, but would not be cleared
+
+		if(InstancesOnDefault.Count!=0) return;
 		var defaultThread=_defaultThread;
 		_defaultThread=null;
-		defaultThread?.Exit();
+		defaultThread.Exit();
 	}
 	#endregion
 

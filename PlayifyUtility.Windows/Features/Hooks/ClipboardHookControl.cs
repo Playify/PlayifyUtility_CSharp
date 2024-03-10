@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
@@ -21,12 +22,12 @@ internal class ClipboardHookControl:Control{
 
 	protected override void WndProc(ref Message m){
 		try{
-			switch(m.Msg){
-				case 0x030D:// WM_CHANGECBCHAIN
+			switch((WindowMessage)m.Msg){
+				case WindowMessage.WM_CHANGECBCHAIN:
 					if(m.WParam==_nextClipboardViewer) _nextClipboardViewer=m.LParam;
 					else SendMessage(_nextClipboardViewer,m.Msg,m.WParam,m.LParam);
 					break;
-				case 0x0308:// WM_DRAWCLIPBOARD
+				case WindowMessage.WM_DRAWCLIPBOARD:
 					GlobalClipboardHook.TriggerChange();
 					SendMessage(_nextClipboardViewer,m.Msg,m.WParam,m.LParam);
 					break;

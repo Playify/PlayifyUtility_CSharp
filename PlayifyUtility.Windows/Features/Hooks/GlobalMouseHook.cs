@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Features.Interact;
 using PlayifyUtility.Windows.Utils;
+using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
@@ -65,20 +66,20 @@ public static class GlobalMouseHook{
 		thread.Exit(()=>UnhookWindowsHookEx(_hook));
 	}
 
-	private static int HookProc(int code,int wParam,ref MouseHookStruct lParam){
+	private static int HookProc(int code,WindowMessage wParam,ref MouseHookStruct lParam){
 		try{
 			if(code>=0){
 				if(wParam switch{
-					   512=>HandleEvent(_move.evt,new MouseEvent(lParam.pt.x,lParam.pt.y,MouseButtons.None)),
-					   522=>HandleEvent(_scroll.evt,new MouseEvent(lParam.pt.x,lParam.pt.y,MouseButtons.None,Math.Sign(lParam.mouseData))),
-					   513=>HandleDown(ref lParam,MouseButtons.Left),
-					   514=>HandleUp(ref lParam,MouseButtons.Left),
-					   516=>HandleDown(ref lParam,MouseButtons.Right),
-					   517=>HandleUp(ref lParam,MouseButtons.Right),
-					   519=>HandleDown(ref lParam,MouseButtons.Middle),
-					   520=>HandleUp(ref lParam,MouseButtons.Middle),
-					   523=>HandleDown(ref lParam,lParam.mouseData==0x10000?MouseButtons.XButton1:MouseButtons.XButton2),
-					   524=>HandleUp(ref lParam,lParam.mouseData==0x10000?MouseButtons.XButton1:MouseButtons.XButton2),
+					   WindowMessage.WM_MOUSEMOVE=>HandleEvent(_move.evt,new MouseEvent(lParam.pt.x,lParam.pt.y,MouseButtons.None)),
+					   WindowMessage.WM_MOUSEWHEEL=>HandleEvent(_scroll.evt,new MouseEvent(lParam.pt.x,lParam.pt.y,MouseButtons.None,Math.Sign(lParam.mouseData))),
+					   WindowMessage.WM_LBUTTONDOWN=>HandleDown(ref lParam,MouseButtons.Left),
+					   WindowMessage.WM_LBUTTONUP=>HandleUp(ref lParam,MouseButtons.Left),
+					   WindowMessage.WM_RBUTTONDOWN=>HandleDown(ref lParam,MouseButtons.Right),
+					   WindowMessage.WM_RBUTTONUP=>HandleUp(ref lParam,MouseButtons.Right),
+					   WindowMessage.WM_MBUTTONDOWN=>HandleDown(ref lParam,MouseButtons.Middle),
+					   WindowMessage.WM_MBUTTONUP=>HandleUp(ref lParam,MouseButtons.Middle),
+					   WindowMessage.WM_XBUTTONDOWN=>HandleDown(ref lParam,lParam.mouseData==0x10000?MouseButtons.XButton1:MouseButtons.XButton2),
+					   WindowMessage.WM_XBUTTONUP=>HandleUp(ref lParam,lParam.mouseData==0x10000?MouseButtons.XButton1:MouseButtons.XButton2),
 					   _=>false,
 				   }) return 1;
 			}
@@ -130,14 +131,14 @@ public static class GlobalMouseHook{
 	private static extern bool UnhookWindowsHookEx(IntPtr hInstance);
 
 	[DllImport("user32.dll")]
-	private static extern int CallNextHookEx(IntPtr idHook,int nCode,int wParam,ref MouseHookStruct lParam);
+	private static extern int CallNextHookEx(IntPtr idHook,int nCode,WindowMessage wParam,ref MouseHookStruct lParam);
 
 	[DllImport("kernel32.dll")]
 	private static extern IntPtr GetModuleHandle(IntPtr zero);
 	#endregion
 
 	#region Constant, Structure and Delegate Definitions
-	private delegate int MouseHookProc(int code,int wParam,ref MouseHookStruct lParam);
+	private delegate int MouseHookProc(int code,WindowMessage wParam,ref MouseHookStruct lParam);
 
 	private const int WhMouseLl=14;
 

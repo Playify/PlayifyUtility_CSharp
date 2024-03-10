@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Features.Interact;
 using PlayifyUtility.Windows.Utils;
+using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
@@ -64,21 +65,21 @@ public static class GlobalKeyboardHook{
 	}
 
 
-	private static int HookProc(int code,int wParam,ref KeyboardHookStruct lParam){
+	private static int HookProc(int code,WindowMessage wParam,ref KeyboardHookStruct lParam){
 		try{
 			if(code>=0&&lParam.DwExtraInfo!=Send.ProcessHandle){
 				var key=(Keys)lParam.VkCode;
 				var evt=new KeyEvent(key,lParam.VkCode,lParam.ScanCode);
 				switch(wParam){
-					case WmKeydown:
-					case WmSysKeyDown:
+					case WindowMessage.WM_KEYDOWN:
+					case WindowMessage.WM_SYSKEYDOWN:
 						_down.evt?.Invoke(evt);
 						if(evt.Handled&&AutoHandleUpWhenHandledDown&&!OnRelease.ContainsKey(key)){
 							OnRelease.Add(key,null);
 						}
 						break;
-					case WmKeyup:
-					case WmSysKeyUp:
+					case WindowMessage.WM_KEYUP:
+					case WindowMessage.WM_SYSKEYUP:
 						if(OnRelease.TryGetValue(key,out var onRelease)){
 							OnRelease.Remove(key);
 							if(key!=onRelease){
@@ -108,14 +109,14 @@ public static class GlobalKeyboardHook{
 	private static extern bool UnhookWindowsHookEx(IntPtr hInstance);
 
 	[DllImport("user32.dll")]
-	private static extern int CallNextHookEx(IntPtr idHook,int nCode,int wParam,ref KeyboardHookStruct lParam);
+	private static extern int CallNextHookEx(IntPtr idHook,int nCode,WindowMessage wParam,ref KeyboardHookStruct lParam);
 
 	[DllImport("kernel32.dll")]
 	private static extern IntPtr GetModuleHandle(IntPtr zero);
 	#endregion
 
 	#region Constant, Structure and Delegate Definitions
-	private delegate int KeyboardHookProc(int code,int wParam,ref KeyboardHookStruct lParam);
+	private delegate int KeyboardHookProc(int code,WindowMessage wParam,ref KeyboardHookStruct lParam);
 
 	[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 	private struct KeyboardHookStruct{
@@ -127,9 +128,5 @@ public static class GlobalKeyboardHook{
 	}
 
 	private const int WhKeyboardLl=13;
-	private const int WmKeydown=0x100;
-	private const int WmKeyup=0x101;
-	private const int WmSysKeyDown=0x104;
-	private const int WmSysKeyUp=0x105;
 	#endregion
 }
