@@ -32,23 +32,23 @@ public class Logger:TextWriter{
 
 	#region Logging
 	public class LogLevel{
-		public static readonly LogLevel Log=new(null,AnsiColor.White);
-		public static readonly LogLevel Special=new(null,AnsiColor.Magenta,AnsiColor.Magenta.Get(AnsiStyle.Bright));
-		public static readonly LogLevel Debug=new("Debug",AnsiColor.Cyan);
-		public static readonly LogLevel Info=new("Info",AnsiColor.Green);
-		public static readonly LogLevel Warning=new("Warning",AnsiColor.Yellow);
-		public static readonly LogLevel Error=new("Error",AnsiColor.Red);
-		public static readonly LogLevel Critical=new("Critical",AnsiColor.Red,AnsiColor.Red.Get(AnsiStyle.Bright));
+		public static readonly LogLevel Log=new(null,ConsoleColor.White);
+		public static readonly LogLevel Special=new(null,ConsoleColor.Magenta,ConsoleColor.Magenta.Ansi());
+		public static readonly LogLevel Debug=new("Debug",ConsoleColor.Cyan);
+		public static readonly LogLevel Info=new("Info",ConsoleColor.Green);
+		public static readonly LogLevel Warning=new("Warning",ConsoleColor.Yellow);
+		public static readonly LogLevel Error=new("Error",ConsoleColor.Red);
+		public static readonly LogLevel Critical=new("Critical",ConsoleColor.Red,ConsoleColor.Red.Ansi());
 
 		public readonly string? Tag;
 		public readonly string BracketColor;
 		public readonly string TagColor;
 		public readonly string? MsgColor;
 
-		public LogLevel(string? tag,AnsiColor color,string? msgColor=null):this(
+		public LogLevel(string? tag,ConsoleColor color,string? msgColor=null):this(
 			tag,
-			color.Get(AnsiStyle.Bold),
-			color.Get(AnsiStyle.Bright|AnsiStyle.Reset),
+			color.Dark().Ansi(AnsiStyle.Bold),
+			AnsiColor.Reset+color.Bright().Ansi(),
 			msgColor){
 		}
 
@@ -75,11 +75,11 @@ public class Logger:TextWriter{
 					str.Append(level.TagColor).Append(enumerator.Current).Append(level.BracketColor);
 				} while(enumerator.MoveNext());
 
-				str.Append(']').Append(AnsiColors.Reset).Append(": ");
+				str.Append(']').Append(AnsiColor.Reset).Append(": ");
 			}
 		}
 
-		if(level.MsgColor!=null) str.Append(level.MsgColor).Append(msg).Append(AnsiColors.Reset);
+		if(level.MsgColor!=null) str.Append(level.MsgColor).Append(msg).Append(AnsiColor.Reset);
 		else str.Append(msg);
 
 		WriteLine(str.ToString());
@@ -120,7 +120,7 @@ public class Logger:TextWriter{
 	public Logger WithName<T>()=>new NamedLogger(this,typeof(T).Name);
 
 	public Logger UseAsConsoleOut(){
-		typeof(AnsiColors).RunClassConstructor();
+		typeof(AnsiColor).RunClassConstructor();
 		Console.SetOut(this);
 		return this;
 	}

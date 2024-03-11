@@ -9,7 +9,7 @@
       "PlayifyUtility.Test/1.0.0": {
         "dependencies": {
           "PlayifyUtility": "1.2.0",
-          "PlayifyUtility.Windows": "1.2.0"
+          "PlayifyUtility.Windows": "1.2.1"
         },
         "runtime": {
           "PlayifyUtility.Test.dll": {}
@@ -20,7 +20,7 @@
           "PlayifyUtility.dll": {}
         }
       },
-      "PlayifyUtility.Windows/1.2.0": {
+      "PlayifyUtility.Windows/1.2.1": {
         "runtime": {
           "PlayifyUtility.Windows.dll": {}
         }
@@ -38,7 +38,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "PlayifyUtility.Windows/1.2.0": {
+    "PlayifyUtility.Windows/1.2.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
