@@ -27,8 +27,7 @@ public static partial class WinCursor{
 	#endregion
 
 	#region Color
-	
-    public static Color GetColorUnderCursor()=>Screenshot.GetColorUnderCursor();
+    public static Color? GetColorUnderCursor()=>Screenshot.GetColorUnderCursor();
 	[Obsolete("Moved to Screenshot class")]
     public static Color GetColorAt(Point location)=>GetColorAt(location.X,location.Y);
 	[Obsolete("Moved to Screenshot class")]

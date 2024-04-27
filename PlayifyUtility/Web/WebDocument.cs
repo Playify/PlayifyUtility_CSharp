@@ -32,6 +32,8 @@ public class WebDocument{
 		for(var match=Variables.Match(Document);match.Success;match=match.NextMatch())
 			Console.WriteLine("[Web|Warning] Sending Document \""+_webSend.Session.Path+"\" without replacing Variable \""+match.Groups[1].Value+"\"");
 		
+		
+		
 		var bytes=Encoding.UTF8.GetBytes(Document.Replace('\x04','#'));
 		if(_webSend.Caching){
 			var hash=$"\"{WebUtils.GetHash(bytes)}\"";
@@ -63,14 +65,16 @@ public class WebDocument{
 		return this;
 	}
 
-	public WebDocument InsertFormatted(string key,string val)=>InsertRaw(key,Fix(val));
-	public WebDocument SetFormatted(string key,string val)=>SetRaw(key,Fix(val));
+	public WebDocument InsertFormatted(string key,string val)=>InsertRaw(key,Escape(val));
+	public WebDocument SetFormatted(string key,string val)=>SetRaw(key,Escape(val));
 
-	private static string Fix(string val)
+	private static string Escape(string val)
 		=>val.Replace('#','\x04')
 		     .Replace("&","&amp;")
 		     .Replace("<","&lt;")
-		     .Replace(">","&gt;");
+		     .Replace(">","&gt;")
+		     .Replace("'","&apos;")
+		     .Replace("\"","&quot;");
 
 	public WebDocument Replace(string key,string value){
 		Document=Document.Replace(key,value);

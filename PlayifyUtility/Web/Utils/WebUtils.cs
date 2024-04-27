@@ -105,6 +105,7 @@ public static class WebUtils{
 			case 101:return "Switching Protocols";
 			case 102:return "Processing";
 			case 200:return "OK";
+			case 204:return "No content";
 			case 206:return "Partial Content";
 			case 300:return "Multiple Choices";
 			case 301:return "Moved Permanently";
