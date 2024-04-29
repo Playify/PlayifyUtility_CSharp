@@ -54,7 +54,7 @@ public static partial class Screenshot{
 	#region Color
 	private static readonly Bitmap ScreenPixel=new(1,1,PixelFormat.Format32bppArgb);
 
-	public static Color GetColorUnderCursor()=>GetColorAt(WinCursor.CursorPos);
+	public static Color? GetColorUnderCursor()=>WinCursor.TryGetCursorPos(out var pos)?GetColorAt(pos):null;
 	public static Color GetColorAt(Point location)=>GetColorAt(location.X,location.Y);
 	public static Color GetColorAt(NativePoint location)=>GetColorAt(location.X,location.Y);
 

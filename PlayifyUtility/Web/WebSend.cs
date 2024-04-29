@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using JetBrains.Annotations;
+using PlayifyUtility.Jsons;
 using PlayifyUtility.Utils.Extensions;
 using PlayifyUtility.Web.Utils;
 
@@ -38,7 +39,9 @@ public class WebSend{
 		return Session.Type==RequestType.Head?System.IO.Stream.Null:output;
 	}
 
+	[Obsolete("Function was used for everything, but it should only be used for templates, switch to the new methods in this class, or use 'new WebDocument(session.Send)' instead")]
 	public WebDocument Document()=>new(this);
+	[Obsolete("Function was used for everything, but it should only be used for templates, switch to the new methods in this class, or use 'new WebDocument(session.Send)' instead")]
 	public WebDocument Document(string s)=>new WebDocument(this).Set(s);
 
 	#region Settings
@@ -137,7 +140,6 @@ public class WebSend{
 		}
 	}
 	public async Task Stream(Stream input,string fileName,bool download=false){
-		
 		if(download) Header("Content-Disposition","attachment; filename=\""+Path.GetFileName(fileName).Replace("\"","\\\"")+"\"");
 		var length=input.Length;
 		if(length>10*1024*1024){//bigger than 10MB => send ranges
@@ -192,6 +194,30 @@ public class WebSend{
 			await stream.FlushAsync();
 		}
 	}
+	
+	public async Task Data(byte[] data,string? mimeType="application/octet-stream",int code=200){
+		if(Caching){
+			var hash=$"\"{WebUtils.GetHash(data)}\"";
+			Header("Etag",hash);
+			var ifNoneMatch=Session.Headers.Get("If-None-Match");
+			if(ifNoneMatch=="*"||ifNoneMatch!=null&&ifNoneMatch.Contains(hash)){
+				await Begin(304);
+				return;
+			}
+		}
+		
+		if(mimeType!=null) Header("Content-Type",mimeType);
+		Header("Content-Length",data.Length.ToString());
+
+		var stream=await Begin(code);
+		if(stream==System.IO.Stream.Null) return;
+		await stream.WriteAsync(data,0,data.Length);
+		await stream.FlushAsync();
+	}
+	public async Task Text(string data,string? mimeType="text/plain; charset=UTF-8",int code=200)=>await Data(Encoding.UTF8.GetBytes(data),mimeType,code);
+	public async Task Html(string data,int code=200)=>await Text(data,"text/html; charset=UTF-8",code);
+	public async Task Json(string data,int code=200)=>await Text(data,"application/json; charset=UTF-8",code);
+	public async Task Json(Json data,int code=200)=>await Json(data.ToString(),code);
 
 
 	public async Task Error(int code){
@@ -208,5 +234,7 @@ public class WebSend{
 		Cache(true);
 		return Begin(301);
 	}
+
+	public Task NoContent()=>Begin(204);
 	#endregion
 }

@@ -18,6 +18,19 @@ public static class TypeExtensions{
 	#endregion
 
 	#region Strings
+
+	public static bool RemoveFromEndOf(this string end,ref string test,bool ignoreCase=false){
+		if(!test.EndsWith(end,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal)) return false;
+		test=test.Substring(0,test.Length-end.Length);
+		return true;
+	}
+	public static bool RemoveFromStartOf(this string start,ref string test,bool ignoreCase=false){
+		if(!test.StartsWith(start,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal)) return false;
+		test=test.Substring(start.Length);
+		return true;
+	}
+	
+
 	public static IEnumerable<string> Split(this string str,Predicate<char> controller){
 		var nextPiece=0;
 
