@@ -18,18 +18,36 @@ public static class TypeExtensions{
 	#endregion
 
 	#region Strings
-
 	public static bool RemoveFromEndOf(this string end,ref string test,bool ignoreCase=false){
 		if(!test.EndsWith(end,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal)) return false;
 		test=test.Substring(0,test.Length-end.Length);
 		return true;
 	}
+
 	public static bool RemoveFromStartOf(this string start,ref string test,bool ignoreCase=false){
 		if(!test.StartsWith(start,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal)) return false;
 		test=test.Substring(start.Length);
 		return true;
 	}
-	
+
+	public static string RemoveFromEnd(this string test,string end,bool ignoreCase=false)=>RemoveFromEnd(test,end,out _,ignoreCase);
+
+	public static string RemoveFromEnd(this string test,string end,out bool removed,bool ignoreCase=false){
+		// ReSharper disable once AssignmentInConditionalExpression
+		if(removed=test.EndsWith(end,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal))
+			return test.Substring(0,test.Length-end.Length);
+		return test;
+	}
+
+	public static string RemoveFromStart(this string test,string start,bool ignoreCase=false)=>RemoveFromStart(test,start,out _,ignoreCase);
+
+	public static string RemoveFromStart(this string test,string start,out bool removed,bool ignoreCase=false){
+		// ReSharper disable once AssignmentInConditionalExpression
+		if(removed=test.StartsWith(start,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal))
+			return test.Substring(start.Length);
+		return test;
+	}
+
 
 	public static IEnumerable<string> Split(this string str,Predicate<char> controller){
 		var nextPiece=0;
