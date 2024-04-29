@@ -43,9 +43,9 @@ public partial struct WinWindow{
 
 	public static WinWindow GetWindowUnderCursor(bool detectInvisibleForeground=false){
 		if(!WinCursor.TryGetCursorPos(out var cursor)) return Zero;
-		
+
 		if(!detectInvisibleForeground) return GetWindowAt(cursor.X,cursor.Y);
-		
+
 		var foreground=Foreground;
 		var rect=foreground.WindowRect;
 		if(rect.Left<=cursor.X&&cursor.Y<=rect.Right&&rect.Top<=cursor.Y&&cursor.Y<=rect.Bottom) return foreground;
@@ -57,6 +57,7 @@ public partial struct WinWindow{
 	public static WinWindow GetWindowAt(int x,int y)=>new WinControl(WindowFromPoint(new Point(x,y))).Window;
 
 	public static WinWindow FindWindow(string? windowName)=>FindWindow(null,windowName);
+
 	public static WinWindow FindAnyWindow(params string[] windowNames){
 		foreach(var windowName in windowNames)
 			if(FindWindow(windowName).NonZero(out var win))
@@ -65,6 +66,13 @@ public partial struct WinWindow{
 	}
 
 	public static WinWindow FindWindow(string? @class,string? windowName)=>new(FindWindow_Hwnd(@class,windowName));
+
+	public static WinWindow WaitForWindow(Func<WinWindow> func,TimeSpan timeout){
+		for(var millis=(int)timeout.TotalMilliseconds;;)
+			if(func().NonZero(out var win)) return win;
+			else if((millis-=10)>=0) Thread.Sleep(10);
+			else throw new OperationCanceledException("Didn't find window after time");
+	}
 
 	public static WinWindow DesktopWindow=>new(GetDesktopWindow());
 
@@ -145,7 +153,7 @@ public partial struct WinWindow{
 		get=>(GwlStyle&(GwlStyle.Caption|GwlStyle.Thickframe))==0;
 		set{
 			const GwlStyle style=GwlStyle.Caption|GwlStyle.Thickframe;
-			
+
 			var l=GwlStyle;
 			l=value?l&~style:l|style;
 			GwlStyle=l;
@@ -281,7 +289,7 @@ public partial struct WinWindow{
 
 
 	public PropMap Props=>new(this);
-	
+
 	public struct PropMap{
 		private readonly WinWindow _win;
 
@@ -317,7 +325,7 @@ public partial struct WinWindow{
 		AltMenu=0xF100,//KeyMenu  //Retrieves the window menu as a result of a keystroke. (Similar to pressing Alt to get the menu)
 		WindowsMenu=0xF130,//TaskList  //Activates the Start menu. (Similar to pressing Win to get the Windows Menu)
 	}
-	
+
 	public void SendSysCommand(SysCommand cmd,int lParam=0)=>SendMessage(WindowMessage.WM_SYSCOMMAND,(int)cmd,lParam);
 	public void PostSysCommand(SysCommand cmd,int lParam=0)=>PostMessage(WindowMessage.WM_SYSCOMMAND,(int)cmd,lParam);
 
@@ -327,9 +335,8 @@ public partial struct WinWindow{
 	public bool SetWindowPos(int hwndInsertAfter,NativeRect rect,uint uFlags)=>SetWindowPos(Hwnd,hwndInsertAfter,rect.X,rect.Y,rect.Width,rect.Height,uFlags);
 	public bool DestroyWindow()=>DestroyWindow(Hwnd);
 	#endregion
-	
-	#region Message
 
+	#region Message
 	[Obsolete("Use the overload with WindowMessage enum instead")]
 	public int SendMessage(int msg,int wParam,int lParam)=>SendMessage((WindowMessage)msg,wParam,lParam);
 
@@ -337,7 +344,8 @@ public partial struct WinWindow{
 	public int SendMessage(int msg,int wParam,IntPtr lParam)=>SendMessage((WindowMessage)msg,wParam,lParam);
 
 	[Obsolete("Use the overload with WindowMessage enum instead")]
-	public int SendMessage<T>(int msg,int wParam,ref T lParam) where T:struct=>SendMessage((WindowMessage)msg,wParam,ref lParam);
+	public int SendMessage<T>(int msg,int wParam,ref T lParam) where T : struct=>SendMessage((WindowMessage)msg,wParam,ref lParam);
+
 	[Obsolete("Use the overload with WindowMessage enum instead")]
 	public bool PostMessage(int msg,int wParam,int lParam)=>PostMessage((WindowMessage)msg,wParam,lParam);
 
@@ -345,25 +353,26 @@ public partial struct WinWindow{
 	public bool PostMessage(int msg,int wParam,IntPtr lParam)=>PostMessage((WindowMessage)msg,wParam,lParam);
 
 	[Obsolete("Use the overload with WindowMessage enum instead")]
-	public bool PostMessage<T>(int msg,int wParam,ref T lParam) where T:struct=>PostMessage((WindowMessage)msg,wParam,ref lParam);
+	public bool PostMessage<T>(int msg,int wParam,ref T lParam) where T : struct=>PostMessage((WindowMessage)msg,wParam,ref lParam);
 
-	
+
 	public void SendNull()=>SendMessage(WindowMessage.WM_NULL,0,0);
 	public void SendNull(int count)=>SendNull(count,TimeSpan.FromMilliseconds(100));
+
 	public void SendNull(int count,TimeSpan delay){
 		while(count-->0){
 			SendNull();
 			Thread.Sleep(delay);
 		}
 	}
-	
-	
+
+
 	public int SendMessage(WindowMessage msg,int wParam,int lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
 	public int SendMessage(WindowMessage msg,int wParam,IntPtr lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
 	public int SendMessage(WindowMessage msg,int wParam,StringBuilder lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
 	public int SendMessage(WindowMessage msg,int wParam,string lParam)=>SendMessage(Hwnd,msg,wParam,lParam);
-	
-	public int SendMessage<T>(WindowMessage msg,int wParam,ref T lParam) where T:struct{
+
+	public int SendMessage<T>(WindowMessage msg,int wParam,ref T lParam) where T : struct{
 		var ptr=Marshal.AllocHGlobal(Marshal.SizeOf<T>());
 		try{
 			Marshal.StructureToPtr(lParam,ptr,false);
@@ -374,10 +383,11 @@ public partial struct WinWindow{
 			Marshal.FreeHGlobal(ptr);
 		}
 	}
+
 	public bool PostMessage(WindowMessage msg,int wParam,int lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
 	public bool PostMessage(WindowMessage msg,int wParam,IntPtr lParam)=>PostMessage(Hwnd,msg,wParam,lParam);
-	
-	public bool PostMessage<T>(WindowMessage msg,int wParam,ref T lParam) where T:struct{
+
+	public bool PostMessage<T>(WindowMessage msg,int wParam,ref T lParam) where T : struct{
 		var ptr=Marshal.AllocHGlobal(Marshal.SizeOf<T>());
 		try{
 			Marshal.StructureToPtr(lParam,ptr,false);
@@ -392,16 +402,17 @@ public partial struct WinWindow{
 
 	#region Operators
 	public WinControl AsControl=>new(Hwnd);
-	
+
 	public override bool Equals(object? obj)=>obj is WinWindow other&&this==other;
 	public override int GetHashCode()=>Hwnd.GetHashCode();
-	public static bool operator!=(WinWindow left,WinWindow right)=>!(left==right);
-	public static bool operator==(WinWindow left,WinWindow right)=>left.Hwnd==right.Hwnd;
+	public static bool operator !=(WinWindow left,WinWindow right)=>!(left==right);
+	public static bool operator ==(WinWindow left,WinWindow right)=>left.Hwnd==right.Hwnd;
 	public static implicit operator bool(WinWindow win)=>win.Hwnd!=IntPtr.Zero;
 	public static implicit operator IntPtr(WinWindow win)=>win.Hwnd;
-	
-	
+
+
 	public static readonly WinWindow Zero;
 	public bool NonZero(out WinWindow win)=>win=this;
 	#endregion
+
 }

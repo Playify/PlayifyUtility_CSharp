@@ -10,16 +10,14 @@ namespace PlayifyUtility.Utils.Extensions;
 
 [PublicAPI]
 public static class TypeExtensions{
+
 	#region Numbers
 	public static bool HasFlags(this int t,int flags)=>(t&flags)==flags;
 	public static int WithFlags(this int t,int flags,bool? set)=>set.TryGet(out var setBool)?WithFlags(t,flags,setBool):t^flags;
 	public static int WithFlags(this int t,int flags,bool set)=>set?t|flags:t&~flags;
-	
 	#endregion
 
 	#region Strings
-	
-
 	public static IEnumerable<string> Split(this string str,Predicate<char> controller){
 		var nextPiece=0;
 
@@ -38,8 +36,6 @@ public static class TypeExtensions{
 	#endregion
 
 	#region Collections
-	
-
 	public static void Deconstruct<TKey,TValue>(this KeyValuePair<TKey,TValue> pair,out TKey key,out TValue value){
 		key=pair.Key;
 		value=pair.Value;
@@ -63,12 +59,12 @@ public static class TypeExtensions{
 		return true;
 	}
 
-	public static bool Remove<TKey,TValue>(this Dictionary<TKey,TValue> t,TKey key,[MaybeNullWhen(false)]out TValue value) where TKey:notnull{
+	public static bool Remove<TKey,TValue>(this Dictionary<TKey,TValue> t,TKey key,[MaybeNullWhen(false)]out TValue value) where TKey : notnull{
 		return t.TryGetValue(key,out value)&&t.Remove(key);
 	}
 
-	public static bool TryAdd<TKey,TValue>(this Dictionary<TKey,TValue> t,TKey key,TValue value) where TKey:notnull{
-		if(!t.ContainsKey(key)) return false;
+	public static bool TryAdd<TKey,TValue>(this Dictionary<TKey,TValue> t,TKey key,TValue value) where TKey : notnull{
+		if(t.ContainsKey(key)) return false;
 		t.Add(key,value);
 		return true;
 	}
@@ -82,11 +78,11 @@ public static class TypeExtensions{
 		result=t.GetValues(key)!;
 		return result!=null!;
 	}
+
 	public static IDisposable AddTemporary<T>(this ISet<T> set,T t)=>new TemporarySetValue<T>(set,t);
 	#endregion
 
 	#region Streams
-	
 	public static async Task<byte[]> ReadFullyAsync(this Stream stream,int length,CancellationToken cancel=new()){
 		var bytes=new byte[length];
 		await stream.ReadFullyAsync(bytes,cancel);
@@ -105,9 +101,8 @@ public static class TypeExtensions{
 	#endregion
 
 	#region Process
-	
 	public static Task WaitForExitAsync(this Process process,
-	                                    CancellationToken cancellationToken=default){
+		CancellationToken cancellationToken=default){
 		if(process.HasExited) return Task.CompletedTask;
 
 		process.EnableRaisingEvents=true;
@@ -121,8 +116,6 @@ public static class TypeExtensions{
 	#endregion
 
 	#region C# internal
-	
-
 	public static TaskAwaiter GetAwaiter(this WaitHandle handle)=>handle.ToTask().GetAwaiter();
 
 	public static Task ToTask(this WaitHandle handle){
@@ -131,19 +124,20 @@ public static class TypeExtensions{
 		lock(localVariableInitLock){
 			RegisteredWaitHandle callbackHandle=null!;
 			callbackHandle=ThreadPool.RegisterWaitForSingleObject(handle,
-			                                                      (_,_)=>{
-				                                                      tcs.SetResult();
-				                                                      // ReSharper disable once AccessToModifiedClosure
-				                                                      lock(localVariableInitLock) callbackHandle.Unregister(null);
-			                                                      },
-			                                                      null,
-			                                                      Timeout.Infinite,
-			                                                      true);
+				(_,_)=>{
+					tcs.SetResult();
+					// ReSharper disable once AccessToModifiedClosure
+					lock(localVariableInitLock) callbackHandle.Unregister(null);
+				},
+				null,
+				Timeout.Infinite,
+				true);
 		}
 
 		return tcs.Task;
 	}
-	
+
 	public static void RunClassConstructor(this Type type)=>RuntimeHelpers.RunClassConstructor(type.TypeHandle);
 	#endregion
+
 }

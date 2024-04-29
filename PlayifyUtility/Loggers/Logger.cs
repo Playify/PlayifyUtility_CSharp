@@ -100,8 +100,10 @@ public class Logger:TextWriter{
 	public void Warning(string msg)=>Log(LogLevel.Warning,msg);
 	public void Error(string msg)=>Log(LogLevel.Error,msg);
 	public void Critical(string msg)=>Log(LogLevel.Critical,msg);
+	public void Error(Exception msg)=>Log(LogLevel.Error,msg.ToString());
+	public void Critical(Exception msg)=>Log(LogLevel.Critical,msg.ToString());
 
-	/**Only prints if Debugger.IsAttached*/
+	/// Only prints if Debugger.IsAttached
 	public void Debugging(string msg){
 		if(Debugger.IsAttached) Debug(msg);
 	}
