@@ -30,7 +30,7 @@ public static partial class WinSystem{
 	}
 
 	#region Input Idle
-	private static DateTime InputIdleTime=>DateTime.Now-InputIdleDuration;
+	public static DateTime InputIdleSince=>DateTime.Now-InputIdleDuration;
 	public static TimeSpan InputIdleDuration{
 		get{
 			var lastInput=new LastInputInfo();
@@ -46,21 +46,22 @@ public static partial class WinSystem{
 		var ret=ShellExecute(IntPtr.Zero,"open",path,null,null,1);
 		if(ret<32) throw new Win32Exception();
 	}
-	
+
 	public static void OpenExplorerAndSelect(string file)=>OpenFolderAndSelect(Path.GetDirectoryName(file)??file,file);
 	public static void OpenFolderAndSelect(string folder,params string[] select)=>OpenFolderAndSelect(folder,(IEnumerable<string>)select);
+
 	public static void OpenFolderAndSelect(string folder,IEnumerable<string> select){
 		SHParseDisplayName(folder,IntPtr.Zero,out var nativeFolder,0,out _);
 		if(nativeFolder==IntPtr.Zero) throw new DirectoryNotFoundException("Error opening Folder \""+folder+"\"");
 
 		var files=select
-		            .Select(file=>{
-			            SHParseDisplayName(Path.Combine(folder,file),IntPtr.Zero,out var nativeFile,0,out _);
-			            return nativeFile;
-		            })
-		            .Where(file=>file!=IntPtr.Zero)
-		            .DefaultIfEmpty(IntPtr.Zero)
-		            .ToArray();
+		          .Select(file=>{
+			          SHParseDisplayName(Path.Combine(folder,file),IntPtr.Zero,out var nativeFile,0,out _);
+			          return nativeFile;
+		          })
+		          .Where(file=>file!=IntPtr.Zero)
+		          .DefaultIfEmpty(IntPtr.Zero)
+		          .ToArray();
 
 		var ret=SHOpenFolderAndSelectItems(nativeFolder,(uint)files.Length,files,0);
 
@@ -68,8 +69,9 @@ public static partial class WinSystem{
 		foreach(var ptr in files)
 			if(ptr!=IntPtr.Zero)
 				Marshal.FreeCoTaskMem(ptr);
-		
+
 		if(ret!=0) throw new Win32Exception(ret);
 	}
 	#endregion
+
 }
