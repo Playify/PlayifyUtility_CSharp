@@ -5,32 +5,33 @@ namespace PlayifyUtility.Utils.Extensions;
 
 [PublicAPI]
 public static class EnumerableExtensions{
+
 	#region Enumerator as Enumerable
 	public static IEnumerator<T> GetEnumerator<T>(this IEnumerator<T> e)=>e;
 	public static IEnumerator GetEnumerator(this IEnumerator e)=>e;
 	#endregion
 
 	#region Null
-	public static T? FirstOrNull<T>(this IEnumerable<T> source) where T:struct{
+	public static T? FirstOrNull<T>(this IEnumerable<T> source) where T : struct{
 		if(source is IList<T>{Count: >0} list) return list[0];
 		using var enumerator=source.GetEnumerator();
 		return enumerator.MoveNext()?enumerator.Current:null;
 	}
 
-	public static T? FirstOrNull<T>(this IEnumerable<T> source,Func<T,bool> predicate) where T:struct{
+	public static T? FirstOrNull<T>(this IEnumerable<T> source,Func<T,bool> predicate) where T : struct{
 		foreach(var t in source)
 			if(predicate(t))
 				return t;
 		return null;
 	}
 
-	public static T? LastOrNull<T>(this IEnumerable<T> source) where T:struct=>source.AsNullable().LastOrDefault();
-	public static T? LastOrNull<T>(this IEnumerable<T> source,Func<T,bool> predicate) where T:struct=>source.Where(predicate).AsNullable().LastOrDefault();
-	public static IEnumerable<T?> AsNullable<T>(this IEnumerable<T> source) where T:struct=>source.Select(s=>(T?)s);
+	public static T? LastOrNull<T>(this IEnumerable<T> source) where T : struct=>source.AsNullable().LastOrDefault();
+	public static T? LastOrNull<T>(this IEnumerable<T> source,Func<T,bool> predicate) where T : struct=>source.Where(predicate).AsNullable().LastOrDefault();
+	public static IEnumerable<T?> AsNullable<T>(this IEnumerable<T> source) where T : struct=>source.Select(s=>(T?)s);
 
-	public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source) where T:class=>source.Where(t=>t!=null)!;
+	public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source) where T : class=>source.Where(t=>t!=null)!;
 
-	public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source) where T:struct{
+	public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source) where T : struct{
 		foreach(var nullable in source)
 			if(nullable.TryGet(out var t))
 				yield return t;
@@ -102,11 +103,28 @@ public static class EnumerableExtensions{
 	public static string ConcatString<T>(this IEnumerable<T> source)=>string.Concat(source);
 
 	public static Dictionary<TKey,TValue> ToDictionary<TKey,TValue>(this IEnumerable<(TKey key,TValue value)> source)
-	where TKey:notnull
+		where TKey : notnull
 		=>source.ToDictionary(t=>t.key,t=>t.value);
+
+	public static Dictionary<TKey,TValue> ToDictionary<TKey,TValue>(this IEnumerable<KeyValuePair<TKey,TValue>> source)
+		where TKey : notnull
+		=>source.ToDictionary(t=>t.Key,t=>t.Value);
+
 	public static IEnumerable<(TKey key,TValue value)> ToTuples<TKey,TValue>(this IEnumerable<KeyValuePair<TKey,TValue>> source)
-	where TKey:notnull
+		where TKey : notnull
 		=>source.Select(pair=>(pair.Key,pair.Value));
+
+	public static IEnumerable<TResult> Select<TKey,TValue,TResult>(this IEnumerable<KeyValuePair<TKey,TValue>> source,Func<TKey,TValue,TResult> selector)=>
+		source.Select(pair=>selector(pair.Key,pair.Value));
+
+	public static IEnumerable<TKey> SelectKey<TKey,TValue>(this IEnumerable<KeyValuePair<TKey,TValue>> source)=>
+		source.Select(pair=>pair.Key);
+
+	public static IEnumerable<TValue> SelectValue<TKey,TValue>(this IEnumerable<KeyValuePair<TKey,TValue>> source)=>source.Select(pair=>pair.Value);
+
+	public static IEnumerable<KeyValuePair<TKey,TValue>> Where<TKey,TValue>(this IEnumerable<KeyValuePair<TKey,TValue>> source,Func<TKey,TValue,bool> selector)=>
+		source.Where(pair=>selector(pair.Key,pair.Value));
+
 
 	public static Task<Task<T>> WhenAny<T>(this IEnumerable<Task<T>> source)=>Task.WhenAny(source);
 	public static Task<Task> WhenAny(this IEnumerable<Task> source)=>Task.WhenAny(source);
@@ -117,4 +135,5 @@ public static class EnumerableExtensions{
 	public static ValueTask<T[]> WhenAll<T>(this IEnumerable<ValueTask<T>> source)=>TaskUtils.WhenAll(source);
 	public static ValueTask WhenAll(this IEnumerable<ValueTask> source)=>TaskUtils.WhenAll(source);
 	#endregion
+
 }
