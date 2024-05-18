@@ -1,8 +1,9 @@
 using System.Collections;
-using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace PlayifyUtility.HelperClasses;
 
+[PublicAPI]
 public class InsertionOrderDictionary<TKey,TValue>:IDictionary<TKey,TValue>{
 	private readonly Dictionary<TKey,TValue> _dictionary;
 	private readonly List<TKey> _order=new();

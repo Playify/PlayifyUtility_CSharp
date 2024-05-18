@@ -28,8 +28,6 @@ public static partial class WinConsole{
 		return SetConsoleMode(iStdOut,outConsoleMode);
 	}
 
-	//TODO keyboard interaction should probably be a separate method
-
 
 	/**Can be hidden using Win+Alt+M and shown using Win+Alt+N*/
 	public static void CreateConsole()=>CreateHideAbleConsole(false);
