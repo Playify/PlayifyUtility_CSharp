@@ -29,6 +29,7 @@ public abstract class WebBase{
 			listener.Start();
 			while(true){
 				var client=await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+				client.NoDelay=true;
 				lock(_clients) _clients.Add(client);
 				_=HandleConnection(client).ContinueWith(_=>{
 					lock(_clients) _clients.Remove(client);

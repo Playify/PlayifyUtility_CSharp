@@ -214,9 +214,10 @@ public class WebSend{
 		await stream.WriteAsync(data,0,data.Length);
 		await stream.FlushAsync();
 	}
-	public async Task Text(string data,string? mimeType="text/plain; charset=UTF-8",int code=200)=>await Data(Encoding.UTF8.GetBytes(data),mimeType,code);
-	public async Task Html(string data,int code=200)=>await Text(data,"text/html; charset=UTF-8",code);
-	public async Task Json(string data,int code=200)=>await Text(data,"application/json; charset=UTF-8",code);
+	public async Task Text(string data,string? mimeType,int code=200)=>await Data(Encoding.UTF8.GetBytes(data),mimeType,code);
+	public async Task Text(string data,int code=200)=>await Text(data,"text/plain; charset=UTF-8",code);
+	public async Task Html([LanguageInjection(InjectedLanguage.HTML)]string data,int code=200)=>await Text(data,"text/html; charset=UTF-8",code);
+	public async Task Json([LanguageInjection(InjectedLanguage.JSON)]string data,int code=200)=>await Text(data,"application/json; charset=UTF-8",code);
 	public async Task Json(Json data,int code=200)=>await Json(data.ToString(),code);
 
 
