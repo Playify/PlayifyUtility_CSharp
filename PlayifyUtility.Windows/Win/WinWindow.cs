@@ -30,6 +30,16 @@ public partial struct WinWindow{
 		return list;
 	}
 
+	public static List<WinWindow> GetProcessWindows(Process process){
+		var list=new List<WinWindow>();
+		foreach(ProcessThread processThread in process.Threads)
+			EnumThreadWindows(processThread.Id,(hwnd,_)=>{
+				list.Add(new WinWindow(hwnd));
+				return true;
+			},0);
+		return list;
+	}
+
 	public static WinWindow FindWindow(Func<WinWindow,bool> predicate){
 		WinWindow result=default;
 		EnumWindows((hwnd,_)=>{
@@ -38,6 +48,20 @@ public partial struct WinWindow{
 			result=window;
 			return false;
 		},0);
+		return result;
+	}
+
+	public static WinWindow FindWindow(Process process,Func<WinWindow,bool> predicate){
+		WinWindow result=default;
+		foreach(ProcessThread processThread in process.Threads)
+			if(!EnumThreadWindows(processThread.Id,(hwnd,_)=>{
+				   var window=new WinWindow(hwnd);
+				   if(!predicate(window)) return true;
+				   result=window;
+				   return false;
+			   },0)){
+				return result;
+			}
 		return result;
 	}
 

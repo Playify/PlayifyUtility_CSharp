@@ -11,6 +11,9 @@ public readonly partial struct WinWindow{
 	private static extern bool EnumWindows(EnumWindowFunc lpEnumFunc,int lParam);
 
 	[DllImport("user32.dll")]
+	private static extern bool EnumThreadWindows(int dwThreadId,EnumWindowFunc lpEnumFunc,int lParam);
+
+	[DllImport("user32.dll")]
 	private static extern bool IsWindowVisible(IntPtr hWnd);
 
 	[DllImport("user32.dll")]
@@ -55,15 +58,19 @@ public readonly partial struct WinWindow{
 
 	[DllImport("user32.dll",CharSet=CharSet.Auto)]
 	private static extern int SendMessage(IntPtr hWnd,WindowMessage msg,int wParam,int lParam);
+
 	[DllImport("user32.dll",CharSet=CharSet.Auto)]
 	private static extern int SendMessage(IntPtr hWnd,WindowMessage msg,int wParam,IntPtr lParam);
+
 	[DllImport("user32.dll",CharSet=CharSet.Auto)]
 	private static extern int SendMessage(IntPtr hWnd,WindowMessage msg,int wParam,StringBuilder lParam);
+
 	[DllImport("user32.dll",CharSet=CharSet.Auto)]
 	private static extern int SendMessage(IntPtr hWnd,WindowMessage msg,int wParam,string lParam);
 
 	[DllImport("user32.dll",SetLastError=true,CharSet=CharSet.Auto)]
 	private static extern bool PostMessage(IntPtr hWnd,WindowMessage msg,int wParam,int lParam);
+
 	[DllImport("user32.dll",SetLastError=true,CharSet=CharSet.Auto)]
 	private static extern bool PostMessage(IntPtr hWnd,WindowMessage msg,int wParam,IntPtr lParam);
 
@@ -104,8 +111,8 @@ public readonly partial struct WinWindow{
 
 	[DllImport("user32.dll")]
 	private static extern bool DestroyWindow(IntPtr hwnd);
-	
-	
+
+
 	[DllImport("dwmapi.dll")]
 	private static extern int DwmSetWindowAttribute(IntPtr hwnd,int attr,ref int attrValue,int attrSize);
 

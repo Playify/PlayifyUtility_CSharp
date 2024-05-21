@@ -1,8 +1,4 @@
-﻿using PlayifyUtility.Loggers;
-using PlayifyUtility.Windows.Features.Interact;
-using PlayifyUtility.Windows.Win;
-
-namespace PlayifyUtils.Test;
+﻿namespace PlayifyUtils.Test;
 
 internal static class Program{
 	[STAThread]
@@ -10,8 +6,7 @@ internal static class Program{
 
 		//WinConsole.CreateHiddenConsole();
 		Thread.CurrentThread.Name="Main";
-		
-		WinSystem.OpenFile("C:/");
+
 
 		/*foreach(ConsoleColor color in Enum.GetValues(typeof(ConsoleColor))){
 			Console.ForegroundColor=color;

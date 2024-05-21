@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 namespace PlayifyUtility.HelperClasses;
 
 [PublicAPI]
-public class InsertionOrderDictionary<TKey,TValue>:IDictionary<TKey,TValue>{
+public class InsertionOrderDictionary<TKey,TValue>:IDictionary<TKey,TValue> where TKey : notnull{
 	private readonly Dictionary<TKey,TValue> _dictionary;
 	private readonly List<TKey> _order=new();
 
@@ -49,7 +49,11 @@ public class InsertionOrderDictionary<TKey,TValue>:IDictionary<TKey,TValue>{
 	#endregion
 
 	#region Get
+#if NET48
 	public bool TryGetValue(TKey key,out TValue value)=>_dictionary.TryGetValue(key,out value);
+#else
+	public bool TryGetValue(TKey key,[MaybeNullWhen(false)]out TValue value)=>_dictionary.TryGetValue(key,out value);
+#endif
 
 	public TValue this[TKey property]{
 		get=>_dictionary[property];
@@ -82,12 +86,11 @@ public class InsertionOrderDictionary<TKey,TValue>:IDictionary<TKey,TValue>{
 	public bool IsReadOnly=>false;
 	public ICollection<TKey> Keys=>_order.AsReadOnly();
 	public ICollection<TValue> Values=>_order.Select(k=>_dictionary[k]).ToList().AsReadOnly();
-	
+
 	public bool EqualsIgnoreOrder(InsertionOrderDictionary<TKey,TValue>? other)=>other!=null&&other._dictionary.Count==_dictionary.Count&&!other._dictionary.Except(_dictionary).Any();
 	public override bool Equals(object? obj)=>obj is InsertionOrderDictionary<TKey,TValue> other&&other._order.SequenceEqual(_order)&&EqualsIgnoreOrder(other);
 	public override int GetHashCode()=>_dictionary.GetHashCode()^(13*_order.GetHashCode());
 	#endregion
-
 
 
 }

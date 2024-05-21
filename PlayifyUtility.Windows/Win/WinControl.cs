@@ -17,20 +17,23 @@ public readonly partial struct WinControl{
 	public WinControl(IntPtr hwnd)=>Hwnd=hwnd;
 	public override string ToString()=>$"{nameof(WinControl)}(0x{Hwnd:x})";
 
-	public static WinControl GetFocused(){
-		var result=GetFocus();
-		if(result!=IntPtr.Zero) return new WinControl(result);
+	public static WinControl Focused{
+		get{
+			var result=GetFocus();
+			if(result!=IntPtr.Zero) return new WinControl(result);
 
-		var window=GetForegroundWindow();
-		if(window==IntPtr.Zero) return new WinControl(IntPtr.Zero);
+			var window=GetForegroundWindow();
+			if(window==IntPtr.Zero) return new WinControl(IntPtr.Zero);
 
-		var tid=GetWindowThreadProcessId(window,out _);
-		var currentThreadId=GetCurrentThreadId();
-		if(!AttachThreadInput(currentThreadId,tid,true)) return new WinControl(IntPtr.Zero);
+			var tid=GetWindowThreadProcessId(window,out _);
+			var currentThreadId=GetCurrentThreadId();
+			if(!AttachThreadInput(currentThreadId,tid,true)) return new WinControl(IntPtr.Zero);
 
-		result=GetFocus();
-		AttachThreadInput(currentThreadId,tid,false);
-		return new WinControl(result);
+			result=GetFocus();
+			AttachThreadInput(currentThreadId,tid,false);
+			return new WinControl(result);
+		}
+		set=>value.Focus();
 	}
 
 	public static Dictionary<string,WinControl> GetControls(IntPtr window){
@@ -58,6 +61,14 @@ public readonly partial struct WinControl{
 			var window=AsWindow;
 			window.Enabled=value;
 		}
+	}
+
+	public void Focus(){
+		var foregroundThreadId=GetWindowThreadProcessId(Window.Hwnd,out _);
+		var currentThreadId=GetCurrentThreadId();
+		AttachThreadInput(currentThreadId,foregroundThreadId,true);
+		SetFocus(Hwnd);
+		AttachThreadInput(currentThreadId,foregroundThreadId,false);
 	}
 
 	#region Info
@@ -99,6 +110,14 @@ public readonly partial struct WinControl{
 	}
 
 	public NativeRect Rect=>AsWindow.WindowRect;
+
+	public NativeRect ClientRect{
+		get{
+			GetClientRect(Hwnd,out var rect);
+			MapWindowPoints(Hwnd,ParentHwnd,ref rect,2);
+			return rect;
+		}
+	}
 	#endregion
 
 	#region Interact

@@ -1,9 +1,13 @@
 using System.Runtime.InteropServices;
 using System.Text;
+using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Win;
 
 public readonly partial struct WinControl{
+	[DllImport("user32.dll")]
+	private static extern IntPtr SetFocus(IntPtr hWnd);
+
 	[DllImport("user32.dll")]
 	private static extern bool AttachThreadInput(uint idAttach,int idAttachTo,bool fAttach);
 
@@ -21,7 +25,14 @@ public readonly partial struct WinControl{
 	private static extern IntPtr GetForegroundWindow();
 
 
+	[DllImport("user32.dll")]
+	internal static extern bool GetClientRect(IntPtr hWnd,out NativeRect lpRect);
+
+	[DllImport("user32.dll")]
+	internal static extern bool MapWindowPoints(IntPtr from,IntPtr to,ref NativeRect lpRect,int two);
+
 	private delegate bool EnumChildWindowFunc(IntPtr hwnd,int lParam);
+
 	[DllImport("user32.dll")]
 	private static extern bool EnumChildWindows(IntPtr hwndParent,EnumChildWindowFunc lpEnumFunc,int lParam);
 
