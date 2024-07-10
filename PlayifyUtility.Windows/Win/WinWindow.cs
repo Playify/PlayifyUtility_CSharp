@@ -264,11 +264,19 @@ public partial struct WinWindow{
 	}
 
 	public void SetDarkMode(bool? dark){
-		var val=dark??WinSystem.DarkMode?1:0;
+		var val=dark??WinSystem.DarkMode;
 		//https://gist.github.com/valinet/6afb524426635df9dbe2a9035701fcf4
-		if(DwmSetWindowAttribute(Hwnd,19,ref val,4)!=0)//check if 19 works
-			DwmSetWindowAttribute(Hwnd,20,ref val,4);//if not, then use 20
+		if(DwmSetWindowAttribute(Hwnd,19,ref val,4)==0) return;//check if 19 works
+		var err=DwmSetWindowAttribute(Hwnd,20,ref val,4);//if not, then use 20
+		if(err!=0) throw new Win32Exception(err);
 	}
+
+	public void SetTransitionsForceDisabled(bool disable){
+		var err=DwmSetWindowAttribute(Hwnd,3,ref disable,4);
+		if(err!=0) throw new Win32Exception(err);
+	}
+
+	public void Redraw()=>RedrawWindow(Hwnd,0,0,0x581);//Frame|UpdateNow|Invalidate|AllChildren
 	#endregion
 
 	#region Info
@@ -335,6 +343,7 @@ public partial struct WinWindow{
 
 	#region Commands
 	public Dictionary<string,WinControl> GetControls()=>WinControl.GetControls(Hwnd);
+	public WinControl? GetControl(string classNn)=>WinControl.GetControl(Hwnd,classNn);
 
 
 	public enum SysCommand{
@@ -431,12 +440,11 @@ public partial struct WinWindow{
 	public override int GetHashCode()=>Hwnd.GetHashCode();
 	public static bool operator !=(WinWindow left,WinWindow right)=>!(left==right);
 	public static bool operator ==(WinWindow left,WinWindow right)=>left.Hwnd==right.Hwnd;
-	public static implicit operator bool(WinWindow win)=>win.Hwnd!=IntPtr.Zero;
 	public static implicit operator IntPtr(WinWindow win)=>win.Hwnd;
 
 
 	public static readonly WinWindow Zero;
-	public bool NonZero(out WinWindow win)=>win=this;
+	public bool NonZero(out WinWindow win)=>(win=this)!=Zero;
 	#endregion
 
 }

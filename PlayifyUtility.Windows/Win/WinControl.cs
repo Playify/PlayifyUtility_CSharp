@@ -55,6 +55,29 @@ public readonly partial struct WinControl{
 		return controls;
 	}
 
+	public static WinControl? GetControl(IntPtr window,string classNn){
+		var counter=new Dictionary<string,int>();
+		WinControl? con=null;
+		EnumChildWindows(window,
+			(child,_)=>{
+				var control=new WinControl(child);
+				var controlClass=control.Class??"";
+
+				if(!classNn.StartsWith(controlClass)) return true;
+
+				var count=counter.TryGetValue(controlClass,out var already)?already+1:1;
+
+				if(classNn==controlClass+count){
+					con=control;
+					return false;
+				}
+				counter[controlClass]=count;
+				return true;
+			},
+			0);
+		return con;
+	}
+
 	public bool Enabled{
 		get=>AsWindow.Enabled;
 		set{
@@ -253,12 +276,11 @@ public readonly partial struct WinControl{
 	public override int GetHashCode()=>Hwnd.GetHashCode();
 	public static bool operator !=(WinControl left,WinControl right)=>!(left==right);
 	public static bool operator ==(WinControl left,WinControl right)=>left.Hwnd==right.Hwnd;
-	public static implicit operator bool(WinControl win)=>win.Hwnd!=IntPtr.Zero;
 	public static implicit operator IntPtr(WinControl win)=>win.Hwnd;
 
 
 	public static readonly WinControl Zero;
-	public bool NonZero(out WinControl win)=>win=this;
+	public bool NonZero(out WinControl win)=>(win=this)!=Zero;
 	#endregion
 
 }

@@ -22,7 +22,7 @@ public static class GlobalClipboardHook{
 	public static Task<Image> GetNextImage(TimeSpan? timeout=null,CancellationToken cancel=default)=>GetNext(Clipboard.GetImage,timeout,cancel);
 	public static Task<string> GetNextString(TimeSpan? timeout=null,CancellationToken cancel=default)=>GetNext(Clipboard.GetText,timeout,cancel);
 
-	public static async Task<T> GetNext<T>(Func<T> getter,TimeSpan? timeout=null,CancellationToken cancel=default){
+	public static async Task<T> GetNext<T>(Func<T?> getter,TimeSpan? timeout=null,CancellationToken cancel=default) where T : notnull{
 		if(timeout.TryGet(out var timeSpan)){
 			using var timer=new CancellationTokenSource(timeSpan);
 			using var cts=CancellationTokenSource.CreateLinkedTokenSource(timer.Token,cancel);
@@ -33,7 +33,9 @@ public static class GlobalClipboardHook{
 
 		Action action=null!;
 		action=()=>{
-			tcs.TrySetResult(getter());
+			var result=getter();
+			if(result==null) return;
+			tcs.TrySetResult(result);
 			OnClipboardChange-=action;
 		};
 
@@ -47,32 +49,42 @@ public static class GlobalClipboardHook{
 		return await tcs.Task;
 	}
 
-	public static Task<Image?> CopyImage(CancellationToken cancel=default)=>CopyImage(true,cancel);
-	public static Task<Image?> CopyImage(bool revert,CancellationToken cancel=default)=>Copy(Clipboard.GetImage,revert,cancel);
-	public static Task<string?> CopyString(CancellationToken cancel=default)=>CopyString(true,cancel);
-	public static Task<string?> CopyString(bool revert,CancellationToken cancel=default)=>Copy(()=>Clipboard.ContainsText()?Clipboard.GetText():null,revert,cancel);
+	public static Task<Image> CopyImage(CancellationToken cancel=default)=>CopyImage(true,cancel);
+	public static Task<Image> CopyImage(bool revert,CancellationToken cancel=default)=>Copy(Clipboard.GetImage,revert,cancel);
+	public static Task<string> CopyString(CancellationToken cancel=default)=>CopyString(true,cancel);
 
-	public static async Task<T> Copy<T>(Func<T> getter,bool revert=true,CancellationToken cancel=default){
-		await ClipboardHookControl.UiThread.JumpAsync();//Clipboard can only be edited on MainThread
+	public static Task<string> CopyString(bool revert,CancellationToken cancel=default)
+		=>Copy(()=>Clipboard.ContainsText()?Clipboard.GetText():null,revert,cancel);
 
-		var text=Clipboard.ContainsText()?Clipboard.GetText():null;
-		var image=text!=null&&Clipboard.ContainsImage()?Clipboard.GetImage():null;//otherwise would copy image of excel sheet
-		var fileDropList=Clipboard.ContainsFileDropList()?Clipboard.GetFileDropList():null;
+	public static async Task<T> Copy<T>(Func<T?> getter,bool revert=true,CancellationToken cancel=default) where T : notnull{
+		if(revert){
+			var (
+				text,
+				image,
+				fileDropList
+				)=await ClipboardHookControl.UiThread.InvokeAsync(
+					  ()=>(
+						      Clipboard.ContainsText()?Clipboard.GetText():null,
+						      !Clipboard.ContainsText()&&Clipboard.ContainsImage()?Clipboard.GetImage():null,//otherwise would copy image of excel shee
+						      Clipboard.ContainsFileDropList()?Clipboard.GetFileDropList():null
+					      ));
+			var result=await Copy(getter,false,cancel);
+
+			await ClipboardHookControl.UiThread.InvokeAsync(()=>{
+				//Can only restore if successfully copied, therefore no try finally block
+				if(text!=null) Clipboard.SetText(text);
+				else if(image!=null) Clipboard.SetImage(image);
+				else if(fileDropList!=null) Clipboard.SetFileDropList(fileDropList);
+				else Clipboard.Clear();
+			});
+
+			return result;
+		}
 
 		var task=GetNext(getter,TimeSpan.FromSeconds(10),cancel);
-
 		new Send().Hide().Combo(ModifierKeys.Control,Keys.C).SendNow();//needs to be hidden to not activate other hotkeys
-
 		var s=await task;
 
-		await ClipboardHookControl.UiThread.JumpAsync();
-		if(!revert) return s;
-		
-		//Can only restore if successfully copied, therefore no try finally block
-		if(text!=null) Clipboard.SetText(text);
-		else if(image!=null) Clipboard.SetImage(image);
-		else if(fileDropList!=null) Clipboard.SetFileDropList(fileDropList);
-		else Clipboard.Clear();
 		return s;
 	}
 }

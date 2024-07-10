@@ -1,5 +1,8 @@
 using System.Collections;
 using JetBrains.Annotations;
+#if !NET48
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace PlayifyUtility.HelperClasses;
 

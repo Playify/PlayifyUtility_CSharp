@@ -48,6 +48,9 @@ public class UiThread{
 
 	public T Invoke<T>(Func<T> a)=>_ctx.Invoke(a);
 
+	public Task InvokeAsync(Action a)=>_ctx.InvokeAsync(a);
+	public Task<T> InvokeAsync<T>(Func<T> a)=>_ctx.InvokeAsync(a);
+
 	public ContextJumper JumpAsync()=>_ctx.JumpAsync();
 
 
@@ -62,6 +65,7 @@ public class UiThread{
 		});
 		thread.Join();
 	}
+
 	public void BeginExit(Action? a=null){
 		BeginInvoke(()=>{
 			a?.Invoke();

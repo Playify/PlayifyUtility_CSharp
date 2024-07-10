@@ -114,7 +114,11 @@ public readonly partial struct WinWindow{
 
 
 	[DllImport("dwmapi.dll")]
-	private static extern int DwmSetWindowAttribute(IntPtr hwnd,int attr,ref int attrValue,int attrSize);
+	private static extern int DwmSetWindowAttribute(IntPtr hwnd,int attr,ref bool attrValue,int four);
+
+	[DllImport("user32.dll")]
+	private static extern bool RedrawWindow(IntPtr hWnd,int lprcUpdate,int hrgnUpdate,uint flags);
+
 
 	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
 	private static extern int GetProp(IntPtr hwnd,string s);

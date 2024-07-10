@@ -1,19 +1,15 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
-using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
 [PublicAPI]
 public sealed class GlobalEventHook:IDisposable{
+
 	#region Events
 	// https://learn.microsoft.com/en-us/windows/win32/winauto/event-constants
 	public static IDisposable Hook(uint evt,WindowEventHandler handler)=>Hook(evt,evt,handler);
 	public static IDisposable Hook(uint min,uint max,WindowEventHandler handler)=>Hook(_defaultThread??=UiThread.Create(nameof(GlobalEventHook)),min,max,handler);
-	public static IDisposable HookCurrent(uint evt,WindowEventHandler handler)=>HookCurrent(evt,evt,handler);
-	public static IDisposable HookCurrent(uint min,uint max,WindowEventHandler handler)=>new GlobalEventHook(
-		UiThread.Current??throw new ThreadStateException("Current thread is not an UiThread"),
-		min,max,handler);
 	public static IDisposable Hook(UiThread thread,uint evt,WindowEventHandler handler)=>Hook(evt,evt,handler);
 	public static IDisposable Hook(UiThread thread,uint min,uint max,WindowEventHandler handler)=>new GlobalEventHook(thread,min,max,handler);
 	#endregion
@@ -33,7 +29,7 @@ public sealed class GlobalEventHook:IDisposable{
 		_thread=thread;
 
 		_proc=(_,@event,hwnd,idObject,idChild,idEventThread,eventTime)=>
-		handler(new WindowEvent(@event,hwnd,idObject,idChild,idEventThread,eventTime));
+			handler(new WindowEvent(@event,hwnd,idObject,idChild,idEventThread,eventTime));
 		_hook=thread.Invoke(()=>SetWinEventHook(min,max,IntPtr.Zero,_proc,0,0,2));
 	}
 
@@ -58,9 +54,10 @@ public sealed class GlobalEventHook:IDisposable{
 
 	[DllImport("user32.dll")]
 	private static extern IntPtr SetWinEventHook(uint evtMin,uint evtMax,IntPtr mod,WinEventProc proc,
-	                                             int idProcess,int idThread,uint dwFlags);
+		int idProcess,int idThread,uint dwFlags);
 
 	[DllImport("user32.dll")]
 	private static extern IntPtr UnhookWinEvent(IntPtr hWinEventHook);
 	#endregion
+
 }
