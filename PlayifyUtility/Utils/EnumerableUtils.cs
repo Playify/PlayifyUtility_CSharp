@@ -4,8 +4,7 @@ using PlayifyUtility.Utils.Extensions;
 namespace PlayifyUtility.Utils;
 
 [PublicAPI]
-[Obsolete("Use EnumerableUtils instead")]
-public static class Sequences{
+public static class EnumerableUtils{
 	public static IEnumerable<long> Primes(){
 		yield return 2;
 		yield return 3;
