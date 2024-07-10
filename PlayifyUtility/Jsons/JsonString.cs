@@ -23,7 +23,7 @@ public class JsonString:Json{
 
 	public new static JsonString? ParseOrNull(TextReader r){
 		if(NextPeek(r)!='"') return null;
-		return UnescapeOrNull(r).NotNull(out var s)?new JsonString(s):null;
+		return UnescapeOrNull(r) is{} s?new JsonString(s):null;
 	}
 	#endregion
 
@@ -48,8 +48,8 @@ public class JsonString:Json{
 
 	public override int GetHashCode()=>Value.GetHashCode();
 
-	public static bool operator==(JsonString l,JsonString r)=>l.Value==r.Value;
-	public static bool operator!=(JsonString l,JsonString r)=>!(l==r);
+	public static bool operator ==(JsonString l,JsonString r)=>l.Value==r.Value;
+	public static bool operator !=(JsonString l,JsonString r)=>!(l==r);
 	public static implicit operator string(JsonString j)=>j.Value;
 	public static implicit operator JsonString(string b)=>new(b);
 	#endregion
@@ -75,7 +75,7 @@ public class JsonString:Json{
 		while(match.Success){
 			str.Append(s,from,match.Index-from);
 			from=match.Index+match.Length;
-			foreach(var c in match.Value) str.Append("\\u").Append($"{(int) c:X4}");
+			foreach(var c in match.Value) str.Append("\\u").Append($"{(int)c:X4}");
 			match=match.NextMatch();
 		}
 		str.Append(s,from,s.Length-from);
@@ -133,11 +133,11 @@ public class JsonString:Json{
 									    >='a' and <='f'=>(c-'a')+10,
 									    >='A' and <='F'=>(c-'A')+10,
 									    //-1=>throw new EndOfStreamException(),
-									    _=>(int?) null,
+									    _=>(int?)null,
 								    }).TryGet(out var hex)) return null;
 							cp|=hex;
 						}
-						if(cp is >=55296 and <=57343)str.Append(char.ToString((char)cp));//Surrogate codepoint value
+						if(cp is >=55296 and <=57343) str.Append(char.ToString((char)cp));//Surrogate codepoint value
 						else str.Append(char.ConvertFromUtf32(cp));
 						break;
 					default:return null;
@@ -152,9 +152,10 @@ public class JsonString:Json{
 						escape=true;
 						break;
 					case var c:
-						str.Append((char) c);
+						str.Append((char)c);
 						break;
 				}
 	}
 	#endregion
+
 }

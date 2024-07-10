@@ -1,5 +1,4 @@
 using System.Text;
-using PlayifyUtility.Utils.Extensions;
 
 namespace PlayifyUtility.Streams;
 
@@ -29,7 +28,7 @@ public class WebStream2:IWebStream{
 	}
 
 	public async Task SkipAsync(int count){
-		while((_list.First?.Value).NotNull(out var link)){
+		while(_list.First?.Value is{} link){
 			var available=link.End-link.Start;
 			if(available<=count){
 				count-=available;
@@ -63,7 +62,7 @@ public class WebStream2:IWebStream{
 	public async Task<int> ReadAsync(byte[] buffer,int offset,int length){
 		var result=0;
 		while(length!=0)
-			if((_list.First?.Value).NotNull(out var link)){
+			if(_list.First?.Value is{} link){
 				var available=link.End-link.Start;
 				if(available<=length){
 					Array.Copy(link.Bytes,link.Start,buffer,offset,available);

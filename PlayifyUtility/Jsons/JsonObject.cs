@@ -44,7 +44,7 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 			}
 		}
 		while(true){
-			if(!JsonString.UnescapeOrNull(r).NotNull(out var key)) return null;
+			if(JsonString.UnescapeOrNull(r) is not{} key) return null;
 			if(NextRead(r)!=':') return null;
 			if(!Json.TryParse(r,out var child)) return null;
 			o[key]=child;
@@ -114,8 +114,7 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 	#region Accessor
 	public override int Count=>_order.Count;
 
-	[AllowNull]
-	public override Json this[string property]{
+	[AllowNull]public override Json this[string property]{
 		get=>_dictionary[property];
 		set{
 			_order.Remove(property);
@@ -138,4 +137,5 @@ public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 		return true;
 	}
 	#endregion
+
 }

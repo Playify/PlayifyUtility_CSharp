@@ -1,6 +1,7 @@
 namespace PlayifyUtility.Utils.Extensions;
 
 public static partial class AsyncExtensions{
+
 	#region Then
 	public static async Task Then(this Task task,Action a){
 		await task;
@@ -37,8 +38,8 @@ public static partial class AsyncExtensions{
 	public static Task Catch(this Task task,Action<Exception> onError)=>Catch<Exception>(task,onError);
 
 	public static Task<T> Catch<T>(this Task<T> task,Func<Exception,T> onError)=>Catch<T,Exception>(task,onError);
-	
-	public static async Task Catch<TException>(this Task task,Action<TException> onError) where TException:Exception{
+
+	public static async Task Catch<TException>(this Task task,Action<TException> onError) where TException : Exception{
 		try{
 			await task;
 		} catch(TException e){
@@ -46,7 +47,7 @@ public static partial class AsyncExtensions{
 		}
 	}
 
-	public static async Task<T> Catch<T,TException>(this Task<T> task,Func<TException,T> onError) where TException:Exception{
+	public static async Task<T> Catch<T,TException>(this Task<T> task,Func<TException,T> onError) where TException : Exception{
 		try{
 			return await task;
 		} catch(TException e){
@@ -59,8 +60,8 @@ public static partial class AsyncExtensions{
 	public static Task CatchAsync(this Task task,Func<Exception,Task> onError)=>CatchAsync<Exception>(task,onError);
 
 	public static Task<T> CatchAsync<T>(this Task<T> task,Func<Exception,Task<T>> onError)=>CatchAsync<T,Exception>(task,onError);
-	
-	public static async Task CatchAsync<TException>(this Task task,Func<TException,Task> onError) where TException:Exception{
+
+	public static async Task CatchAsync<TException>(this Task task,Func<TException,Task> onError) where TException : Exception{
 		try{
 			await task;
 		} catch(TException e){
@@ -68,7 +69,7 @@ public static partial class AsyncExtensions{
 		}
 	}
 
-	public static async Task<T> CatchAsync<T,TException>(this Task<T> task,Func<TException,Task<T>> onError) where TException:Exception{
+	public static async Task<T> CatchAsync<T,TException>(this Task<T> task,Func<TException,Task<T>> onError) where TException : Exception{
 		try{
 			return await task;
 		} catch(TException e){
@@ -103,6 +104,7 @@ public static partial class AsyncExtensions{
 			await onFinally();
 		}
 	}
+
 	public static async Task<T> FinallyAsync<T>(this Task<T> task,Func<Task> onFinally){
 		try{
 			return await task;
@@ -117,10 +119,11 @@ public static partial class AsyncExtensions{
 		try{
 			await task.ConfigureAwait(false);
 		} catch(Exception e){
-			if(@catch.NotNull(out var c)) c(e);
+			if(@catch!=null) @catch(e);
 			else Console.Error.WriteLine(e);
 		}
 	}
+
 	public static void Background(this ValueTask task)=>Background(task.IsCompleted?Task.CompletedTask:task.AsTask());
 	public static void Background<T>(this ValueTask<T> task)=>Background(task.IsCompleted?Task.CompletedTask:task.AsTask());
 	#endregion
@@ -138,4 +141,5 @@ public static partial class AsyncExtensions{
 		return result;
 	}
 	#endregion
+
 }
