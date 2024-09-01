@@ -8,21 +8,27 @@
     ".NETCoreApp,Version=v6.0": {
       "PlayifyUtility.Test/1.0.0": {
         "dependencies": {
-          "PlayifyUtility": "1.3.0",
+          "PlayifyUtility": "1.3.1",
           "PlayifyUtility.Windows": "1.3.0"
         },
         "runtime": {
           "PlayifyUtility.Test.dll": {}
         }
       },
-      "PlayifyUtility/1.3.0": {
+      "PlayifyUtility/1.3.1": {
         "runtime": {
-          "PlayifyUtility.dll": {}
+          "PlayifyUtility.dll": {
+            "assemblyVersion": "1.3.1",
+            "fileVersion": "1.3.2.0"
+          }
         }
       },
       "PlayifyUtility.Windows/1.3.0": {
         "runtime": {
-          "PlayifyUtility.Windows.dll": {}
+          "PlayifyUtility.Windows.dll": {
+            "assemblyVersion": "1.3.0",
+            "fileVersion": "1.3.0.0"
+          }
         }
       }
     }
@@ -33,7 +39,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "PlayifyUtility/1.3.0": {
+    "PlayifyUtility/1.3.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

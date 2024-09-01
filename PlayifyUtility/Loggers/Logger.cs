@@ -118,6 +118,7 @@ public class Logger:TextWriter{
 		                                                                                                       :FileLogger.Create(appName,logName)).SetAnsi(ansi));
 
 	public Logger WithoutColor()=>this is AnsiLessLogger?this:new AnsiLessLogger(this);
+	public Logger WithDate(string format="yyyy-MM-dd HH:mm:ss",IFormatProvider? provider=null)=>new DateLogger(this,format,provider);
 	public Logger WithName(params string[] names)=>names.Length==0?this:new NamedLogger(this,names);
 	public Logger WithName<T>()=>new NamedLogger(this,typeof(T).Name);
 
@@ -129,5 +130,4 @@ public class Logger:TextWriter{
 
 	private Logger SetAnsi(bool b)=>b?this:WithoutColor();
 	#endregion
-
 }
