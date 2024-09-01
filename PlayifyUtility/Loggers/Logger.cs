@@ -8,10 +8,17 @@ namespace PlayifyUtility.Loggers;
 [PublicAPI]
 public class Logger:TextWriter{
 	private readonly TextWriter _writer;
+	private static ThreadLocal<Logger?> _find=new();
 
 	public Logger():this(Console.Out){}
-	public Logger(TextWriter writer)=>_writer=writer;
 	public Logger(Logger writer)=>_writer=writer;
+	public Logger(TextWriter writer){
+		_writer=writer;
+		if(_writer is Logger)return;
+		_find.Value=null;
+		_writer.Flush();//if logger is wrapped somehow, find it, remove all wrapping, and use the underlying logger
+		_writer=_find.Value??writer;
+	}
 
 	#region TextWriter
 	public override Encoding Encoding=>_writer.Encoding;
@@ -20,7 +27,11 @@ public class Logger:TextWriter{
 #if !NETFRAMEWORK
 	public override ValueTask DisposeAsync()=>_writer.DisposeAsync();
 #endif
-	public override void Flush()=>_writer.Flush();
+	public override void Flush(){
+		_find.Value??=this;
+		_writer.Flush();
+	}
+
 	public override Task FlushAsync()=>_writer.FlushAsync();
 	public override void Write(char value)=>_writer.Write(value);
 	public override void Write(char[] buffer,int index,int count)=>_writer.Write(buffer,index,count);
