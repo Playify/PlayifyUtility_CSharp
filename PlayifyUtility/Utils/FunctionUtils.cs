@@ -6,6 +6,10 @@ namespace PlayifyUtility.Utils;
 
 [PublicAPI]
 public static class FunctionUtils{
+	public static bool TryGetAlways<T>(T value,[MaybeNullWhen(false)]out T t){
+		t=value;
+		return true;
+	}
 	public static bool TryGetNever<T>([MaybeNullWhen(false)]out T t){
 		t=default;
 		return false;
@@ -21,8 +25,17 @@ public static class FunctionUtils{
 		while(true) Thread.Sleep(Timeout.Infinite);
 		// ReSharper disable once FunctionNeverReturns
 	}
+	[DoesNotReturn]
+	public static void SleepForever(CancellationToken cancel){
+		while(true){
+			cancel.ThrowIfCancellationRequested();
+			cancel.WaitHandle.WaitOne();
+		}
+		// ReSharper disable once FunctionNeverReturns
+	}
 
 	public static Task DelayForever()=>Task.Delay(Timeout.Infinite);
+	public static Task DelayForever(CancellationToken cancel)=>Task.Delay(Timeout.Infinite,cancel);
 
 
 	public static void Retry(Action func,int tries=3,TimeSpan? delay=null){

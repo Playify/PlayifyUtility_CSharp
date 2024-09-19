@@ -24,6 +24,6 @@ public static class VariableExtensions{
 		return t.HasValue;
 	}
 
-	//Helper function if the user wants to write 'new StructType(args).Value=true;'
+	[Obsolete("Write '_=variable with{Value=true};' instead")]
 	public static ref T AsInlineEditable<T>(this T t) where T : struct=>ref new ReferenceTo<T>(t).Value;
 }
