@@ -50,14 +50,16 @@ public static class EnumerableExtensions{
 		return first.Zip(second,(f,s,i)=>(f,s,i));
 	}
 
-	public static IEnumerable<(TFirst a,TSecond b)> Zip<TFirst,TSecond>(this IEnumerable<TFirst> first,
+#if NETFRAMEWORK
+	public static IEnumerable<(TFirst First,TSecond Second)> Zip<TFirst,TSecond>(this IEnumerable<TFirst> first,
 		IEnumerable<TSecond> second)
 		=>first.Zip(second,(f,s)=>(f,s));
+#endif
 
 	public static IEnumerable<TResult> Zip<TFirst,TSecond,TResult>(this IEnumerable<TFirst> first,
 		IEnumerable<TSecond> second,
 		Func<TFirst,TSecond,int,TResult> resultSelector){
-		return first.Zip(second).Select((tuple,i)=>resultSelector(tuple.a,tuple.b,i));
+		return first.Zip(second).Select((tuple,i)=>resultSelector(tuple.First,tuple.Second,i));
 	}
 
 	public static IEnumerable<TResult> TryParseAll<TSource,TResult>(this IEnumerable<TSource> source,
