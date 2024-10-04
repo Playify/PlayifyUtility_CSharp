@@ -1,6 +1,6 @@
-namespace PlayifyUtility.HelperClasses;
+namespace PlayifyUtility.HelperClasses.Dispose;
 
-public sealed class CallbackAsDisposable:IDisposable{
+public readonly struct CallbackAsDisposable:IDisposable{
 	private readonly Action _dispose;
 
 	public CallbackAsDisposable(Action dispose)=>_dispose=dispose;
