@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace PlayifyUtility.HelperClasses;
+namespace PlayifyUtility.HelperClasses.Dispose;
 
 [PublicAPI]
 public sealed class TemporarySetValue<T>:IDisposable{

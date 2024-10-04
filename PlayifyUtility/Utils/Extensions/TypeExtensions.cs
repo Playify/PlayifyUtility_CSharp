@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using PlayifyUtility.HelperClasses;
+using PlayifyUtility.HelperClasses.Dispose;
 
 namespace PlayifyUtility.Utils.Extensions;
 
@@ -146,6 +147,18 @@ public static class TypeExtensions{
 	}
 	#endregion
 
+	#region SemaphoreS
+
+	private static SemaphoreSlimReleaser ReleaseLater(this SemaphoreSlim semaphore)=>new(semaphore);
+	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore){semaphore.WaitAsync();return semaphore.ReleaseLater();}
+	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore,CancellationToken cancel){semaphore.WaitAsync(cancel);return semaphore.ReleaseLater();}
+	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore,TimeSpan timeout,CancellationToken cancel=default){semaphore.WaitAsync(timeout,cancel);return semaphore.ReleaseLater();}
+	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore){semaphore.Wait();return semaphore.ReleaseLater();}
+	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore,CancellationToken cancel){semaphore.Wait(cancel);return semaphore.ReleaseLater();}
+	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore,TimeSpan timeout,CancellationToken cancel=default){semaphore.Wait(timeout,cancel);return semaphore.ReleaseLater();}
+
+	#endregion
+
 	#region C# internal
 	public static TaskAwaiter GetAwaiter(this WaitHandle handle)=>handle.ToTask().GetAwaiter();
 
@@ -167,6 +180,8 @@ public static class TypeExtensions{
 
 		return tcs.Task;
 	}
+
+
 
 	public static void RunClassConstructor(this Type type)=>RuntimeHelpers.RunClassConstructor(type.TypeHandle);
 	#endregion
