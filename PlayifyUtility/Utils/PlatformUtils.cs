@@ -9,7 +9,7 @@ using JetBrains.Annotations;
 namespace PlayifyUtility.Utils;
 
 [PublicAPI]
-public class PlatformUtils{
+public static partial class PlatformUtils{
 	public static bool IsAndroid()=>Type.GetType("Android.Content.Context")!=null;
 	public static bool IsLinux()=>RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 	public static bool IsWindows()=>RuntimeInformation.IsOSPlatform(OSPlatform.Windows);

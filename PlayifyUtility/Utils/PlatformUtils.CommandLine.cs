@@ -1,13 +1,9 @@
 using System.Text;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 
 namespace PlayifyUtility.Utils;
 
-[PublicAPI]
-public class CommandLineUtils{
-	public static readonly Regex CommentRegex=new(@"\/\/.*|\/\*(?s:.*?)\*\/");
-
+public static partial class PlatformUtils{
 	public static List<string> SplitArguments(string commandLine,bool removeHashComments=true){
 		var builder=new StringBuilder(commandLine.Length);
 		var list=new List<string>();
@@ -91,7 +87,8 @@ public class CommandLineUtils{
 		}
 		return arguments.ToString();
 	}
-
+	
+	
 	public static string MakeSafeFileName(string s,char replacement='#')
 		=>Path.GetInvalidFileNameChars()
 		      .Aggregate(s,(curr,c)=>curr.Replace(c,replacement));

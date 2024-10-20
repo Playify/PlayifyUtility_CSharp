@@ -1,10 +1,11 @@
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Dynamic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
-using PlayifyUtility.HelperClasses;
 using PlayifyUtility.HelperClasses.Dispose;
 
 namespace PlayifyUtility.Utils.Extensions;
@@ -19,7 +20,24 @@ public static class TypeExtensions{
 	#endregion
 
 	#region Strings
-	public static bool RemoveFromEndOf(this string end,ref string test,bool ignoreCase=false){
+    public static bool TryRemoveFromEndOf(this string s,string end,out string result,bool ignoreCase=false){
+	    if(!s.EndsWith(end,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal)){
+		    result=s;
+		    return false;
+	    }
+		result=s.Substring(0,s.Length-end.Length);
+		return true;
+	}
+
+	public static bool TryRemoveFromStartOf(this string s,string start,out string result,bool ignoreCase=false){
+		if(!s.StartsWith(start,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal)){
+			result=s;
+			return false;
+		}
+		result=s.Substring(start.Length);
+		return true;
+	}
+    public static bool RemoveFromEndOf(this string end,ref string test,bool ignoreCase=false){
 		if(!test.EndsWith(end,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal)) return false;
 		test=test.Substring(0,test.Length-end.Length);
 		return true;
@@ -31,8 +49,10 @@ public static class TypeExtensions{
 		return true;
 	}
 
+	[Pure]
 	public static string RemoveFromEnd(this string test,string end,bool ignoreCase=false)=>RemoveFromEnd(test,end,out _,ignoreCase);
 
+	[Pure]
 	public static string RemoveFromEnd(this string test,string end,out bool removed,bool ignoreCase=false){
 		// ReSharper disable once AssignmentInConditionalExpression
 		if(removed=test.EndsWith(end,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal))
@@ -40,8 +60,10 @@ public static class TypeExtensions{
 		return test;
 	}
 
+	[Pure]
 	public static string RemoveFromStart(this string test,string start,bool ignoreCase=false)=>RemoveFromStart(test,start,out _,ignoreCase);
 
+	[Pure]
 	public static string RemoveFromStart(this string test,string start,out bool removed,bool ignoreCase=false){
 		// ReSharper disable once AssignmentInConditionalExpression
 		if(removed=test.StartsWith(start,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal))
@@ -91,16 +113,6 @@ public static class TypeExtensions{
 		return true;
 	}
 
-	public static bool Remove<TKey,TValue>(this Dictionary<TKey,TValue> t,TKey key,[MaybeNullWhen(false)]out TValue value) where TKey : notnull{
-		return t.TryGetValue(key,out value)&&t.Remove(key);
-	}
-
-	public static bool TryAdd<TKey,TValue>(this Dictionary<TKey,TValue> t,TKey key,TValue value) where TKey : notnull{
-		if(t.ContainsKey(key)) return false;
-		t.Add(key,value);
-		return true;
-	}
-
 	public static bool TryGetValue(this NameValueCollection t,string key,[MaybeNullWhen(false)]out string result){
 		result=t.Get(key)!;
 		return result!=null!;
@@ -147,7 +159,7 @@ public static class TypeExtensions{
 	}
 	#endregion
 
-	#region SemaphoreS
+	#region Semaphores
 
 	private static SemaphoreSlimReleaser ReleaseLater(this SemaphoreSlim semaphore)=>new(semaphore);
 	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore){semaphore.WaitAsync();return semaphore.ReleaseLater();}
@@ -159,7 +171,7 @@ public static class TypeExtensions{
 
 	#endregion
 
-	#region C# internal
+	#region WaitHandle
 	public static TaskAwaiter GetAwaiter(this WaitHandle handle)=>handle.ToTask().GetAwaiter();
 
 	public static Task ToTask(this WaitHandle handle){
@@ -180,10 +192,23 @@ public static class TypeExtensions{
 
 		return tcs.Task;
 	}
-
-
-
-	public static void RunClassConstructor(this Type type)=>RuntimeHelpers.RunClassConstructor(type.TypeHandle);
 	#endregion
 
+	#region Reflection
+	public static void RunClassConstructor(this Type type)=>RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+
+	
+
+	public static IList<Type>? GetGenericTypeArguments(this InvokeMemberBinder binder)
+		=>System.Type.GetType("Mono.Runtime")!=null
+			  ?binder
+			   .GetType()
+			   .GetField("typeArguments",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Static)
+			   ?.GetValue(binder) as IList<Type>
+			  :binder
+			   .GetType()
+			   .GetInterface("Microsoft.CSharp.RuntimeBinder.ICSharpInvokeOrInvokeMemberBinder")
+			   ?.GetProperty("TypeArguments")
+			   ?.GetValue(binder,null) as IList<Type>;
+	#endregion
 }

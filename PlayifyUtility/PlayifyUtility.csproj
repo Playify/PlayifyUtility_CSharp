@@ -48,5 +48,8 @@
         <Compile Update="Utils\Extensions\AsyncExtensions.Then.cs">
           <DependentUpon>AsyncExtensions.cs</DependentUpon>
         </Compile>
+        <Compile Update="Utils\PlatformUtils.CommandLine.cs">
+          <DependentUpon>PlatformUtils.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>

@@ -97,6 +97,12 @@ public static class EnumerableUtils{
 		while(count-->0)
 			yield return selector(arg);
 	}
+	public static IEnumerable<T> NextFromLast<T>(T start,Func<T,T> nextFromLast){
+		yield return start;
+		while(true)
+			yield return start=nextFromLast(start);
+		// ReSharper disable once IteratorNeverReturns
+	}
 
 
 	public static IEnumerable<T> Concat<T>(params IEnumerable<T>[] sources)=>sources.SelectMany();

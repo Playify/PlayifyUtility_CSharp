@@ -40,6 +40,78 @@ public static class EnumerableExtensions{
 
 	#region Select and Zip
 	public static IEnumerable<T> SelectMany<T>(this IEnumerable<IEnumerable<T>> source)=>source.SelectMany(enumerable=>enumerable);
+
+	public static IEnumerable<TTo> SelectMany<TFrom,TTo>(this IEnumerable<TFrom> source,Func<TFrom,(TTo,TTo)> selector){
+		foreach(var from in source.Select(selector)){
+			yield return from.Item1;
+			yield return from.Item2;
+		}
+	}
+
+	public static IEnumerable<TTo> SelectMany<TFrom,TTo>(this IEnumerable<TFrom> source,Func<TFrom,(TTo,TTo,TTo)> selector){
+		foreach(var from in source.Select(selector)){
+			yield return from.Item1;
+			yield return from.Item2;
+			yield return from.Item3;
+		}
+	}
+
+	public static IEnumerable<TTo> SelectMany<TFrom,TTo>(this IEnumerable<TFrom> source,Func<TFrom,(TTo,TTo,TTo,TTo)> selector){
+		foreach(var from in source.Select(selector)){
+			yield return from.Item1;
+			yield return from.Item2;
+			yield return from.Item3;
+			yield return from.Item4;
+		}
+	}
+
+	public static IEnumerable<TTo> SelectMany<TFrom,TTo>(this IEnumerable<TFrom> source,Func<TFrom,(TTo,TTo,TTo,TTo,TTo)> selector){
+		foreach(var from in source.Select(selector)){
+			yield return from.Item1;
+			yield return from.Item2;
+			yield return from.Item3;
+			yield return from.Item4;
+			yield return from.Item5;
+		}
+	}
+
+	public static IEnumerable<TTo> SelectMany<TFrom,TTo>(this IEnumerable<TFrom> source,Func<TFrom,(TTo,TTo,TTo,TTo,TTo,TTo)> selector){
+		foreach(var from in source.Select(selector)){
+			yield return from.Item1;
+			yield return from.Item2;
+			yield return from.Item3;
+			yield return from.Item4;
+			yield return from.Item5;
+			yield return from.Item6;
+		}
+	}
+
+	public static IEnumerable<TTo> SelectMany<TFrom,TTo>(this IEnumerable<TFrom> source,Func<TFrom,(TTo,TTo,TTo,TTo,TTo,TTo,TTo)> selector){
+		foreach(var from in source.Select(selector)){
+			yield return from.Item1;
+			yield return from.Item2;
+			yield return from.Item3;
+			yield return from.Item4;
+			yield return from.Item5;
+			yield return from.Item6;
+			yield return from.Item7;
+		}
+	}
+
+	public static IEnumerable<TTo> SelectMany<TFrom,TTo>(this IEnumerable<TFrom> source,Func<TFrom,(TTo,TTo,TTo,TTo,TTo,TTo,TTo,TTo)> selector){
+		foreach(var from in source.Select(selector)){
+			yield return from.Item1;
+			yield return from.Item2;
+			yield return from.Item3;
+			yield return from.Item4;
+			yield return from.Item5;
+			yield return from.Item6;
+			yield return from.Item7;
+			yield return from.Item8;
+		}
+	}
+
+
 	public static IOrderedEnumerable<T> Ordered<T>(this IEnumerable<T> source)=>source.OrderBy(t=>t);
 	public static IOrderedEnumerable<T> OrderedDescending<T>(this IEnumerable<T> source)=>source.OrderByDescending(t=>t);
 
@@ -56,13 +128,40 @@ public static class EnumerableExtensions{
 		=>first.Zip(second,(f,s)=>(f,s));
 #endif
 
+	public static void Enumerate<T>(this IEnumerable<T> e){
+		foreach(var _ in e){
+			//do nothing
+		}
+	}
+
+	[MustUseReturnValue]
+	public static IEnumerable<T> IsEmpty<T>(IEnumerable<T> e,out bool b){
+		if(e is ICollection collection){
+			b=collection.Count==0;
+			return e;
+		}
+		var enumerator=e.GetEnumerator();
+		if(!enumerator.MoveNext()){
+			b=true;
+			return[];
+		}
+		b=false;
+		return YieldAll();
+
+		IEnumerable<T> YieldAll(){
+			do yield return enumerator.Current;
+			while(enumerator.MoveNext());
+			enumerator.Dispose();
+		}
+	}
+
 	public static IEnumerable<TResult> Zip<TFirst,TSecond,TResult>(this IEnumerable<TFirst> first,
 		IEnumerable<TSecond> second,
 		Func<TFirst,TSecond,int,TResult> resultSelector){
 		return first.Zip(second).Select((tuple,i)=>resultSelector(tuple.First,tuple.Second,i));
 	}
 
-	public static IEnumerable<TResult> TryParseAll<TSource,TResult>(this IEnumerable<TSource> source,
+	public static IEnumerable<TResult> TryGetAll<TSource,TResult>(this IEnumerable<TSource> source,
 		TryParseFunction<TSource,TResult> tryParse){
 		foreach(var e in source)
 			if(tryParse(e,out var result))
@@ -102,6 +201,12 @@ public static class EnumerableExtensions{
 
 	#region Type specific
 	public static string Join<T>(this IEnumerable<T> source,string sep)=>string.Join(sep,source);
+	public static string Join<T>(this IEnumerable<T> source,char sep)
+#if NETFRAMEWORK
+		=>string.Join(char.ToString(sep),source);
+#else
+		=>string.Join(sep,source);
+#endif
 	public static string ConcatString<T>(this IEnumerable<T> source)=>string.Concat(source);
 
 	public static Dictionary<TKey,TValue> ToDictionary<TKey,TValue>(this IEnumerable<(TKey key,TValue value)> source)
