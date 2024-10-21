@@ -169,7 +169,7 @@ public static class EnumerableExtensions{
 	}
 
 	public static IEnumerable<TResult> TryGetAll<TSource,TResult>(this IEnumerable<TSource> source,
-		IDictionary<TSource,TResult> dictionary){
+		IReadOnlyDictionary<TSource,TResult> dictionary){
 		foreach(var e in source)
 			if(dictionary.TryGetValue(e,out var result))
 				yield return result;
