@@ -220,13 +220,16 @@ public class Send{
 		return Key((Keys)(num1&255),down);
 	}
 
-	public Send Text(string s){
+	public Send Text(string s,int wait=-1){
 		s=s.Replace("\r\n","\n");
 		if(s=="") return this;
 
 		var mods=Mods;
 
-		foreach(var c in s) Char(c);
+		foreach(var c in s){
+			Char(c);
+			Wait(wait);
+		}
 
 		Mods=mods;
 

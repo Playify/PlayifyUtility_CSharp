@@ -11,11 +11,11 @@ namespace PlayifyUtility.Windows.Win;
 
 [SuppressMessage("ReSharper","CommentTypo")]
 [PublicAPI]
-public readonly partial struct WinControl{
+public readonly partial struct WinControl:IEquatable<WinControl>{
 	public readonly IntPtr Hwnd;
 
 	public WinControl(IntPtr hwnd)=>Hwnd=hwnd;
-	public override string ToString()=>$"{nameof(WinControl)}(0x{Hwnd:x})";
+	public override string ToString()=>$"{nameof(WinControl)}(0x{Hwnd.ToString("x")})";
 
 	public static WinControl Focused{
 		get{
@@ -272,6 +272,7 @@ public readonly partial struct WinControl{
 	#region Operators
 	public WinWindow AsWindow=>new(Hwnd);
 
+	public bool Equals(WinControl other)=>Hwnd.Equals(other.Hwnd);
 	public override bool Equals(object? obj)=>obj is WinControl other&&this==other;
 	public override int GetHashCode()=>Hwnd.GetHashCode();
 	public static bool operator !=(WinControl left,WinControl right)=>!(left==right);

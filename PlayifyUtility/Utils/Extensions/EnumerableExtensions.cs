@@ -162,9 +162,16 @@ public static class EnumerableExtensions{
 	}
 
 	public static IEnumerable<TResult> TryGetAll<TSource,TResult>(this IEnumerable<TSource> source,
-		TryParseFunction<TSource,TResult> tryParse){
+		TryParseFunction<TSource,TResult> tryGet){
 		foreach(var e in source)
-			if(tryParse(e,out var result))
+			if(tryGet(e,out var result))
+				yield return result;
+	}
+
+	public static IEnumerable<TResult> TryGetAll<TSource,TResult>(this IEnumerable<TSource> source,
+		IDictionary<TSource,TResult> dictionary){
+		foreach(var e in source)
+			if(dictionary.TryGetValue(e,out var result))
 				yield return result;
 	}
 	#endregion
