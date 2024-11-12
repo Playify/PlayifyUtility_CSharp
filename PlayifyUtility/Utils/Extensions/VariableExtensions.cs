@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
-using PlayifyUtility.HelperClasses;
 
 namespace PlayifyUtility.Utils.Extensions;
 
@@ -24,6 +23,12 @@ public static class VariableExtensions{
 		return t.HasValue;
 	}
 
-	[Obsolete("Write '_=variable with{Value=true};' instead")]
-	public static ref T AsInlineEditable<T>(this T t) where T : struct=>ref new ReferenceTo<T>(t).Value;
+	public static bool TryCast<T,TResult>(this T? t,out TResult result) where TResult:T{
+		if(t is TResult res){
+			result=res;
+			return true;
+		}
+		result=default!;
+		return false;
+	}
 }

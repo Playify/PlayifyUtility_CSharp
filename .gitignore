@@ -1,4 +1,7 @@
 obj
+_run
+.idea
+*.user
 *.nupkg
 *.snupkg
 .idea
