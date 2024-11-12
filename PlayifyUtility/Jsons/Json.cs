@@ -8,6 +8,7 @@ namespace PlayifyUtility.Jsons;
 
 [PublicAPI]
 public abstract partial class Json{
+
 	#region Parse
 	public static bool TryParse(string s,[MaybeNullWhen(false)]out Json json)=>TryParseGeneric(s,out json,ParseOrNull);
 	public static bool TryParse(ref string s,[MaybeNullWhen(false)]out Json json)=>TryParseGeneric(ref s,out json,ParseOrNull);
@@ -47,13 +48,13 @@ public abstract partial class Json{
 	#endregion
 
 	#region Operators
-	public abstract override bool Equals(object? obj);
-	public abstract override int GetHashCode();
+	public override abstract bool Equals(object? obj);
+	public override abstract int GetHashCode();
 
 	public static explicit operator bool(Json j)=>j.AsBool();
 	public static explicit operator double(Json j)=>j.AsDouble();
-	public static explicit operator int(Json j)=>(int) j.AsDouble();
-	public static explicit operator long(Json j)=>(long) j.AsDouble();
+	public static explicit operator int(Json j)=>(int)j.AsDouble();
+	public static explicit operator long(Json j)=>(long)j.AsDouble();
 	public static explicit operator string(Json j)=>j.AsString();
 
 	public static implicit operator Json(bool b)=>b?JsonBool.True:JsonBool.False;
@@ -105,4 +106,5 @@ public abstract partial class Json{
 	public JsonObject? GetObject(string property)=>Get(property) as JsonObject;
 	public JsonObject? GetObject(int index)=>Get(index) as JsonObject;
 	#endregion
+
 }

@@ -14,7 +14,7 @@
         <Description>Utilities for other Playify Projects</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
-		<Version>1.4.1</Version>
+		<Version>1.5.0</Version>
 
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -36,9 +36,6 @@
         </Compile>
         <Compile Remove="PlayifyUtils.Test\**" />
         <Compile Remove="PlayifyUtils.Windows\**" />
-        <Compile Update="Jsons2\Json.Parse.cs">
-            <DependentUpon>Json.cs</DependentUpon>
-        </Compile>
         <Compile Update="Jsons\Json.Parse.cs">
             <DependentUpon>Json.cs</DependentUpon>
         </Compile>

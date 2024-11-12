@@ -78,18 +78,14 @@ public static partial class PlatformUtils{
 			else{
 				arguments.Append('"');
 				arguments.Append(escapeQuote.Replace(args[arg],
-				                                     m=>
-				                                     m.Groups[1].Value+m.Groups[1].Value+
-				                                     (m.Groups[2].Value=="\""?"\\\"":"")));
+					m=>
+						m.Groups[1].Value+m.Groups[1].Value+
+						(m.Groups[2].Value=="\""?"\\\"":"")));
 				arguments.Append('"');
 			}
 			if(arg+1<args.Length) arguments.Append(' ');
 		}
 		return arguments.ToString();
 	}
-	
-	
-	public static string MakeSafeFileName(string s,char replacement='#')
-		=>Path.GetInvalidFileNameChars()
-		      .Aggregate(s,(curr,c)=>curr.Replace(c,replacement));
+
 }
