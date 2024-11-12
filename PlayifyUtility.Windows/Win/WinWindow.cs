@@ -11,7 +11,7 @@ using PlayifyUtility.Windows.Utils;
 namespace PlayifyUtility.Windows.Win;
 
 [PublicAPI]
-public partial struct WinWindow{
+public partial struct WinWindow:IEquatable<WinWindow>{
 
 	public readonly IntPtr Hwnd;
 
@@ -436,6 +436,7 @@ public partial struct WinWindow{
 	#region Operators
 	public WinControl AsControl=>new(Hwnd);
 
+	public bool Equals(WinWindow other)=>Hwnd==other.Hwnd;
 	public override bool Equals(object? obj)=>obj is WinWindow other&&this==other;
 	public override int GetHashCode()=>Hwnd.GetHashCode();
 	public static bool operator !=(WinWindow left,WinWindow right)=>!(left==right);

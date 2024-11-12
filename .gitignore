@@ -4,3 +4,5 @@ _run
 *.user
 *.nupkg
 *.snupkg
+.idea
+_run
