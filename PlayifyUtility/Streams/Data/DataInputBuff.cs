@@ -34,7 +34,7 @@ public class DataInputBuff:DataInput,ICloneable{
 		_count=len;
 	}
 
-	public static DataInputBuff Empty=>_empty??=new DataInputBuff(Array.Empty<byte>());
+	public static DataInputBuff Empty=>_empty??=new DataInputBuff([]);
 
 	object ICloneable.Clone()=>Clone();
 
@@ -69,11 +69,7 @@ public class DataInputBuff:DataInput,ICloneable{
 
 	public override int Read()=>_pos<_count?_buf[_pos++]&0xff:-1;
 
-	public byte[] ReadAll(){
-		var bytes=new byte[Available()];
-		ReadFully(bytes);
-		return bytes;
-	}
+	public byte[] ReadAll()=>ReadFully(Available());
 
 	public (byte[] b,int off,int len) GetBufferOffsetAndLength()=>(_buf,_pos,_count-_pos);
 

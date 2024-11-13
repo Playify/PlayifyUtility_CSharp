@@ -12,7 +12,7 @@ public class Send{
 
 	#region Constants
 	public static readonly IntPtr ProcessHandle=Process.GetCurrentProcess().Handle;
-	private static readonly Keys[] Extended={
+	private static readonly Keys[] Extended=[
 		RMenu,RControlKey,Insert,Delete,Home,End,PageDown,PageUp,
 		Up,Down,Left,Right,NumLock,Pause,PrintScreen,Divide,Enter,
 		Apps,LWin,RWin,
@@ -20,11 +20,11 @@ public class Send{
 		VolumeDown,VolumeMute,VolumeUp,
 		MediaStop,MediaNextTrack,MediaPlayPause,MediaPreviousTrack,
 		LaunchApplication1,LaunchApplication2,LaunchMail,
-	};
+	];
 
-	private static readonly Keys[] MouseButtons={
+	private static readonly Keys[] MouseButtons=[
 		LButton,RButton,MButton,XButton1,XButton2,
-	};
+	];
 	#endregion
 
 	#region Hidden
@@ -39,7 +39,7 @@ public class Send{
 	#region Send
 	public bool IsEmpty=>_list.Count==0;
 
-	private readonly List<Input> _list=new();
+	private readonly List<Input> _list=[];
 
 	private Send Add(Input input){
 		_list.Add(input);
