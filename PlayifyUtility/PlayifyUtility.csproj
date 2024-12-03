@@ -31,9 +31,6 @@
 
 
     <ItemGroup>
-        <Compile Update="Special\CaseSensitiveDirectory.Native.cs">
-            <DependentUpon>CaseSensitiveDirectory.cs</DependentUpon>
-        </Compile>
         <Compile Remove="PlayifyUtils.Test\**" />
         <Compile Remove="PlayifyUtils.Windows\**" />
         <Compile Update="Jsons\Json.Parse.cs">
