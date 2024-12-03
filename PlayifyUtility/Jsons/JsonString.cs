@@ -99,6 +99,7 @@ public class JsonString:Json{
 		while(true)
 			if(escape){
 				switch(r.Read()){
+					case -1:return null;/*
 					case '\\':
 						str.Append('\\');
 						break;
@@ -107,7 +108,7 @@ public class JsonString:Json{
 						break;
 					case '/':
 						str.Append('/');
-						break;
+						break;*/
 					case 'b':
 						str.Append('\b');
 						break;
@@ -137,10 +138,13 @@ public class JsonString:Json{
 								    }).TryGet(out var hex)) return null;
 							cp|=hex;
 						}
-						if(cp is >=55296 and <=57343) str.Append(char.ToString((char)cp));//Surrogate codepoint value
-						else str.Append(char.ConvertFromUtf32(cp));
+						str.Append(cp is >=55296 and <=57343
+							           ?char.ToString((char)cp)//Surrogate codepoint value
+							           :char.ConvertFromUtf32(cp));
 						break;
-					default:return null;
+					case var c://Defaults to just using the char as it is
+						str.Append(c);
+						break;
 				}
 				escape=false;
 			} else

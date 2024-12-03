@@ -276,13 +276,13 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 	private async Task Send(int op,byte[] data,int offset,int len){
 		try{
 			byte[] arr;
-			if(len<=125) arr=new[]{(byte)(128|op),(byte)len};
-			else if(len<=65536) arr=new byte[]{(byte)(128|op),126,(byte)(len>> 8),(byte)len};
+			if(len<=125) arr=[(byte)(128|op),(byte)len];
+			else if(len<=65536) arr=[(byte)(128|op),126,(byte)(len>> 8),(byte)len];
 			else
-				arr=new byte[]{
+				arr=[
 					(byte)(128|op),127,0,0,0,0,
-					(byte)(len>> 24),(byte)(len>> 16),(byte)(len>> 8),unchecked((byte)len)
-				};
+					(byte)(len>> 24),(byte)(len>> 16),(byte)(len>> 8),unchecked((byte)len),
+				];
 			try{
 				await _sendSemaphore.WaitAsync();
 				await _output.WriteAsync(arr,0,arr.Length);
