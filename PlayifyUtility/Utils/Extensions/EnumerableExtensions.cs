@@ -135,7 +135,7 @@ public static class EnumerableExtensions{
 	}
 
 	[MustUseReturnValue]
-	public static IEnumerable<T> IsEmpty<T>(IEnumerable<T> e,out bool b){
+	public static IEnumerable<T> CheckEmpty<T>(this IEnumerable<T> e,out bool b){
 		if(e is ICollection collection){
 			b=collection.Count==0;
 			return e;
@@ -154,6 +154,36 @@ public static class EnumerableExtensions{
 			enumerator.Dispose();
 		}
 	}
+
+	[MustUseReturnValue]
+	public static IEnumerable<T> CheckSingle<T>(this IEnumerable<T> e,out bool b,out T? firstElement){
+		if(e is IList<T> collection){
+			b=collection.Count==1;
+			firstElement=b?collection[0]:default;
+			return e;
+		}
+		var enumerator=e.GetEnumerator();
+		if(!enumerator.MoveNext()){
+			b=false;
+			firstElement=default;
+			return[];
+		}
+		firstElement=enumerator.Current;
+		if(!enumerator.MoveNext()){
+			b=true;
+			return YieldAll();
+		}
+
+		b=false;
+		return YieldAll().Prepend(firstElement);
+
+		IEnumerable<T> YieldAll(){
+			do yield return enumerator.Current;
+			while(enumerator.MoveNext());
+			enumerator.Dispose();
+		}
+	}
+
 
 	public static IEnumerable<TResult> Zip<TFirst,TSecond,TResult>(this IEnumerable<TFirst> first,
 		IEnumerable<TSecond> second,

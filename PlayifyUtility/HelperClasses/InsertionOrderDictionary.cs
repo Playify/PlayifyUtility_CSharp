@@ -1,5 +1,6 @@
 using System.Collections;
 using JetBrains.Annotations;
+using PlayifyUtility.Utils.Extensions;
 #if !NET48
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -9,7 +10,7 @@ namespace PlayifyUtility.HelperClasses;
 [PublicAPI]
 public class InsertionOrderDictionary<TKey,TValue>:IDictionary<TKey,TValue> where TKey : notnull{
 	private readonly Dictionary<TKey,TValue> _dictionary;
-	private readonly List<TKey> _order=new();
+	private readonly List<TKey> _order=[];
 
 	public InsertionOrderDictionary()=>_dictionary=new Dictionary<TKey,TValue>();
 
@@ -76,7 +77,8 @@ public class InsertionOrderDictionary<TKey,TValue>:IDictionary<TKey,TValue> wher
 		_order.Clear();
 	}
 
-	public IEnumerator<KeyValuePair<TKey,TValue>> GetEnumerator()=>_order.Select(key=>new KeyValuePair<TKey,TValue>(key,_dictionary[key])).GetEnumerator();
+	public IEnumerator<KeyValuePair<TKey,TValue>> GetEnumerator()
+		=>_order.Select(key=>new KeyValuePair<TKey,TValue>(key,_dictionary[key])).GetEnumerator();
 
 	IEnumerator IEnumerable.GetEnumerator()=>GetEnumerator();
 
@@ -90,9 +92,12 @@ public class InsertionOrderDictionary<TKey,TValue>:IDictionary<TKey,TValue> wher
 	public ICollection<TKey> Keys=>_order.AsReadOnly();
 	public ICollection<TValue> Values=>_order.Select(k=>_dictionary[k]).ToList().AsReadOnly();
 
-	public bool EqualsIgnoreOrder(InsertionOrderDictionary<TKey,TValue>? other)=>other!=null&&other._dictionary.Count==_dictionary.Count&&!other._dictionary.Except(_dictionary).Any();
+	public bool EqualsIgnoreOrder(InsertionOrderDictionary<TKey,TValue>? other)
+		=>other!=null&&other._dictionary.Count==_dictionary.Count&&
+		  !other._dictionary.ToTuples().Except(_dictionary.ToTuples()).Any();
+
 	public override bool Equals(object? obj)=>obj is InsertionOrderDictionary<TKey,TValue> other&&other._order.SequenceEqual(_order)&&EqualsIgnoreOrder(other);
-	public override int GetHashCode()=>_dictionary.GetHashCode()^(13*_order.GetHashCode());
+	public override int GetHashCode()=>_dictionary.GetHashCode()^13*_order.GetHashCode();
 	#endregion
 
 

@@ -1,10 +1,12 @@
+using JetBrains.Annotations;
+
 namespace PlayifyUtility.HelperClasses.Dispose;
 
-public readonly struct CallbackAsAsyncDisposable:IAsyncDisposable{
-	private readonly Func<ValueTask> _dispose;
+[PublicAPI]
+[MustDisposeResource]
+public readonly struct CallbackAsAsyncDisposable(Func<ValueTask> dispose):IAsyncDisposable{
+	public CallbackAsAsyncDisposable(Func<Task> dispose):this(()=>new ValueTask(dispose())){
+	}
 
-	public CallbackAsAsyncDisposable(Func<ValueTask> dispose)=>_dispose=dispose;
-	public CallbackAsAsyncDisposable(Func<Task> dispose)=>_dispose=()=>new ValueTask(dispose());
-
-	public ValueTask DisposeAsync()=>_dispose();
+	public ValueTask DisposeAsync()=>dispose();
 }
