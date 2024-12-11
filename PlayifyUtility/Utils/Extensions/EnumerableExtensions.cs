@@ -171,7 +171,7 @@ public static class EnumerableExtensions{
 		firstElement=enumerator.Current;
 		if(!enumerator.MoveNext()){
 			b=true;
-			return[];
+			return[firstElement];
 		}
 
 		b=false;
