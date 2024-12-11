@@ -135,7 +135,7 @@ public static class EnumerableExtensions{
 	}
 
 	[MustUseReturnValue]
-	public static IEnumerable<T> CheckEmpty<T>(this IEnumerable<T> e,out bool b){
+	public static IEnumerable<T> IsEmpty<T>(this IEnumerable<T> e,out bool b){
 		if(e is ICollection collection){
 			b=collection.Count==0;
 			return e;
@@ -156,7 +156,7 @@ public static class EnumerableExtensions{
 	}
 
 	[MustUseReturnValue]
-	public static IEnumerable<T> CheckSingle<T>(this IEnumerable<T> e,out bool b,out T? firstElement){
+	public static IEnumerable<T> IsSingle<T>(this IEnumerable<T> e,out bool b,out T? firstElement){
 		if(e is IList<T> collection){
 			b=collection.Count==1;
 			firstElement=b?collection[0]:default;
@@ -171,7 +171,7 @@ public static class EnumerableExtensions{
 		firstElement=enumerator.Current;
 		if(!enumerator.MoveNext()){
 			b=true;
-			return YieldAll();
+			return[];
 		}
 
 		b=false;
