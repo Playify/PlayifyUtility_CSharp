@@ -3,6 +3,7 @@ using System.Text;
 using JetBrains.Annotations;
 using Microsoft.Win32.SafeHandles;
 using PlayifyUtility.Windows.Features;
+using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Win;
 
@@ -10,7 +11,10 @@ namespace PlayifyUtility.Windows.Win;
 public static partial class WinConsole{
 	public static WinWindow ConsoleWindow=>new(GetConsoleWindow());
 
-	public static bool RunningInRider=>ConsoleWindow.Class=="PseudoConsoleWindow";
+	public static bool RunningInRider=>
+		ConsoleWindow.Class=="PseudoConsoleWindow"&&//PseudoConsoleWindow would also be true for Win11 Terminal app
+		(ConsoleWindow.ExStyle&ExStyle.NoActivate)!=0&&//RightScrollBar, Left, Transparent, ToolWindow, WindowEdge, Layered, NoActivate
+		(ConsoleWindow.GwlStyle&GwlStyle.DlgFrame)!=0;//Overlapped, TabStop, Group, Thickframe, DlgFrame, ClipSiblings, PopupWindow
 
 	public static bool Visible{
 		get=>ConsoleWindow.NonZero(out var console)&&console.IsVisible;
