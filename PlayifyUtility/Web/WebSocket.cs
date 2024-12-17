@@ -61,7 +61,7 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 		var random=new Random();
 		const string source="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		var webSocketKey=EnumerableUtils.RepeatSelect(16,()=>source[random.Next(source.Length)])
-		                                .Join("");
+		                                .ConcatString();
 
 
 		var header="GET "+path+" HTTP/1.1\r\n"+

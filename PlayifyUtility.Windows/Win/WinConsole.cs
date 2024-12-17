@@ -31,7 +31,7 @@ public static partial class WinConsole{
 
 	private static bool EnableAnsi(IntPtr stream)=>
 		GetConsoleMode(stream,out var mode)&&
-		SetConsoleMode(stream,mode|1|4|8);//ENABLE_PROCESSED_OUTPUT|ENABLE_VIRTUAL_TERMINAL_PROCESSING|DISABLE_NEWLINE_AUTO_RETURN
+		SetConsoleMode(stream,mode|1|4);//ENABLE_PROCESSED_OUTPUT|ENABLE_VIRTUAL_TERMINAL_PROCESSING
 
 
 	public static WinWindow CreateConsole(){
