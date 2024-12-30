@@ -20,11 +20,11 @@ public static class TypeExtensions{
 	#endregion
 
 	#region Strings
-    public static bool TryRemoveFromEndOf(this string s,string end,out string result,bool ignoreCase=false){
-	    if(!s.EndsWith(end,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal)){
-		    result=s;
-		    return false;
-	    }
+	public static bool TryRemoveFromEndOf(this string s,string end,out string result,bool ignoreCase=false){
+		if(!s.EndsWith(end,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal)){
+			result=s;
+			return false;
+		}
 		result=s.Substring(0,s.Length-end.Length);
 		return true;
 	}
@@ -37,7 +37,8 @@ public static class TypeExtensions{
 		result=s.Substring(start.Length);
 		return true;
 	}
-    public static bool RemoveFromEndOf(this string end,ref string test,bool ignoreCase=false){
+
+	public static bool RemoveFromEndOf(this string end,ref string test,bool ignoreCase=false){
 		if(!test.EndsWith(end,ignoreCase?StringComparison.OrdinalIgnoreCase:StringComparison.Ordinal)) return false;
 		test=test.Substring(0,test.Length-end.Length);
 		return true;
@@ -72,6 +73,7 @@ public static class TypeExtensions{
 	}
 
 
+	[Pure]
 	public static IEnumerable<string> Split(this string str,Predicate<char> controller){
 		var nextPiece=0;
 
@@ -83,6 +85,91 @@ public static class TypeExtensions{
 		yield return str.Substring(nextPiece);
 	}
 
+	[Pure]
+	public static bool TryIndexOf(this string str,string value,out int index,StringComparison comparision=StringComparison.Ordinal){
+		index=str.IndexOf(value,comparision);
+		return index!=-1;
+	}
+
+	[Pure]
+	public static bool TryIndexOf(this string str,string value,int startIndex,out int index,StringComparison comparision=StringComparison.Ordinal){
+		index=str.IndexOf(value,startIndex,comparision);
+		return index!=-1;
+	}
+
+	[Pure]
+	public static bool TryIndexOf(this string str,char value,out int index){
+		index=str.IndexOf(value);
+		return index!=-1;
+	}
+
+	[Pure]
+	public static bool TryIndexOf(this string str,char value,int startIndex,out int index){
+		index=str.IndexOf(value,startIndex);
+		return index!=-1;
+	}
+
+	[Pure]
+	public static bool TryLastIndexOf(this string str,string value,out int index,StringComparison comparision=StringComparison.Ordinal){
+		index=str.LastIndexOf(value,comparision);
+		return index!=-1;
+	}
+
+	[Pure]
+	public static bool TryLastIndexOf(this string str,string value,int startIndex,out int index,StringComparison comparision=StringComparison.Ordinal){
+		index=str.LastIndexOf(value,startIndex,comparision);
+		return index!=-1;
+	}
+
+	[Pure]
+	public static bool TryLastIndexOf(this string str,char value,out int index){
+		index=str.LastIndexOf(value);
+		return index!=-1;
+	}
+
+	[Pure]
+	public static bool TryLastIndexOf(this string str,char value,int startIndex,out int index){
+		index=str.LastIndexOf(value,startIndex);
+		return index!=-1;
+	}
+
+
+	[Pure]
+	public static string? GetBefore(this string str,string separator,StringComparison stringComparison=StringComparison.Ordinal)
+		=>str.TryIndexOf(separator,out var index,stringComparison)?str.Substring(0,index):null;
+
+	[Pure]
+	public static string? GetBefore(this string str,char separator)
+		=>str.TryIndexOf(separator,out var index)?str.Substring(0,index):null;
+
+	[Pure]
+	public static string? GetAfter(this string str,string separator,StringComparison stringComparison=StringComparison.Ordinal)
+		=>str.TryIndexOf(separator,out var index,stringComparison)?str.Substring(index+separator.Length):null;
+
+	[Pure]
+	public static string? GetAfter(this string str,char separator)
+		=>str.TryIndexOf(separator,out var index)?str.Substring(index+1):null;
+
+	[Pure]
+	public static string? GetBeforeLast(this string str,string separator,StringComparison stringComparison=StringComparison.Ordinal)
+		=>str.TryLastIndexOf(separator,out var index,stringComparison)?str.Substring(0,index):null;
+
+	[Pure]
+	public static string? GetBeforeLast(this string str,char separator)
+		=>str.TryLastIndexOf(separator,out var index)?str.Substring(0,index):null;
+
+	[Pure]
+	public static string? GetAfterLast(this string str,string separator,StringComparison stringComparison=StringComparison.Ordinal)
+		=>str.TryLastIndexOf(separator,out var index,stringComparison)?str.Substring(index+separator.Length):null;
+
+	[Pure]
+	public static string? GetAfterLast(this string str,char separator)
+		=>str.TryLastIndexOf(separator,out var index)?str.Substring(index+1):null;
+
+
+	//TODO Slice to get two parts based on separator
+
+	[Pure]
 	public static bool IsSuccess(this Match t,out Match result){
 		result=t;
 		return t.Success;
@@ -160,15 +247,37 @@ public static class TypeExtensions{
 	#endregion
 
 	#region Semaphores
-
 	private static SemaphoreSlimReleaser ReleaseLater(this SemaphoreSlim semaphore)=>new(semaphore);
-	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore){semaphore.WaitAsync();return semaphore.ReleaseLater();}
-	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore,CancellationToken cancel){semaphore.WaitAsync(cancel);return semaphore.ReleaseLater();}
-	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore,TimeSpan timeout,CancellationToken cancel=default){semaphore.WaitAsync(timeout,cancel);return semaphore.ReleaseLater();}
-	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore){semaphore.Wait();return semaphore.ReleaseLater();}
-	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore,CancellationToken cancel){semaphore.Wait(cancel);return semaphore.ReleaseLater();}
-	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore,TimeSpan timeout,CancellationToken cancel=default){semaphore.Wait(timeout,cancel);return semaphore.ReleaseLater();}
 
+	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore){
+		semaphore.WaitAsync();
+		return semaphore.ReleaseLater();
+	}
+
+	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore,CancellationToken cancel){
+		semaphore.WaitAsync(cancel);
+		return semaphore.ReleaseLater();
+	}
+
+	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore,TimeSpan timeout,CancellationToken cancel=default){
+		semaphore.WaitAsync(timeout,cancel);
+		return semaphore.ReleaseLater();
+	}
+
+	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore){
+		semaphore.Wait();
+		return semaphore.ReleaseLater();
+	}
+
+	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore,CancellationToken cancel){
+		semaphore.Wait(cancel);
+		return semaphore.ReleaseLater();
+	}
+
+	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore,TimeSpan timeout,CancellationToken cancel=default){
+		semaphore.Wait(timeout,cancel);
+		return semaphore.ReleaseLater();
+	}
 	#endregion
 
 	#region WaitHandle
@@ -197,10 +306,9 @@ public static class TypeExtensions{
 	#region Reflection
 	public static void RunClassConstructor(this Type type)=>RuntimeHelpers.RunClassConstructor(type.TypeHandle);
 
-	
 
 	public static IList<Type>? GetGenericTypeArguments(this InvokeMemberBinder binder)
-		=>System.Type.GetType("Mono.Runtime")!=null
+		=>Type.GetType("Mono.Runtime")!=null
 			  ?binder
 			   .GetType()
 			   .GetField("typeArguments",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Static)
@@ -211,4 +319,5 @@ public static class TypeExtensions{
 			   ?.GetProperty("TypeArguments")
 			   ?.GetValue(binder,null) as IList<Type>;
 	#endregion
+
 }

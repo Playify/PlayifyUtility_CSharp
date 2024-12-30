@@ -1,9 +1,11 @@
+using JetBrains.Annotations;
+
 namespace PlayifyUtility.HelperClasses.Dispose;
 
-public class SemaphoreSlimReleaser:IDisposable{
-	private SemaphoreSlim? _semaphore;
-
-	public SemaphoreSlimReleaser(SemaphoreSlim semaphore)=>_semaphore=semaphore;
+[PublicAPI]
+[MustDisposeResource]
+public sealed class SemaphoreSlimReleaser(SemaphoreSlim semaphore):IDisposable{
+	private SemaphoreSlim? _semaphore=semaphore;
 
 	public void Dispose(){
 		_semaphore?.Release();

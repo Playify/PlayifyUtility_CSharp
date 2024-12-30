@@ -10,6 +10,7 @@ public static class FunctionUtils{
 		t=value;
 		return true;
 	}
+
 	public static bool TryGetNever<T>([MaybeNullWhen(false)]out T t){
 		t=default;
 		return false;
@@ -20,11 +21,15 @@ public static class FunctionUtils{
 		return returnValue;
 	}
 
+	public static void Ignore<T>(T toIgnore){}
+
+
 	[DoesNotReturn]
 	public static void SleepForever(){
 		while(true) Thread.Sleep(Timeout.Infinite);
 		// ReSharper disable once FunctionNeverReturns
 	}
+
 	[DoesNotReturn]
 	public static void SleepForever(CancellationToken cancel){
 		while(true){

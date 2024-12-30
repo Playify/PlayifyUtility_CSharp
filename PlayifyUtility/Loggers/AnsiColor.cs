@@ -24,11 +24,15 @@ public static class AnsiColor{
 
 	static AnsiColor(){//Enable Ansi output in console
 		if(!PlatformUtils.IsWindows()) return;
-		var iStdOut=GetStdHandle(-11);//STD_OUTPUT_HANDLE
-		if(!GetConsoleMode(iStdOut,out var outConsoleMode)) return;
-		outConsoleMode|=0x0004|0x0008;//ENABLE_VIRTUAL_TERMINAL_PROCESSING|DISABLE_NEWLINE_AUTO_RETURN
-		SetConsoleMode(iStdOut,outConsoleMode);
+		EnableAnsi(GetStdHandle(-11));//STD_OUTPUT_HANDLE
+		EnableAnsi(GetStdHandle(-12));//STD_ERROR_HANDLE
 	}
+
+	//Same as in WinConsole:
+	private static bool EnableAnsi(IntPtr stream)=>
+		GetConsoleMode(stream,out var mode)&&
+		SetConsoleMode(stream,mode|1|4);//ENABLE_PROCESSED_OUTPUT|ENABLE_VIRTUAL_TERMINAL_PROCESSING
+
 
 	public static string Ansi(this ConsoleColor color,AnsiStyle style=default){
 		// https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797

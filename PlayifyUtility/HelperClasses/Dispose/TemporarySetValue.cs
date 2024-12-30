@@ -3,7 +3,8 @@ using JetBrains.Annotations;
 namespace PlayifyUtility.HelperClasses.Dispose;
 
 [PublicAPI]
-public sealed class TemporarySetValue<T>:IDisposable{
+[MustDisposeResource]
+public readonly struct TemporarySetValue<T>:IDisposable{
 	private readonly ISet<T> _set;
 	public readonly T Value;
 
