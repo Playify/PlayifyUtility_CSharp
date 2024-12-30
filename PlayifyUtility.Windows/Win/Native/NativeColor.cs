@@ -5,18 +5,11 @@ namespace PlayifyUtility.Windows.Win.Native;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [StructLayout(LayoutKind.Sequential)]
-public struct NativeColor{
-	private readonly byte R;
-	private readonly byte G;
-	private readonly byte B;
-	private readonly byte A;
-
-	public NativeColor(Color color){
-		R=color.R;
-		G=color.G;
-		B=color.B;
-		A=0;
-	}
+public struct NativeColor(Color color){
+	private readonly byte R=color.R;
+	private readonly byte G=color.G;
+	private readonly byte B=color.B;
+	private readonly byte A=0;
 
 	public uint GetRgb()=>(uint) ((R<<16)|(G<<8)|B);
 

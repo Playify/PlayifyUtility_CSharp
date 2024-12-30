@@ -12,11 +12,10 @@ using PlayifyUtility.Windows.Utils;
 namespace PlayifyUtility.Windows.Win;
 
 [PublicAPI]
-public partial struct WinWindow:IEquatable<WinWindow>{
+public partial struct WinWindow(IntPtr hwnd):IEquatable<WinWindow>{
 
-	public readonly IntPtr Hwnd;
+	public readonly IntPtr Hwnd=hwnd;
 
-	public WinWindow(IntPtr hwnd)=>Hwnd=hwnd;
 	public override string ToString()=>$"{nameof(WinWindow)}(0x{Hwnd.ToInt64():x})";
 
 	public static List<WinWindow> GetOpenWindows()=>GetOpenWindows(w=>w.IsVisible);
