@@ -96,6 +96,8 @@ public readonly partial struct WinWindow{
 	[DllImport("user32.dll")]
 	private static extern bool SetLayeredWindowAttributes(IntPtr hWnd,NativeColor color,byte alpha,int dwFlags);
 
+	[DllImport("kernel32.dll")]
+	private static extern int GetCurrentProcessId();
 	[DllImport("user32.dll")]
 	private static extern IntPtr GetWindowThreadProcessId(IntPtr handle,out int processId);
 

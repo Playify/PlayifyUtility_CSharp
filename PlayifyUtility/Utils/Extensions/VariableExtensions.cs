@@ -12,6 +12,11 @@ public static class VariableExtensions{
 		t=to;
 		return true;
 	}
+	public static bool TryOverride<T>(this ref T? t,T? to) where T : struct{
+		if(Equals(t,to)) return false;
+		t=to;
+		return true;
+	}
 
 	public static bool NotNull<T>(this T? t,[MaybeNullWhen(false)]out T result) where T : class?{
 		result=t;
