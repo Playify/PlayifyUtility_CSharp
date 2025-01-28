@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
+using PlayifyUtility.Windows.Utils;
 using PlayifyUtility.Windows.Win.Native;
 #if NETFRAMEWORK
 using PlayifyUtility.Windows.Utils;
@@ -11,11 +12,10 @@ using PlayifyUtility.Windows.Utils;
 namespace PlayifyUtility.Windows.Win;
 
 [PublicAPI]
-public partial struct WinWindow:IEquatable<WinWindow>{
+public partial struct WinWindow(IntPtr hwnd):IEquatable<WinWindow>{
 
-	public readonly IntPtr Hwnd;
+	public readonly IntPtr Hwnd=hwnd;
 
-	public WinWindow(IntPtr hwnd)=>Hwnd=hwnd;
 	public override string ToString()=>$"{nameof(WinWindow)}(0x{Hwnd.ToInt64():x})";
 
 	public static List<WinWindow> GetOpenWindows()=>GetOpenWindows(w=>w.IsVisible);
@@ -280,23 +280,30 @@ public partial struct WinWindow:IEquatable<WinWindow>{
 	#endregion
 
 	#region Info
-	public Process? Process{
+	private static int? _ownProcessId;
+#if NETFRAMEWORK
+	public static int OwnProcessId=>_ownProcessId??=GetCurrentProcessId();
+#else
+	public static int OwnProcessId=>_ownProcessId??=Environment.ProcessId;
+#endif
+
+	public int? ProcessId{
 		get{
 			try{
-				GetWindowThreadProcessId(Hwnd,out var pid);
-				return Process.GetProcessById(pid);
+				if(GetWindowThreadProcessId(Hwnd,out var pid)==IntPtr.Zero) return null;
+				return pid;
 			} catch{
 				return null;
 			}
 		}
 	}
+	public Process? Process=>ProcessId.TryGet(out var pid)?Process.GetProcessById(pid):null;
 
 	private static readonly Dictionary<int,string?> ProcessExeCache=new();
 	public string? ProcessExe{
 		get{
 			try{
-				GetWindowThreadProcessId(Hwnd,out var pid);
-				if(pid==0) return null;
+				if(!ProcessId.TryGet(out var pid)) return null;
 				if(ProcessExeCache.TryGetValue(pid,out var exe)) return exe;
 				return ProcessExeCache[pid]=Process.GetProcessById(pid).MainModule?.FileName;
 			} catch{

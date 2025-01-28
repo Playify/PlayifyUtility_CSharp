@@ -11,10 +11,9 @@ namespace PlayifyUtility.Windows.Win;
 
 [SuppressMessage("ReSharper","CommentTypo")]
 [PublicAPI]
-public readonly partial struct WinControl:IEquatable<WinControl>{
-	public readonly IntPtr Hwnd;
+public readonly partial struct WinControl(IntPtr hwnd):IEquatable<WinControl>{
+	public readonly IntPtr Hwnd=hwnd;
 
-	public WinControl(IntPtr hwnd)=>Hwnd=hwnd;
 	public override string ToString()=>$"{nameof(WinControl)}(0x{Hwnd.ToString("x")})";
 
 	public static WinControl Focused{
