@@ -81,7 +81,11 @@ public static partial class WinConsole{
 	public static NotifyIcon CreateHiddenConsole(string notifyIconName,bool consoleTitle=true)=>CreateHiddenConsole(notifyIconName,null,consoleTitle);
 
 	public static NotifyIcon CreateHiddenConsole(string notifyIconName,ContextMenuStrip? strip=null,bool consoleTitle=true){
-		if(consoleTitle) Console.Title=notifyIconName;
+		if(consoleTitle)
+			try{
+				Console.Title=notifyIconName;
+			} catch(IOException){
+			}
 
 
 		var notifyIcon=new NotifyIcon{
