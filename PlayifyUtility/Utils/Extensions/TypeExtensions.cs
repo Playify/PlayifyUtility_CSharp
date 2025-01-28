@@ -166,8 +166,20 @@ public static class TypeExtensions{
 	public static string? GetAfterLast(this string str,char separator)
 		=>str.TryLastIndexOf(separator,out var index)?str.Substring(index+1):null;
 
+	[Pure]
+	public static (string left,string right)? SliceAt(this string str,char separator)=>str.TryIndexOf(separator,out var index)?(str.Substring(0,index),str.Substring(index+1)):null;
 
-	//TODO Slice to get two parts based on separator
+	[Pure]
+	public static (string left,string right)? SliceAtLast(this string str,char separator)=>str.TryLastIndexOf(separator,out var index)?(str.Substring(0,index),str.Substring(index+1)):null;
+
+	[Pure]
+	public static (string left,string right)? SliceAt(this string str,string separator,StringComparison stringComparison=StringComparison.Ordinal)
+		=>str.TryIndexOf(separator,out var index,stringComparison)?(str.Substring(0,index),str.Substring(index+separator.Length)):null;
+
+	[Pure]
+	public static (string left,string right)? SliceAtLast(this string str,string separator,StringComparison stringComparison=StringComparison.Ordinal)
+		=>str.TryLastIndexOf(separator,out var index,stringComparison)?(str.Substring(0,index),str.Substring(index+separator.Length)):null;
+
 
 	[Pure]
 	public static bool IsSuccess(this Match t,out Match result){
