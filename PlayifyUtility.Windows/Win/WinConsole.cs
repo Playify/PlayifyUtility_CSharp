@@ -103,7 +103,7 @@ public static partial class WinConsole{
 			notifyIcon.Dispose();
 		};
 
-		if(RunningInRider) notifyIcon.Text=notifyIconName;
+		if(RunningInRider) notifyIcon.Text=$"{notifyIconName} (Dev)";
 		else{
 			var console=CreateHiddenConsole();
 			notifyIcon.MouseClick+=(_,e)=>{
