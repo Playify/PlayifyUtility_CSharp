@@ -78,7 +78,6 @@ public static partial class WinConsole{
 		return console;
 	}
 
-	public static NotifyIcon CreateHiddenConsole(string notifyIconName,bool consoleTitle=true)=>CreateHiddenConsole(notifyIconName,null,consoleTitle);
 
 	public static NotifyIcon CreateHiddenConsole(string notifyIconName,ContextMenuStrip? strip=null,bool consoleTitle=true){
 		if(consoleTitle)
@@ -103,7 +102,7 @@ public static partial class WinConsole{
 			notifyIcon.Dispose();
 		};
 
-		if(RunningInRider) notifyIcon.Text=$"{notifyIconName} (Dev)";
+		if(RunningInRider) notifyIcon.Text=notifyIconName;
 		else{
 			var console=CreateHiddenConsole();
 			notifyIcon.MouseClick+=(_,e)=>{
