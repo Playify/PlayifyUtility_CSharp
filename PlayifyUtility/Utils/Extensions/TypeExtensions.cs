@@ -259,33 +259,40 @@ public static class TypeExtensions{
 	#endregion
 
 	#region Semaphores
+	[MustDisposeResource]
 	private static SemaphoreSlimReleaser ReleaseLater(this SemaphoreSlim semaphore)=>new(semaphore);
 
-	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore){
-		semaphore.WaitAsync();
+	[MustDisposeResource]
+	public static async Task<SemaphoreSlimReleaser> BorrowAsync(this SemaphoreSlim semaphore){
+		await semaphore.WaitAsync();
 		return semaphore.ReleaseLater();
 	}
 
-	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore,CancellationToken cancel){
-		semaphore.WaitAsync(cancel);
+	[MustDisposeResource]
+	public static async Task<SemaphoreSlimReleaser> BorrowAsync(this SemaphoreSlim semaphore,CancellationToken cancel){
+		await semaphore.WaitAsync(cancel);
 		return semaphore.ReleaseLater();
 	}
 
-	public static SemaphoreSlimReleaser BorrowAsync(this SemaphoreSlim semaphore,TimeSpan timeout,CancellationToken cancel=default){
-		semaphore.WaitAsync(timeout,cancel);
+	[MustDisposeResource]
+	public static async Task<SemaphoreSlimReleaser> BorrowAsync(this SemaphoreSlim semaphore,TimeSpan timeout,CancellationToken cancel=default){
+		await semaphore.WaitAsync(timeout,cancel);
 		return semaphore.ReleaseLater();
 	}
 
+	[MustDisposeResource]
 	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore){
 		semaphore.Wait();
 		return semaphore.ReleaseLater();
 	}
 
+	[MustDisposeResource]
 	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore,CancellationToken cancel){
 		semaphore.Wait(cancel);
 		return semaphore.ReleaseLater();
 	}
 
+	[MustDisposeResource]
 	public static SemaphoreSlimReleaser Borrow(this SemaphoreSlim semaphore,TimeSpan timeout,CancellationToken cancel=default){
 		semaphore.Wait(timeout,cancel);
 		return semaphore.ReleaseLater();

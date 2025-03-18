@@ -99,16 +99,17 @@ public class JsonString:Json{
 		while(true)
 			if(escape){
 				switch(r.Read()){
-					case -1:return null;/*
-					case '\\':
-						str.Append('\\');
-						break;
-					case '"':
-						str.Append('"');
-						break;
-					case '/':
-						str.Append('/');
-						break;*/
+					case -1:
+						return null;/*
+						case '\\':
+							str.Append('\\');
+							break;
+						case '"':
+							str.Append('"');
+							break;
+						case '/':
+							str.Append('/');
+							break;*/
 					case 'b':
 						str.Append('\b');
 						break;
@@ -143,7 +144,7 @@ public class JsonString:Json{
 							           :char.ConvertFromUtf32(cp));
 						break;
 					case var c://Defaults to just using the char as it is
-						str.Append(c);
+						str.Append((char)c);
 						break;
 				}
 				escape=false;
