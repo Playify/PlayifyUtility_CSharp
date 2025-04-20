@@ -56,6 +56,27 @@ public static partial class AsyncExtensions{
 	}
 	#endregion
 
+	#region CatchRethrow
+	public static Task CatchRethrow(this Task task,Action<Exception> onError)=>CatchRethrow<Exception>(task,onError);
+	public static Task<T> CatchRethrow<T>(this Task<T> task,Action<Exception> onError)=>CatchRethrow<T,Exception>(task,onError);
+
+	public static async Task CatchRethrow<TException>(this Task task,Action<TException> onError) where TException : Exception{
+		try{
+			await task;
+		} catch(TException e) when(FunctionUtils.RunThenReturn(()=>onError(e),false)){
+			throw;
+		}
+	}
+
+	public static async Task<T> CatchRethrow<T,TException>(this Task<T> task,Action<TException> onError) where TException : Exception{
+		try{
+			return await task;
+		} catch(TException e) when(FunctionUtils.RunThenReturn(()=>onError(e),false)){
+			throw;
+		}
+	}
+	#endregion
+
 	#region CatchAsync
 	public static Task CatchAsync(this Task task,Func<Exception,Task> onError)=>CatchAsync<Exception>(task,onError);
 

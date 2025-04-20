@@ -78,20 +78,35 @@ public static partial class WinConsole{
 		return console;
 	}
 
-	public static NotifyIcon CreateHiddenConsole(string notifyIconName,bool consoleTitle=true){
-		if(consoleTitle) Console.Title=notifyIconName;
+
+	public static NotifyIcon CreateHiddenConsole(string notifyIconName,ContextMenuStrip? strip=null,bool consoleTitle=true){
+		if(consoleTitle)
+			try{
+				Console.Title=notifyIconName;
+			} catch(IOException){
+			}
 
 
 		var notifyIcon=new NotifyIcon{
 			Icon=ShellThumbnail.GetOwnExeIcon(false)??SystemIcons.Application,
 			Text=$"{notifyIconName} (Hidden)",
+			ContextMenuStrip=strip??new ContextMenuStrip{
+				Items={
+					{"Exit",null,(_,_)=>Environment.Exit(0)},
+				},
+			},
 			Visible=true,
+		};
+		AppDomain.CurrentDomain.ProcessExit+=(_,_)=>{
+			notifyIcon.Visible=false;
+			notifyIcon.Dispose();
 		};
 
 		if(RunningInRider) notifyIcon.Text=notifyIconName;
 		else{
 			var console=CreateHiddenConsole();
-			notifyIcon.Click+=(_,_)=>{
+			notifyIcon.MouseClick+=(_,e)=>{
+				if((e.Button&MouseButtons.Left)==0) return;
 				var visible=console.IsVisible^=true;
 				notifyIcon.Text=$"{notifyIconName} ({(visible?"Visible":"Hidden")})";
 				if(visible) console.SetForeground();

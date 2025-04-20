@@ -5,9 +5,6 @@ using System.Text;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Utils;
 using PlayifyUtility.Windows.Win.Native;
-#if NETFRAMEWORK
-using PlayifyUtility.Windows.Utils;
-#endif
 
 namespace PlayifyUtility.Windows.Win;
 

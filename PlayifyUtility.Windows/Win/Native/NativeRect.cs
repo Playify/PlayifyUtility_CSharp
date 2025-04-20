@@ -26,8 +26,8 @@ public struct NativeRect{
 			Right=rect.Right,
 		};
 
-	public NativePoint TopLeft=>new(){X=Top,Y=Left};
-	public NativePoint BottomRight=>new(){X=Bottom,Y=Right};
-	public Point Location=>new(Top,Left);
+	public NativePoint TopLeft=>new(){X=Left,Y=Top};
+	public NativePoint BottomRight=>new(){X=Right,Y=Bottom};
+	public Point Location=>new(Left,Top);
 	public Size Size=>new(Width,Height);
 }
