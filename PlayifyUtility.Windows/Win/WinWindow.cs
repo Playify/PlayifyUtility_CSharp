@@ -346,6 +346,8 @@ public partial struct WinWindow(IntPtr hwnd):IEquatable<WinWindow>{
 
 		public bool TryOverride(string s,int value)=>GetProp(_win.Hwnd,s)!=value&&SetProp(_win.Hwnd,s,value);
 	}
+
+	public bool IsHungApp=>IsHungAppWindow(Hwnd);
 	#endregion
 
 	#region Commands
