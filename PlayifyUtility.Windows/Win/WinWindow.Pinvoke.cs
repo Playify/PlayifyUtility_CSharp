@@ -130,5 +130,7 @@ public readonly partial struct WinWindow{
 
 	[DllImport("user32.dll",CharSet=CharSet.Unicode)]
 	private static extern int RemoveProp(IntPtr hwnd,string s);
-
+	
+	[DllImport("user32.dll")]
+	private static extern bool IsHungAppWindow(IntPtr hwnd);
 }
