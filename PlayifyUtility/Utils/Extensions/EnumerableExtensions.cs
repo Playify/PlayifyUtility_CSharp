@@ -33,7 +33,7 @@ public static class EnumerableExtensions{
 
 	public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source) where T : struct{
 		foreach(var nullable in source)
-			if(nullable.TryGet(out var t))
+			if(nullable is{} t)
 				yield return t;
 	}
 	#endregion

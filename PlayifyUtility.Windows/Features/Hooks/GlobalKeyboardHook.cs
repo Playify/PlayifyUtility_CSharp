@@ -1,13 +1,13 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Features.Interact;
-using PlayifyUtility.Windows.Utils;
 using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
 [PublicAPI]
 public static class GlobalKeyboardHook{
+
 	#region Events
 	public static event GlobalKeyEventHandler KeyDown{add=>Hook(ref _down,value);remove=>Unhook(ref _down,value);}
 	public static event GlobalKeyEventHandler KeyUp{add=>Hook(ref _up,value);remove=>Unhook(ref _up,value);}
@@ -22,7 +22,7 @@ public static class GlobalKeyboardHook{
 		get=>_paused;
 		set{
 			if(_paused==value) return;
-			if(_thread?.IsCurrent??false) return;//Unhooking would not work
+			if(_thread?.IsCurrent??false) throw new ThreadStateException("Can't pause from current thread");//Unhooking would not work
 			_paused=value;
 
 			if(value){
@@ -32,7 +32,7 @@ public static class GlobalKeyboardHook{
 				thread.Exit(()=>UnhookWindowsHookEx(_hook));
 			} else if(_thread==null&&(_up.lst.Any()||_down.lst.Any())){
 				_thread=UiThread.Create(nameof(GlobalKeyboardHook));
-				_hook=_thread.Invoke(()=>SetWindowsHookEx(WhKeyboardLl,Proc,GetModuleHandle(IntPtr.Zero),0));
+				_hook=_thread.Invoke(()=>SetWindowsHookEx(WhKeyboardLl,Proc,CommonHook.HInstance(),0));
 			}
 		}
 	}
@@ -52,7 +52,7 @@ public static class GlobalKeyboardHook{
 		tuple.evt+=value;
 		if(_thread!=null||Paused) return;
 		_thread=UiThread.Create(nameof(GlobalKeyboardHook));
-		_hook=_thread.Invoke(()=>SetWindowsHookEx(WhKeyboardLl,Proc,GetModuleHandle(IntPtr.Zero),0));
+		_hook=_thread.Invoke(()=>SetWindowsHookEx(WhKeyboardLl,Proc,CommonHook.HInstance(),0));
 	}
 
 	private static void Unhook(ref (GlobalKeyEventHandler? evt,List<GlobalKeyEventHandler> lst) tuple,GlobalKeyEventHandler value){
@@ -84,7 +84,7 @@ public static class GlobalKeyboardHook{
 							OnRelease.Remove(key);
 							if(key!=onRelease){
 								evt.Handled=true;
-								if(onRelease.TryGet(out var release))
+								if(onRelease is{} release)
 									new Send().Key(release,false).SendNow();
 							}
 						}
@@ -106,13 +106,10 @@ public static class GlobalKeyboardHook{
 	private static extern IntPtr SetWindowsHookEx(int idHook,KeyboardHookProc callback,IntPtr hInstance,uint threadId);
 
 	[DllImport("user32.dll")]
-	private static extern bool UnhookWindowsHookEx(IntPtr hInstance);
+	private static extern bool UnhookWindowsHookEx(IntPtr hHook);
 
 	[DllImport("user32.dll")]
 	private static extern int CallNextHookEx(IntPtr idHook,int nCode,WindowMessage wParam,ref KeyboardHookStruct lParam);
-
-	[DllImport("kernel32.dll")]
-	private static extern IntPtr GetModuleHandle(IntPtr zero);
 	#endregion
 
 	#region Constant, Structure and Delegate Definitions
@@ -129,4 +126,5 @@ public static class GlobalKeyboardHook{
 
 	private const int WhKeyboardLl=13;
 	#endregion
+
 }

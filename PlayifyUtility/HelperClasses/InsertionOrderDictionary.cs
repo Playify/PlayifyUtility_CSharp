@@ -32,10 +32,7 @@ public class InsertionOrderDictionary<TKey,TValue>:IDictionary<TKey,TValue> wher
 		_order.Add(key);
 	}
 
-	public void Add(KeyValuePair<TKey,TValue> item){
-		(_dictionary as IDictionary<TKey,TValue>).Add(item);
-		_order.Add(item.Key);
-	}
+	public void Add(KeyValuePair<TKey,TValue> item)=>Add(item.Key,item.Value);
 	#endregion
 
 	#region Remove

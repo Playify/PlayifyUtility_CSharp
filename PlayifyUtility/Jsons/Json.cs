@@ -41,7 +41,13 @@ public abstract partial class Json{
 	#region ToString
 	public override string ToString()=>ToString(null);
 	public string ToPrettyString()=>ToString("\t");
+
+	/**
+	 * Positive numbers will indent with ' '
+	 * Negative numbers will indent with '\t'
+	 */
 	public string ToString(int indentSpaces)=>ToString(indentSpaces<0?new string('\t',-indentSpaces):new string(' ',indentSpaces));
+
 	public abstract string ToString(string? indent);
 
 	public virtual StringBuilder Append(StringBuilder str,string? indent)=>str.Append(ToString(indent));
@@ -63,10 +69,10 @@ public abstract partial class Json{
 	public static implicit operator Json(long number)=>new JsonNumber(number);
 	public static implicit operator Json(string? s)=>s!=null?new JsonString(s):JsonNull.Null;
 
-	public static implicit operator Json(bool? nullable)=>nullable.TryGet(out var nonnull)?nonnull:JsonNull.Null;
-	public static implicit operator Json(double? nullable)=>nullable.TryGet(out var nonnull)?nonnull:JsonNull.Null;
-	public static implicit operator Json(int? nullable)=>nullable.TryGet(out var nonnull)?nonnull:JsonNull.Null;
-	public static implicit operator Json(long? nullable)=>nullable.TryGet(out var nonnull)?nonnull:JsonNull.Null;
+	public static implicit operator Json(bool? nullable)=>nullable.HasValue?nullable.GetValueOrDefault():JsonNull.Null;
+	public static implicit operator Json(double? nullable)=>nullable.HasValue?nullable.GetValueOrDefault():JsonNull.Null;
+	public static implicit operator Json(int? nullable)=>nullable.HasValue?nullable.GetValueOrDefault():JsonNull.Null;
+	public static implicit operator Json(long? nullable)=>nullable.HasValue?nullable.GetValueOrDefault():JsonNull.Null;
 	#endregion
 
 	#region Accessor

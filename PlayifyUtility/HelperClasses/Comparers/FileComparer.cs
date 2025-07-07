@@ -21,7 +21,7 @@ public class FileComparer:IComparer<string>{
 	}
 
 	private static int CompareFilePart(string x,string y){
-		if(x.Length!=0&&y.Length!=0&&//If non empty
+		if(x.Length!=0&&y.Length!=0&&//If non-empty
 		   x[0] is >='0' and <='9'&&y[0] is >='0' and <='9')//and both are numbers
 			(x,y)=(x.PadLeft(y.Length,'0'),y.PadLeft(x.Length,'0'));//pad them both
 

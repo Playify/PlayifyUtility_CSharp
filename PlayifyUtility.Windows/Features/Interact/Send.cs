@@ -55,7 +55,7 @@ public class Send{
 	}
 
 	public void SendNow(){
-		if(_startingMods.TryGet(out var startingMods)) Mods=startingMods;
+		if(_startingMods is{} startingMods) Mods=startingMods;
 
 		while(_list.Count!=0){
 			if(_list[0].Type==-1){//Sleep node
@@ -178,7 +178,7 @@ public class Send{
 
 	#region Keyboard
 	public Send Key(Keys key,bool? down=null)
-		=>!down.TryGet(out var d)
+		=>down is not{} d
 			  ?Key(key,true).Key(key,false)
 			  :MouseButtons.Contains(key)
 				  ?_MouseButton(key,d)
@@ -238,7 +238,7 @@ public class Send{
 
 
 	private Send _Unicode(char c,bool? down)
-		=>!down.TryGet(out var d)
+		=>down is not{} d
 			  ?_Unicode(c,true)._Unicode(c,false)
 			  :Add(new Input{
 				  Type=1,

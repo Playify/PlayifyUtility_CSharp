@@ -27,37 +27,40 @@ public class JsonNumber:Json{
 
 		if(c is not ((>='0' and <='9') or '+' or '-')) return null;
 		var builder=new StringBuilder();
-		builder.Append((char) c);
+		builder.Append((char)c);
 		c=r.Peek();
 		if(c=='I')
 			return builder[0] is '+' or '-'&&"Infinity".All(n=>r.Read()==n)
-			       ?new JsonNumber(builder[0]=='+'
-			                       ?double.PositiveInfinity
-			                       :double.NegativeInfinity)
-			       :null;
+				       ?new JsonNumber(builder[0]=='+'
+					                       ?double.PositiveInfinity
+					                       :double.NegativeInfinity)
+				       :null;
 
 		var allowDot=true;
 		var allowE=true;
 		var allowSign=false;
+		var hasDigits=false;
 		while(true){
 			switch(c){
 				case >='0' and <='9':
-					builder.Append((char) c);
+					hasDigits=true;
+					builder.Append((char)c);
 					break;
 				case '.' when allowDot:
 					builder.Append('.');
 					allowDot=false;
 					break;
-				case 'e' or 'E' when allowE&&(builder.Length>1||builder[0]!='-'):
-					builder.Append((char) c);
+				case 'e' or 'E' when allowE&&hasDigits:
+					builder.Append((char)c);
 					allowE=false;
 					allowSign=true;
 					allowDot=false;
 
 					r.Read();//remove peeked value from stream
-					continue;
+					c=r.Peek();
+					continue;//Can't use break, as that would set allowSign to false again.
 				case '+' or '-' when allowSign:
-					builder.Append((char) c);
+					builder.Append((char)c);
 					break;
 				default:{
 					return double.TryParse(builder.ToString(),NumberStyles.Any,CultureInfo.InvariantCulture,out var v)?new JsonNumber(v):null;
@@ -89,13 +92,14 @@ public class JsonNumber:Json{
 	public override int GetHashCode()=>Value.GetHashCode();
 
 	// ReSharper disable once CompareOfFloatsByEqualityOperator
-	public static bool operator==(JsonNumber l,JsonNumber r)=>l.Value==r.Value;
-	public static bool operator!=(JsonNumber l,JsonNumber r)=>!(l==r);
+	public static bool operator ==(JsonNumber l,JsonNumber r)=>l.Value==r.Value;
+	public static bool operator !=(JsonNumber l,JsonNumber r)=>!(l==r);
 	public static implicit operator double(JsonNumber j)=>j.Value;
-	public static explicit operator int(JsonNumber j)=>(int) j.Value;
-	public static explicit operator long(JsonNumber j)=>(long) j.Value;
+	public static explicit operator int(JsonNumber j)=>(int)j.Value;
+	public static explicit operator long(JsonNumber j)=>(long)j.Value;
 	public static implicit operator JsonNumber(double b)=>new(b);
 	public static implicit operator JsonNumber(int b)=>new(b);
 	public static implicit operator JsonNumber(long b)=>new(b);
 	#endregion
+
 }

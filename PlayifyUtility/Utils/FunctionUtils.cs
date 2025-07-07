@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
-using PlayifyUtility.Utils.Extensions;
 
 namespace PlayifyUtility.Utils;
 
@@ -50,7 +49,7 @@ public static class FunctionUtils{
 				func();
 				return;
 			} catch(Exception) when(tryNumber++<tries){
-				if(delay.TryGet(out var d)) Thread.Sleep(d);
+				if(delay is{} d) Thread.Sleep(d);
 			}
 	}
 
@@ -60,7 +59,7 @@ public static class FunctionUtils{
 			try{
 				return func();
 			} catch(Exception) when(tryNumber++<tries){
-				if(delay.TryGet(out var d)) Thread.Sleep(d);
+				if(delay is{} d) Thread.Sleep(d);
 			}
 	}
 
@@ -79,7 +78,7 @@ public static class FunctionUtils{
 				await func();
 				return;
 			} catch(Exception) when(tryNumber++<tries){
-				if(delay.TryGet(out var d)) await Task.Delay(d);
+				if(delay is{} d) await Task.Delay(d);
 			}
 	}
 
@@ -89,7 +88,7 @@ public static class FunctionUtils{
 			try{
 				return await func();
 			} catch(Exception) when(tryNumber++<tries){
-				if(delay.TryGet(out var d)) await Task.Delay(d);
+				if(delay is{} d) await Task.Delay(d);
 			}
 	}
 

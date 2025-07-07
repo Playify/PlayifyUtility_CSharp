@@ -1,7 +1,8 @@
+using JetBrains.Annotations;
+
 namespace PlayifyUtility.HelperClasses.Comparers;
 
-public class ComparerFromFunc<T>:IComparer<T>{
-	private readonly Func<T,T,int> _compare;
-	public ComparerFromFunc(Func<T,T,int> compare)=>_compare=compare;
-	public int Compare(T? x,T? y)=>_compare(x!,y!);
+[PublicAPI]
+public class ComparerFromFunc<T>(Func<T,T,int> compare):IComparer<T>{
+	public int Compare(T? x,T? y)=>compare(x!,y!);
 }

@@ -14,7 +14,7 @@
         <Description>Utilities for other Playify Projects (Windows extensions)</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
-		<Version>1.4.1</Version>
+		<Version>1.5.0</Version>
 
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -43,9 +43,6 @@
         </Compile>
         <Compile Update="Win\WinWindow.Pinvoke.cs">
             <DependentUpon>WinWindow.cs</DependentUpon>
-        </Compile>
-        <Compile Update="Win\WinCursor.Pinvoke.cs">
-            <DependentUpon>WinCursor.cs</DependentUpon>
         </Compile>
         <Compile Update="Win\WinControl.Pinvoke.cs">
             <DependentUpon>WinControl.cs</DependentUpon>

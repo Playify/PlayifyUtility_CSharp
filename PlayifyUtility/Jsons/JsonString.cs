@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using PlayifyUtility.Utils;
 using PlayifyUtility.Utils.Extensions;
@@ -48,37 +47,32 @@ public class JsonString:Json{
 
 	public override int GetHashCode()=>Value.GetHashCode();
 
-	public static bool operator ==(JsonString l,JsonString r)=>l.Value==r.Value;
-	public static bool operator !=(JsonString l,JsonString r)=>!(l==r);
+	public static bool operator ==(JsonString? l,JsonString? r)=>l?.Value==r?.Value;
+	public static bool operator !=(JsonString? l,JsonString? r)=>!(l==r);
 	public static implicit operator string(JsonString j)=>j.Value;
 	public static implicit operator JsonString(string b)=>new(b);
 	#endregion
 
 	#region Accessor
-	private static readonly Regex ControlCharacters=new("[\0-\x1f]");
 	public static string Escape(string? s)=>Escape(new StringBuilder(),s).ToString();
 
 	public static StringBuilder Escape(StringBuilder str,string? s){
 		if(s==null) return str.Append("null");
+
 		str.Append('"');
-		s=s.Replace("\\",@"\\");
-		s=s.Replace("\"","\\\"");
-		s=s.Replace("\b",@"\b");
-		s=s.Replace("\f",@"\f");
-		s=s.Replace("\r",@"\r");
-		s=s.Replace("\n",@"\n");
-		s=s.Replace("\t",@"\t");
-
-
-		var match=ControlCharacters.Match(s);
-		var from=0;
-		while(match.Success){
-			str.Append(s,from,match.Index-from);
-			from=match.Index+match.Length;
-			foreach(var c in match.Value) str.Append("\\u").Append($"{(int)c:X4}");
-			match=match.NextMatch();
-		}
-		str.Append(s,from,s.Length-from);
+		foreach(var c in s)
+			switch(c){
+				case '\\':str.Append(@"\\"); break;
+				case '"':str.Append("\\\""); break;
+				case '\b':str.Append("\\b"); break;
+				case '\f':str.Append("\\f"); break;
+				case '\n':str.Append("\\n"); break;
+				case '\r':str.Append("\\r"); break;
+				case '\t':str.Append("\\t"); break;
+				case <(char)0x20 or (>=(char)0xD800 and <=(char)0xDFFF)://Control characters need to be escaped
+					str.Append("\\u").Append(((int)c).ToString("X4")); break;
+				default:str.Append(c); break;
+			}
 		str.Append('"');
 		return str;
 	}
@@ -130,13 +124,13 @@ public class JsonString:Json{
 						for(var i=0;i<4;i++){
 							cp<<=4;
 							var c=r.Read();
-							if(!(c switch{
-									    >='0' and <='9'=>c-'0',
-									    >='a' and <='f'=>(c-'a')+10,
-									    >='A' and <='F'=>(c-'A')+10,
-									    //-1=>throw new EndOfStreamException(),
-									    _=>(int?)null,
-								    }).TryGet(out var hex)) return null;
+							if(c switch{
+								   >='0' and <='9'=>c-'0',
+								   >='a' and <='f'=>(c-'a')+10,
+								   >='A' and <='F'=>(c-'A')+10,
+								   //-1=>throw new EndOfStreamException(),
+								   _=>(int?)null,
+							   } is not{} hex) return null;
 							cp|=hex;
 						}
 						str.Append(cp is >=55296 and <=57343

@@ -5,6 +5,7 @@ namespace PlayifyUtility.Windows.Features.Hooks;
 
 [PublicAPI]
 public static class GlobalShellHook{
+
 	#region Events
 	public static event Action<ShellHookEvent> ShellEvent{add=>Hook(value);remove=>Unhook(value);}
 	#endregion
@@ -22,7 +23,7 @@ public static class GlobalShellHook{
 		_shell.evt+=value;
 		if(_thread!=null) return;
 		_thread=UiThread.Create(nameof(GlobalShellHook));
-		_hook=_thread.Invoke(()=>SetWindowsHookEx(WhShell,Proc,GetModuleHandle(IntPtr.Zero),0));
+		_hook=_thread.Invoke(()=>SetWindowsHookEx(WhShell,Proc,CommonHook.HInstance(),0));
 	}
 
 	private static void Unhook(Action<ShellHookEvent> value){
@@ -54,9 +55,6 @@ public static class GlobalShellHook{
 
 	[DllImport("user32.dll")]
 	private static extern int CallNextHookEx(IntPtr idHook,int nCode,IntPtr wParam,IntPtr lParam);
-
-	[DllImport("kernel32.dll")]
-	private static extern IntPtr GetModuleHandle(IntPtr zero);
 	#endregion
 
 	#region Constant, Structure and Delegate Definitions
@@ -64,4 +62,5 @@ public static class GlobalShellHook{
 
 	private const int WhShell=10;
 	#endregion
+
 }

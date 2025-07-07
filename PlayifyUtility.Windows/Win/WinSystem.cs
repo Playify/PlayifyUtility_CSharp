@@ -41,6 +41,25 @@ public static partial class WinSystem{
 	}
 	#endregion
 
+	#region Cursor
+	public static Point CursorPos{
+		get{
+			if(GetCursorPos(out var point)) return point;
+			throw new Exception("Error getting cursor pos");
+		}
+		set=>SetCursorPos(value.X,value.Y);
+	}
+
+	public static bool TryGetCursorPos(out Point point){
+		var b=GetCursorPos(out var nativePoint);
+		point=nativePoint;
+		return b;
+	}
+
+	[DllImport("user32.dll",EntryPoint="SetCursorPos")]
+	public static extern bool SetCursorPos(int x,int y);
+	#endregion
+
 	#region Open Files & Folder
 	public static void OpenFile(string path){
 		var ret=ShellExecute(IntPtr.Zero,"open",path,null,null,1);

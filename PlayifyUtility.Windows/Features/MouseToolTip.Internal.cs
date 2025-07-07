@@ -16,7 +16,7 @@ public static partial class MouseToolTip{
 			_hooked=false;
 			return;
 		}
-		if(!WinCursor.TryGetCursorPos(out var p)) return;
+		if(!WinSystem.TryGetCursorPos(out var p)) return;
 		p.X+=16;
 		p.Y+=16;
 		_currentToolTip.SendMessage(WindowMessage.TTM_TRACKPOSITION,0,((p.Y&0xffff)<<16)|(p.X&0xffff));
@@ -30,8 +30,7 @@ public static partial class MouseToolTip{
 		public UIntPtr uId;
 		public NativeRect rect;
 		public IntPtr hInst;
-		[MarshalAs(UnmanagedType.LPWStr)]
-		public string? lpszText;
+		[MarshalAs(UnmanagedType.LPWStr)]public string? lpszText;
 		public IntPtr lParam;
 	}
 

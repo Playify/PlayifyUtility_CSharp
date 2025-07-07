@@ -6,15 +6,12 @@ using PlayifyUtility.Utils.Extensions;
 namespace PlayifyUtility.Streams;
 
 [PublicAPI]
-public class PushbackReader:TextReader{
+public class PushbackReader(TextReader reader):TextReader{
 	private readonly Stack<int> _pushback=new();
-	private readonly TextReader _reader;
 
-	public PushbackReader(TextReader reader)=>_reader=reader;
+	public override int Peek()=>_pushback.TryPeek(out var r)?r:reader.Peek();
 
-	public override int Peek()=>_pushback.TryPeek(out var r)?r:_reader.Peek();
-
-	public override int Read()=>_pushback.TryPop(out var r)?r:_reader.Read();
+	public override int Read()=>_pushback.TryPop(out var r)?r:reader.Read();
 
 	public void Unread(int c)=>_pushback.Push(c);
 
@@ -22,7 +19,10 @@ public class PushbackReader:TextReader{
 		for(var i=offset+length-1;i>=offset;i--) _pushback.Push(chars[i]);
 	}
 
+	//unreads, such that when reading again, the start of the string gets returned first
+	public void Unread(string s)=>Unread(s.ToCharArray(),0,s.Length);
 
-	public override void Close()=>_reader.Close();
-	protected override void Dispose(bool disposing)=>_reader.Dispose();
+
+	public override void Close()=>reader.Close();
+	protected override void Dispose(bool disposing)=>reader.Dispose();
 }

@@ -2,12 +2,12 @@ using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
-using PlayifyUtility.Windows.Utils;
 
 namespace PlayifyUtility.Windows.Features.Interact;
 
 [PublicAPI]
 public class SendBuilder{
+
 	#region Static
 	public static Keys StringToKey(string s)=>TryConvertStringToKey(s)??throw new ArgumentException("Invalid key: "+s);
 
@@ -77,15 +77,17 @@ public class SendBuilder{
 	}
 
 	public static bool IsSingleKey(string action,out Keys key){
-		if(action.StartsWith("{")&&action.EndsWith("}"))
-			return TryConvertStringToKey(action.Substring(1,action.Length-2).Trim()).TryGet(out key);
+		if(action.StartsWith("{")&&action.EndsWith("}")){
+			var keys=TryConvertStringToKey(action.Substring(1,action.Length-2).Trim());
+			key=keys.GetValueOrDefault();
+			return keys.HasValue;
+		}
 		key=default;
 		return false;
 	}
 
 	public static string GetSingleKey(Keys key)=>"{"+KeyToString(key)+"}";
-	
-	
+
 
 	public static SendBuilder Parse(string s,bool throwOnError=false)=>new(s,throwOnError);
 	#endregion
@@ -124,6 +126,7 @@ public class SendBuilder{
 
 
 	public Send ToSend()=>ToSend(new Send());
+
 	public Send ToSend(Send send){
 		foreach(var tuple in _tuples) tuple.apply(send);
 		return send;
@@ -157,8 +160,8 @@ public class SendBuilder{
 				s=s.Substring(nextToken);
 				continue;
 			}
-			
-			
+
+
 			//Find full {bracket}
 			var i=s.Length<2?-1:s.IndexOf('}',1);
 			if(i==-1){//If '{' is last char of string, or no '}' is found in general
@@ -173,7 +176,7 @@ public class SendBuilder{
 			var inner=s.Substring(1,i-1).Trim();
 			s=s.Substring(i+1);
 
-			
+
 			//Handle {#comments}
 			if(inner.StartsWith("#")){
 				_tuples.Add((_=>{},Opening+Italic+inner+Closing));
@@ -194,7 +197,7 @@ public class SendBuilder{
 				case 2:{//Handle e.g. {Key down} or {Key 5} (repeats Key 5 times)
 					switch(args[1].ToLowerInvariant()){
 						case "down":{
-							if(TryConvertStringToKey(args[0]).TryGet(out var key)){
+							if(TryConvertStringToKey(args[0]) is{} key){
 								_tuples.Add((
 									            send=>send.Key(key,true),
 									            Opening+KeyToString(key)+" down"+Closing
@@ -204,7 +207,7 @@ public class SendBuilder{
 							break;
 						}
 						case "up":{
-							if(TryConvertStringToKey(args[0]).TryGet(out var key)){
+							if(TryConvertStringToKey(args[0]) is{} key){
 								_tuples.Add((
 									            send=>send.Key(key,false),
 									            Opening+KeyToString(key)+" up"+Closing
@@ -255,7 +258,7 @@ public class SendBuilder{
 
 	private bool ParseCombo(string arg,int repeat=1){
 		var mods=ModsOf(ref arg);
-		if(!TryConvertStringToKey(arg).TryGet(out var key))
+		if(TryConvertStringToKey(arg) is not{} key)
 			if(new StringInfo(arg).LengthInTextElements==1){
 				_tuples.Add((
 					            send=>send.Text(repeat!=1?string.Join("",Enumerable.Repeat(arg,repeat)):arg),

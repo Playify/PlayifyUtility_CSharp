@@ -12,12 +12,17 @@ public class Logger:TextWriter{
 
 	public Logger():this(Console.Out){}
 	public Logger(Logger writer)=>_writer=writer;
+
 	public Logger(TextWriter writer){
 		_writer=writer;
-		if(_writer is Logger)return;
+		if(_writer is Logger) return;
 		_find.Value=null;
 		_writer.Flush();//if logger is wrapped somehow, find it, remove all wrapping, and use the underlying logger
 		_writer=_find.Value??writer;
+
+		typeof(AnsiColor).RunClassConstructor();
+		if(this is not AnsiLessLogger&&!AnsiColor.IsSupported)//Ensure the writer is wrapped in ansiless, if it is not supported
+			_writer=new AnsiLessLogger(_writer);
 	}
 
 	#region TextWriter
@@ -42,7 +47,7 @@ public class Logger:TextWriter{
 	#endregion
 
 	#region Logging
-	public class LogLevel{
+	public class LogLevel(string? tag,string bracketColor,string tagColor,string? msgColor=null){
 		public static readonly LogLevel Log=new(null,ConsoleColor.White);
 		public static readonly LogLevel Special=new(null,ConsoleColor.Magenta,ConsoleColor.Magenta.Ansi());
 		public static readonly LogLevel Debug=new("Debug",ConsoleColor.Cyan);
@@ -51,23 +56,16 @@ public class Logger:TextWriter{
 		public static readonly LogLevel Error=new("Error",ConsoleColor.Red);
 		public static readonly LogLevel Critical=new("Critical",ConsoleColor.Red,ConsoleColor.Red.Ansi());
 
-		public readonly string? Tag;
-		public readonly string BracketColor;
-		public readonly string TagColor;
-		public readonly string? MsgColor;
+		public readonly string? Tag=tag;
+		public readonly string BracketColor=bracketColor;
+		public readonly string TagColor=tagColor;
+		public readonly string? MsgColor=msgColor;
 
 		public LogLevel(string? tag,ConsoleColor color,string? msgColor=null):this(
 			tag,
 			color.Dark().Ansi(AnsiStyle.Bold),
 			AnsiColor.Reset+color.Bright().Ansi(),
 			msgColor){
-		}
-
-		public LogLevel(string? tag,string bracketColor,string tagColor,string? msgColor=null){
-			Tag=tag;
-			BracketColor=bracketColor;
-			TagColor=tagColor;
-			MsgColor=msgColor;
 		}
 
 	}
@@ -92,8 +90,9 @@ public class Logger:TextWriter{
 
 		if(level.MsgColor!=null) str.Append(level.MsgColor).Append(msg).Append(AnsiColor.Reset);
 		else str.Append(msg);
+		str.Append(NewLine);
 
-		WriteLine(str.ToString());
+		Write(str.ToString());
 	}
 
 	public virtual IEnumerable<string> Tags(LogLevel level){
@@ -134,11 +133,11 @@ public class Logger:TextWriter{
 	public Logger WithName<T>()=>new NamedLogger(this,typeof(T).Name);
 
 	public Logger UseAsConsoleOut(){
-		typeof(AnsiColor).RunClassConstructor();
 		Console.SetOut(this);
 		return this;
 	}
 
 	private Logger SetAnsi(bool b)=>b?this:WithoutColor();
 	#endregion
+
 }

@@ -1,13 +1,13 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Features.Interact;
-using PlayifyUtility.Windows.Utils;
 using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
 [PublicAPI]
 public static class GlobalMouseHook{
+
 	#region Events
 	public static event GlobalMouseEventHandler MouseDown{add=>Hook(ref _down,value);remove=>Unhook(ref _down,value);}
 	public static event GlobalMouseEventHandler MouseUp{add=>Hook(ref _up,value);remove=>Unhook(ref _up,value);}
@@ -22,7 +22,7 @@ public static class GlobalMouseHook{
 		get=>_paused;
 		set{
 			if(_paused==value) return;
-			if(_thread?.IsCurrent??false) return;//Unhooking would not work
+			if(_thread?.IsCurrent??false) throw new ThreadStateException("Can't pause from current thread");//Unhooking would not work
 			_paused=value;
 
 			if(value){
@@ -32,12 +32,12 @@ public static class GlobalMouseHook{
 				thread.Exit(()=>UnhookWindowsHookEx(_hook));
 			} else if(_thread==null&&(_up.lst.Any()||_down.lst.Any()||_move.lst.Any()||_scroll.lst.Any())){
 				_thread=UiThread.Create(nameof(GlobalMouseHook));
-				_hook=_thread.Invoke(()=>SetWindowsHookEx(WhMouseLl,Proc,GetModuleHandle(IntPtr.Zero),0));
+				_hook=_thread.Invoke(()=>SetWindowsHookEx(WhMouseLl,Proc,CommonHook.HInstance(),0));
 			}
 		}
 	}
 	#endregion
-	
+
 	#region Instance Variables
 	private static readonly MouseHookProc Proc=HookProc;
 	private static UiThread? _thread;
@@ -54,7 +54,7 @@ public static class GlobalMouseHook{
 		tuple.evt+=value;
 		if(_thread!=null||Paused) return;
 		_thread=UiThread.Create(nameof(GlobalMouseHook));
-		_hook=_thread.Invoke(()=>SetWindowsHookEx(WhMouseLl,Proc,GetModuleHandle(IntPtr.Zero),0));
+		_hook=_thread.Invoke(()=>SetWindowsHookEx(WhMouseLl,Proc,CommonHook.HInstance(),0));
 	}
 
 	private static void Unhook(ref (GlobalMouseEventHandler? evt,List<GlobalMouseEventHandler> lst) tuple,GlobalMouseEventHandler value){
@@ -113,7 +113,7 @@ public static class GlobalMouseHook{
 			GlobalKeyboardHook.OnRelease.Remove(key);
 			if(key!=onRelease){
 				evt.Handled=true;
-				if(onRelease.TryGet(out var release))
+				if(onRelease is{} release)
 					new Send().Key(release,false).SendNow();
 			}
 		}
@@ -128,13 +128,10 @@ public static class GlobalMouseHook{
 	private static extern IntPtr SetWindowsHookEx(int idHook,MouseHookProc callback,IntPtr hInstance,uint threadId);
 
 	[DllImport("user32.dll")]
-	private static extern bool UnhookWindowsHookEx(IntPtr hInstance);
+	private static extern bool UnhookWindowsHookEx(IntPtr hHook);
 
 	[DllImport("user32.dll")]
 	private static extern int CallNextHookEx(IntPtr idHook,int nCode,WindowMessage wParam,ref MouseHookStruct lParam);
-
-	[DllImport("kernel32.dll")]
-	private static extern IntPtr GetModuleHandle(IntPtr zero);
 	#endregion
 
 	#region Constant, Structure and Delegate Definitions
@@ -158,4 +155,5 @@ public static class GlobalMouseHook{
 		public IntPtr dwExtraInfo;
 	}
 	#endregion
+
 }

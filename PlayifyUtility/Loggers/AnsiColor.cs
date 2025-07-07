@@ -22,8 +22,12 @@ public static class AnsiColor{
 	[DllImport("kernel32.dll")]
 	private static extern IntPtr GetStdHandle(int nStdHandle);
 
+	public static bool IsSupported=>!PlatformUtils.IsWindows()||Environment.OSVersion.Version.Major>=10;//Either Linux or Win10 upwards. Win7 is not supported
+
 	static AnsiColor(){//Enable Ansi output in console
 		if(!PlatformUtils.IsWindows()) return;
+		if(Environment.OSVersion.Version.Major<10) return;
+
 		EnableAnsi(GetStdHandle(-11));//STD_OUTPUT_HANDLE
 		EnableAnsi(GetStdHandle(-12));//STD_ERROR_HANDLE
 	}

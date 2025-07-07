@@ -1,6 +1,5 @@
 using JetBrains.Annotations;
 using PlayifyUtility.Windows.Features.Interact;
-using PlayifyUtility.Windows.Utils;
 
 namespace PlayifyUtility.Windows.Features.Hooks;
 
@@ -23,7 +22,7 @@ public static class GlobalClipboardHook{
 	public static Task<string> GetNextString(TimeSpan? timeout=null,CancellationToken cancel=default)=>GetNext(Clipboard.GetText,timeout,cancel);
 
 	public static async Task<T> GetNext<T>(Func<T?> getter,TimeSpan? timeout=null,CancellationToken cancel=default) where T : notnull{
-		if(timeout.TryGet(out var timeSpan)){
+		if(timeout is{} timeSpan){
 			using var timer=new CancellationTokenSource(timeSpan);
 			using var cts=CancellationTokenSource.CreateLinkedTokenSource(timer.Token,cancel);
 			return await GetNext(getter,null,cts.Token);

@@ -63,7 +63,7 @@ public partial struct WinWindow(IntPtr hwnd):IEquatable<WinWindow>{
 	}
 
 	public static WinWindow GetWindowUnderCursor(bool detectInvisibleForeground=false){
-		if(!WinCursor.TryGetCursorPos(out var cursor)) return Zero;
+		if(!WinSystem.TryGetCursorPos(out var cursor)) return Zero;
 
 		if(!detectInvisibleForeground) return GetWindowAt(cursor.X,cursor.Y);
 
@@ -294,13 +294,13 @@ public partial struct WinWindow(IntPtr hwnd):IEquatable<WinWindow>{
 			}
 		}
 	}
-	public Process? Process=>ProcessId.TryGet(out var pid)?Process.GetProcessById(pid):null;
+	public Process? Process=>ProcessId is{} pid?Process.GetProcessById(pid):null;
 
 	private static readonly Dictionary<int,string?> ProcessExeCache=new();
 	public string? ProcessExe{
 		get{
 			try{
-				if(!ProcessId.TryGet(out var pid)) return null;
+				if(ProcessId is not{} pid) return null;
 				if(ProcessExeCache.TryGetValue(pid,out var exe)) return exe;
 				return ProcessExeCache[pid]=Process.GetProcessById(pid).MainModule?.FileName;
 			} catch{

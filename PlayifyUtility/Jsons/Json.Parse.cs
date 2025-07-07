@@ -58,9 +58,8 @@ public abstract partial class Json{
 					switch(r.Read()){
 						case '\r':
 						case '\n':
-							return true;
 						case -1:
-							return false;
+							return true;
 					}
 				}
 			default:return false;

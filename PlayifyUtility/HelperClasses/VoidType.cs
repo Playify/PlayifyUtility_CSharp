@@ -1,4 +1,3 @@
 namespace PlayifyUtility.HelperClasses;
 
-public readonly struct VoidType{
-}
+public readonly struct VoidType;

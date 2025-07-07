@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using PlayifyUtility.Windows.Win.Native;
 
 namespace PlayifyUtility.Windows.Win;
 
@@ -33,4 +34,7 @@ public static partial class WinSystem{
 
 	[DllImport("shell32.dll",SetLastError=true)]
 	public static extern void SHParseDisplayName([MarshalAs(UnmanagedType.LPWStr)]string name,IntPtr bindingContext,[Out]out IntPtr pidl,uint sfgaoIn,[Out]out uint psfgaoOut);
+
+	[DllImport("user32.dll")]
+	private static extern bool GetCursorPos(out NativePoint lpPoint);
 }

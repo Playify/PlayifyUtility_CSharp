@@ -15,7 +15,7 @@ public static class TypeExtensions{
 
 	#region Numbers
 	public static bool HasFlags(this int t,int flags)=>(t&flags)==flags;
-	public static int WithFlags(this int t,int flags,bool? set)=>set.TryGet(out var setBool)?WithFlags(t,flags,setBool):t^flags;
+	public static int WithFlags(this int t,int flags,bool? set)=>set is{} setBool?WithFlags(t,flags,setBool):t^flags;
 	public static int WithFlags(this int t,int flags,bool set)=>set?t|flags:t&~flags;
 	#endregion
 
@@ -182,6 +182,7 @@ public static class TypeExtensions{
 
 
 	[Pure]
+	[Obsolete("Instead use: regex.Match(input) is{Success:true} result")]
 	public static bool IsSuccess(this Match t,out Match result){
 		result=t;
 		return t.Success;
@@ -236,6 +237,22 @@ public static class TypeExtensions{
 		var offset=0;
 		while(true){
 			var i=await stream.ReadAsync(array,offset,array.Length-offset,cancel);
+			if(i<=0) throw new EndOfStreamException();
+			offset+=i;
+			if(offset==array.Length) break;
+		}
+	}
+
+	public static byte[] ReadFully(this Stream stream,int length){
+		var bytes=new byte[length];
+		stream.ReadFully(bytes);
+		return bytes;
+	}
+
+	public static void ReadFully(this Stream stream,byte[] array){
+		var offset=0;
+		while(true){
+			var i=stream.Read(array,offset,array.Length-offset);
 			if(i<=0) throw new EndOfStreamException();
 			offset+=i;
 			if(offset==array.Length) break;

@@ -9,7 +9,7 @@ namespace System.Threading.Tasks;
 public class TaskCompletionSource{
 	private readonly TaskCompletionSource<VoidType> _tcs;
 
-	public TaskCompletionSource()=>_tcs=new();
+	public TaskCompletionSource()=>_tcs=new TaskCompletionSource<VoidType>();
 	public TaskCompletionSource(TaskCreationOptions creationOptions)=>_tcs=new TaskCompletionSource<VoidType>(creationOptions);
 	public TaskCompletionSource(object? state)=>_tcs=new TaskCompletionSource<VoidType>(state);
 	public TaskCompletionSource(object? state,TaskCreationOptions creationOptions)=>_tcs=new TaskCompletionSource<VoidType>(state,creationOptions);
