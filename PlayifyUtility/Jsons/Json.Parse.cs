@@ -19,6 +19,14 @@ public abstract partial class Json{
 	}
 
 
+	protected static bool ReadLiteral(TextReader r,string s){
+		foreach(var c in s){
+			if(r.Peek()!=c) return false;
+			r.Read();
+		}
+		return true;
+	}
+
 	protected static int NextRead(TextReader r){
 		while(true){
 			var c=r.Read();

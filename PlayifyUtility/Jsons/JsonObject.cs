@@ -9,7 +9,7 @@ namespace PlayifyUtility.Jsons;
 [PublicAPI]
 public class JsonObject:Json,IEnumerable<KeyValuePair<string,Json>>{
 	private readonly Dictionary<string,Json> _dictionary=new();
-	private readonly List<string> _order=new();
+	private readonly List<string> _order=[];
 
 	public JsonObject(){}
 

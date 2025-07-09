@@ -25,9 +25,9 @@ public class JsonBool:Json{
 	public new static JsonBool? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
 
 	public new static JsonBool? ParseOrNull(TextReader r)
-		=>NextRead(r) switch{
-			't' when r.Read()=='r'&&r.Read()=='u'&&r.Read()=='e'=>True,
-			'f' when r.Read()=='a'&&r.Read()=='l'&&r.Read()=='s'&&r.Read()=='e'=>False,
+		=>NextPeek(r) switch{
+			't'=>ReadLiteral(r,"true")?True:null,
+			'f'=>ReadLiteral(r,"false")?False:null,
 			_=>null,
 		};
 	#endregion
@@ -49,9 +49,10 @@ public class JsonBool:Json{
 
 	public override int GetHashCode()=>Value?1:0;
 
-	public static bool operator==(JsonBool l,JsonBool r)=>ReferenceEquals(l,r);
-	public static bool operator!=(JsonBool l,JsonBool r)=>!(l==r);
+	public static bool operator ==(JsonBool l,JsonBool r)=>ReferenceEquals(l,r);
+	public static bool operator !=(JsonBool l,JsonBool r)=>!(l==r);
 	public static implicit operator bool(JsonBool j)=>j.Value;
 	public static implicit operator JsonBool(bool b)=>b?True:False;
 	#endregion
+
 }

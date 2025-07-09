@@ -7,9 +7,8 @@ using PlayifyUtility.Utils.Extensions;
 namespace PlayifyUtility.Jsons;
 
 [PublicAPI]
-public class JsonString:Json{
-	public readonly string Value;
-	public JsonString(string value)=>Value=value;
+public class JsonString(string value):Json{
+	public readonly string Value=value;
 
 	#region Parse
 	public static bool TryParse(string s,[MaybeNullWhen(false)]out JsonString json)=>TryParseGeneric(s,out json,ParseOrNull);
@@ -20,10 +19,7 @@ public class JsonString:Json{
 	public new static JsonString? ParseOrNull(string s)=>TryParse(s,out var json)?json:null;
 	public new static JsonString? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
 
-	public new static JsonString? ParseOrNull(TextReader r){
-		if(NextPeek(r)!='"') return null;
-		return UnescapeOrNull(r) is{} s?new JsonString(s):null;
-	}
+	public new static JsonString? ParseOrNull(TextReader r)=>UnescapeOrNull(r) is{} s?new JsonString(s):null;
 	#endregion
 
 	#region Convert
@@ -69,7 +65,7 @@ public class JsonString:Json{
 				case '\n':str.Append("\\n"); break;
 				case '\r':str.Append("\\r"); break;
 				case '\t':str.Append("\\t"); break;
-				case <(char)0x20 or (>=(char)0xD800 and <=(char)0xDFFF)://Control characters need to be escaped
+				case <(char)0x20 or >=(char)0xD800 and <=(char)0xDFFF://Control characters need to be escaped
 					str.Append("\\u").Append(((int)c).ToString("X4")); break;
 				default:str.Append(c); break;
 			}
@@ -85,8 +81,10 @@ public class JsonString:Json{
 
 	public static string? UnescapeOrNull(string s)=>TryUnescape(s,out var result)?result:null;
 
-	public static string? UnescapeOrNull(TextReader r){
-		if(r.Read()!='"') return null;
+	public static string? UnescapeOrNull(TextReader r)=>UnescapeOrNull(r,'"',true);
+
+	public static string? UnescapeOrNull(TextReader r,char quoteChar,bool allowEscape){
+		if(NextRead(r)!='"') return null;
 
 		var str=new StringBuilder();
 		var escape=false;
@@ -94,7 +92,11 @@ public class JsonString:Json{
 			if(escape){
 				switch(r.Read()){
 					case -1:
-						return null;/*
+						return null;
+					case var any when any!=quoteChar&&!allowEscape://Don't escape it not requested
+						str.Append('\\').Append((char)any);
+						break;
+					/*
 						case '\\':
 							str.Append('\\');
 							break;
@@ -104,6 +106,11 @@ public class JsonString:Json{
 						case '/':
 							str.Append('/');
 							break;*/
+					case '\r':
+						if(r.Peek()=='\n') r.Read();
+						break;
+					case '\n':
+						break;
 					case 'b':
 						str.Append('\b');
 						break;
@@ -126,8 +133,8 @@ public class JsonString:Json{
 							var c=r.Read();
 							if(c switch{
 								   >='0' and <='9'=>c-'0',
-								   >='a' and <='f'=>(c-'a')+10,
-								   >='A' and <='F'=>(c-'A')+10,
+								   >='a' and <='f'=>c-'a'+10,
+								   >='A' and <='F'=>c-'A'+10,
 								   //-1=>throw new EndOfStreamException(),
 								   _=>(int?)null,
 							   } is not{} hex) return null;
@@ -144,7 +151,7 @@ public class JsonString:Json{
 				escape=false;
 			} else
 				switch(r.Read()){
-					case '"':return str.ToString();
+					case var maybeQuote when maybeQuote==quoteChar:return str.ToString();
 					//case -1:throw new EndOfStreamException();
 					case -1:return null;
 					case '\\':

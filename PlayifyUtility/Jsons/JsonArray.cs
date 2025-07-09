@@ -9,7 +9,7 @@ namespace PlayifyUtility.Jsons;
 
 [PublicAPI]
 public class JsonArray:Json,IEnumerable<Json>{
-	private readonly List<Json> _value=new();
+	private readonly List<Json> _value=[];
 	public JsonArray(){}
 	public JsonArray(params Json[] e)=>AddRange(e);
 	public JsonArray(IEnumerable<Json> e)=>AddRange(e);
@@ -105,8 +105,7 @@ public class JsonArray:Json,IEnumerable<Json>{
 	#region Accessor
 	public override int Count=>_value.Count;
 
-	[AllowNull]
-	public override Json this[int index]{
+	[AllowNull]public override Json this[int index]{
 		get=>_value[index];
 		set=>_value[index]=value??JsonNull.Null;
 	}
@@ -128,4 +127,5 @@ public class JsonArray:Json,IEnumerable<Json>{
 	public void AddRange(IEnumerable<bool> e)=>_value.AddRange(e.Select(j=>(Json)j));
 	public void AddRange(IEnumerable<string> e)=>_value.AddRange(e.Select(j=>(Json)j));
 	#endregion
+
 }

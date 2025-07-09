@@ -7,9 +7,8 @@ using PlayifyUtility.Utils.Extensions;
 namespace PlayifyUtility.Jsons;
 
 [PublicAPI]
-public class JsonNumber:Json{
-	public readonly double Value;
-	public JsonNumber(double value)=>Value=value;
+public class JsonNumber(double value):Json{
+	public readonly double Value=value;
 
 	#region Parse
 	public static bool TryParse(string s,[MaybeNullWhen(false)]out JsonNumber json)=>TryParseGeneric(s,out json,ParseOrNull);
@@ -21,24 +20,12 @@ public class JsonNumber:Json{
 	public new static JsonNumber? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
 
 	public new static JsonNumber? ParseOrNull(TextReader r){
-		var c=NextRead(r);
-		if(c=='N') return r.Read()=='a'&&r.Read()=='N'?new JsonNumber(double.NaN):null;
-		if(c=='I') return "nfinity".All(n=>r.Read()==n)?new JsonNumber(double.PositiveInfinity):null;
-
-		if(c is not ((>='0' and <='9') or '+' or '-')) return null;
 		var builder=new StringBuilder();
-		builder.Append((char)c);
-		c=r.Peek();
-		if(c=='I')
-			return builder[0] is '+' or '-'&&"Infinity".All(n=>r.Read()==n)
-				       ?new JsonNumber(builder[0]=='+'
-					                       ?double.PositiveInfinity
-					                       :double.NegativeInfinity)
-				       :null;
+		var c=NextPeek(r);
 
 		var allowDot=true;
 		var allowE=true;
-		var allowSign=false;
+		var allowSign=true;
 		var hasDigits=false;
 		while(true){
 			switch(c){
@@ -62,6 +49,10 @@ public class JsonNumber:Json{
 				case '+' or '-' when allowSign:
 					builder.Append((char)c);
 					break;
+				case 'N' when builder.ToString() is "" or "+" or "-":
+					return ReadLiteral(r,"NaN")?new JsonNumber(double.NaN):null;
+				case 'I' when builder.ToString() is "" or "+" or "-":
+					return ReadLiteral(r,"Infinity")?new JsonNumber(builder.Length!=0&&builder[0]=='-'?double.NegativeInfinity:double.PositiveInfinity):null;
 				default:{
 					return double.TryParse(builder.ToString(),NumberStyles.Any,CultureInfo.InvariantCulture,out var v)?new JsonNumber(v):null;
 				}

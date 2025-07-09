@@ -18,7 +18,7 @@ public class JsonNull:Json{
 
 	public new static JsonNull? ParseOrNull(string s)=>TryParse(s,out var json)?json:null;
 	public new static JsonNull? ParseOrNull(ref string s)=>TryParse(ref s,out var json)?json:null;
-	public new static JsonNull? ParseOrNull(TextReader r)=>NextRead(r)=='n'&&r.Read()=='u'&&r.Read()=='l'&&r.Read()=='l'?Null:null;
+	public new static JsonNull? ParseOrNull(TextReader r)=>NextPeek(r)=='n'&&ReadLiteral(r,"null")?Null:null;
 	#endregion
 
 	#region Convert
@@ -31,4 +31,5 @@ public class JsonNull:Json{
 
 	public override int GetHashCode()=>-1;
 	#endregion
+
 }
