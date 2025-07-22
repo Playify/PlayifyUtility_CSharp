@@ -51,19 +51,19 @@ public class DataInput:IDisposable{
 	public byte ReadByte(){
 		var ch=Read();
 		if(ch<0) throw new EndOfStreamException();
-		return (byte) ch;
+		return (byte)ch;
 	}
 
 	public short ReadShort(){
 		var ch1=Read();
 		var ch2=Read();
 		if((ch1|ch2)<0) throw new EndOfStreamException();
-		return (short) ((ch1<<8)+ch2);
+		return (short)((ch1<<8)+ch2);
 	}
 
-	public ushort ReadUShort()=>(ushort) ReadShort();
+	public ushort ReadUShort()=>(ushort)ReadShort();
 
-	public char ReadChar()=>(char) ReadShort();
+	public char ReadChar()=>(char)ReadShort();
 
 	public int ReadInt(){
 		var ch1=Read();
@@ -74,18 +74,19 @@ public class DataInput:IDisposable{
 		return (ch1<<24)+(ch2<<16)+(ch3<<8)+ch4;
 	}
 
-	public uint ReadUInt()=>(uint) ReadInt();
+	public uint ReadUInt()=>(uint)ReadInt();
 
 	public long ReadLong(){
 		ReadFully(_readBuffer,0,8);
-		return ((long) _readBuffer[0]<<56)+((long) (_readBuffer[1]&255)<<48)+((long) (_readBuffer[2]&255)<<40)+((long) (_readBuffer[3]&255)<<32)+((long) (_readBuffer[4]&255)<<24)+((_readBuffer[5]&255)<<16)+((_readBuffer[6]&255)<<8)+(_readBuffer[7]&255);
+		return ((long)_readBuffer[0]<<56)+((long)(_readBuffer[1]&255)<<48)+((long)(_readBuffer[2]&255)<<40)+((long)(_readBuffer[3]&255)<<32)+((long)(_readBuffer[4]&255)<<24)+((_readBuffer[5]&255)<<16)+((_readBuffer[6]&255)<<8)+
+		       (_readBuffer[7]&255);
 	}
 
-	public ulong ReadULong()=>(ulong) ReadLong();
+	public ulong ReadULong()=>(ulong)ReadLong();
 
 	public float ReadFloat(){
 		ReadFully(_readBuffer,0,4);
-		if(!BitConverter.IsLittleEndian) Array.Reverse(_readBuffer,0,4);
+		if(BitConverter.IsLittleEndian) Array.Reverse(_readBuffer,0,4);
 		return BitConverter.ToSingle(_readBuffer,0);
 	}
 
