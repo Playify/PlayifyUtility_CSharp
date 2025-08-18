@@ -27,7 +27,7 @@ public class DataOutput{
 
 	public virtual void Close()=>OutputStream.Close();
 
-	public virtual void Write(int b)=>OutputStream.WriteByte((byte) b);
+	public virtual void Write(int b)=>OutputStream.WriteByte((byte)b);
 
 	public void WriteBoolean(bool v)=>Write(v?1:0);
 
@@ -49,50 +49,66 @@ public class DataOutput{
 	}
 
 	public void WriteInt(int v){
-		Write((int) ((uint) v>> 24));
-		Write((int) ((uint) v>> 16));
-		Write((int) ((uint) v>> 8));
-		Write((int) (uint) v);
+		Write((int)((uint)v>> 24));
+		Write((int)((uint)v>> 16));
+		Write((int)((uint)v>> 8));
+		Write((int)(uint)v);
 	}
 
 	public void WriteUInt(uint v){
-		Write((int) (v>> 24));
-		Write((int) (v>> 16));
-		Write((int) (v>> 8));
-		Write((int) v);
+		Write((int)(v>> 24));
+		Write((int)(v>> 16));
+		Write((int)(v>> 8));
+		Write((int)v);
 	}
 
 	public void WriteLong(long v){
-		_writeBuffer[0]=(byte) (v>> 56);
-		_writeBuffer[1]=(byte) (v>> 48);
-		_writeBuffer[2]=(byte) (v>> 40);
-		_writeBuffer[3]=(byte) (v>> 32);
-		_writeBuffer[4]=(byte) (v>> 24);
-		_writeBuffer[5]=(byte) (v>> 16);
-		_writeBuffer[6]=(byte) (v>> 8);
-		_writeBuffer[7]=(byte) v;
+		_writeBuffer[0]=(byte)(v>> 56);
+		_writeBuffer[1]=(byte)(v>> 48);
+		_writeBuffer[2]=(byte)(v>> 40);
+		_writeBuffer[3]=(byte)(v>> 32);
+		_writeBuffer[4]=(byte)(v>> 24);
+		_writeBuffer[5]=(byte)(v>> 16);
+		_writeBuffer[6]=(byte)(v>> 8);
+		_writeBuffer[7]=(byte)v;
 		Write(_writeBuffer,0,8);
 	}
 
 	public void WriteLong(ulong v){
-		_writeBuffer[0]=(byte) (v>> 56);
-		_writeBuffer[1]=(byte) (v>> 48);
-		_writeBuffer[2]=(byte) (v>> 40);
-		_writeBuffer[3]=(byte) (v>> 32);
-		_writeBuffer[4]=(byte) (v>> 24);
-		_writeBuffer[5]=(byte) (v>> 16);
-		_writeBuffer[6]=(byte) (v>> 8);
-		_writeBuffer[7]=(byte) v;
+		_writeBuffer[0]=(byte)(v>> 56);
+		_writeBuffer[1]=(byte)(v>> 48);
+		_writeBuffer[2]=(byte)(v>> 40);
+		_writeBuffer[3]=(byte)(v>> 32);
+		_writeBuffer[4]=(byte)(v>> 24);
+		_writeBuffer[5]=(byte)(v>> 16);
+		_writeBuffer[6]=(byte)(v>> 8);
+		_writeBuffer[7]=(byte)v;
 		Write(_writeBuffer,0,8);
 	}
 
 	public void WriteFloat(float v){
+#if NETFRAMEWORK
 		var bytes=BitConverter.GetBytes(v);
 		if(BitConverter.IsLittleEndian) Array.Reverse(bytes);
 		Write(bytes);
+#else
+		if(BitConverter.IsLittleEndian) WriteInt(BitConverter.SingleToInt32Bits(v));
+		else{
+			var bytes=BitConverter.GetBytes(v);
+			Array.Reverse(bytes);
+			Write(bytes);
+		}
+#endif
 	}
 
-	public void WriteDouble(double v)=>WriteLong(BitConverter.DoubleToInt64Bits(v));
+	public void WriteDouble(double v){
+		if(BitConverter.IsLittleEndian) WriteLong(BitConverter.DoubleToInt64Bits(v));
+		else{
+			var bytes=BitConverter.GetBytes(v);
+			Array.Reverse(bytes);
+			Write(bytes);
+		}
+	}
 
 	public void WriteString(string? str){
 		if(str==null){
@@ -123,15 +139,15 @@ public class DataOutput{
 
 	//7 bit encoding (special case for negatives)
 	public void WriteLength(long i){
-		var u=(ulong) (i<0?~i:i);
+		var u=(ulong)(i<0?~i:i);
 		while(u>=0x80){
-			Write((int) (u|0x80));
+			Write((int)(u|0x80));
 			u>>= 7;
 		}
 		if(i<0){
-			Write((int) (u|0x80));
+			Write((int)(u|0x80));
 			Write(0);
-		} else Write((int) u);
+		} else Write((int)u);
 	}
 
 	public void WriteGuid(Guid guid)=>Write(guid.ToByteArray());

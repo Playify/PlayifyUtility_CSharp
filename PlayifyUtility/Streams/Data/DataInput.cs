@@ -85,12 +85,23 @@ public class DataInput:IDisposable{
 	public ulong ReadULong()=>(ulong)ReadLong();
 
 	public float ReadFloat(){
+#if NETFRAMEWORK
 		ReadFully(_readBuffer,0,4);
 		if(BitConverter.IsLittleEndian) Array.Reverse(_readBuffer,0,4);
+#else
+		if(BitConverter.IsLittleEndian) return BitConverter.Int32BitsToSingle(ReadInt());
+		ReadFully(_readBuffer,0,4);
+		Array.Reverse(_readBuffer,0,4);
+#endif
 		return BitConverter.ToSingle(_readBuffer,0);
 	}
 
-	public double ReadDouble()=>BitConverter.Int64BitsToDouble(ReadLong());
+	public double ReadDouble(){
+		if(BitConverter.IsLittleEndian) return BitConverter.Int64BitsToDouble(ReadLong());
+		ReadFully(_readBuffer,0,4);
+		Array.Reverse(_readBuffer,0,8);
+		return BitConverter.ToDouble(_readBuffer,0);
+	}
 
 	public string? ReadString(){
 		var length=ReadLength();
