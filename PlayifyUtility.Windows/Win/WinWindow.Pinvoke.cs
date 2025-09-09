@@ -117,6 +117,8 @@ public readonly partial struct WinWindow{
 
 	[DllImport("dwmapi.dll")]
 	private static extern int DwmSetWindowAttribute(IntPtr hwnd,int attr,ref bool attrValue,int four);
+	[DllImport("dwmapi.dll")]
+	private static extern int DwmGetWindowAttribute(IntPtr hwnd,int attr,ref bool attrValue,int four);
 
 	[DllImport("user32.dll")]
 	private static extern bool RedrawWindow(IntPtr hWnd,int lprcUpdate,int hrgnUpdate,uint flags);

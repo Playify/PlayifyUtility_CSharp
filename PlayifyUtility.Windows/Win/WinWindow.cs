@@ -260,7 +260,7 @@ public partial struct WinWindow(IntPtr hwnd):IEquatable<WinWindow>{
 		}
 	}
 
-	public void SetDarkMode(bool? dark){
+	public void SetDarkMode(bool? dark=null){
 		var val=dark??WinSystem.DarkMode;
 		//https://gist.github.com/valinet/6afb524426635df9dbe2a9035701fcf4
 		if(DwmSetWindowAttribute(Hwnd,19,ref val,4)==0) return;//check if 19 works
@@ -268,9 +268,25 @@ public partial struct WinWindow(IntPtr hwnd):IEquatable<WinWindow>{
 		if(err!=0) throw new Win32Exception(err);
 	}
 
-	public void SetTransitionsForceDisabled(bool disable){
-		var err=DwmSetWindowAttribute(Hwnd,3,ref disable,4);
+	public bool ForceDisableTransitions{
+		//get=>DwmGet(3);//would always return false, even when enabled
+		set=>DwmSet(3,value);
+	}
+	public bool ForceDisableAeroPeek{
+		get=>DwmGet(12);
+		set=>DwmSet(12,value);
+	}
+	
+	
+	public void DwmSet(int attr,bool b){
+		var err=DwmSetWindowAttribute(Hwnd,attr,ref b,4);
 		if(err!=0) throw new Win32Exception(err);
+	}
+	public bool DwmGet(int attr){
+		var b=false;
+		var err=DwmGetWindowAttribute(Hwnd,attr,ref b,4);
+		if(err!=0) throw new Win32Exception(err);
+		return b;
 	}
 
 	public void Redraw()=>RedrawWindow(Hwnd,0,0,0x581);//Frame|UpdateNow|Invalidate|AllChildren
