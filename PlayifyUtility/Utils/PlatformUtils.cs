@@ -14,6 +14,11 @@ public static partial class PlatformUtils{
 	public static bool IsLinux()=>RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 	public static bool IsWindows()=>RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
+	public static Version GetWindowsVersion(){
+		var v=new OsVersionInfo{Size=Marshal.SizeOf(typeof(OsVersionInfo))};
+		RtlGetVersion(ref v);
+		return new Version(v.Major,v.Minor,v.Build);
+	}
 
 	public static async Task<PhysicalAddress?> GetMac(IPAddress ip){
 		if(IsAndroid()){

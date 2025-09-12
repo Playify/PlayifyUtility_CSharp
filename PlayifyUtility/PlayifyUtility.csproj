@@ -14,7 +14,7 @@
         <Description>Utilities for other Playify Projects</Description>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryUrl>https://github.com/Playify/PlayifyUtility_CSharp</RepositoryUrl>
-		<Version>1.6.4</Version>
+		<Version>1.6.5</Version>
 
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -43,6 +43,9 @@
           <DependentUpon>AsyncExtensions.cs</DependentUpon>
         </Compile>
         <Compile Update="Utils\PlatformUtils.CommandLine.cs">
+			<DependentUpon>PlatformUtils.cs</DependentUpon>
+		</Compile>
+		<Compile Update="Utils\PlatformUtils.PInvoke.cs">
           <DependentUpon>PlatformUtils.cs</DependentUpon>
         </Compile>
     </ItemGroup>
