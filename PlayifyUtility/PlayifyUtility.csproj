@@ -18,6 +18,8 @@
 
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFrameworkIdentifier)'=='.NETFramework'">
@@ -48,5 +50,7 @@
 		<Compile Update="Utils\PlatformUtils.PInvoke.cs">
           <DependentUpon>PlatformUtils.cs</DependentUpon>
         </Compile>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="../LICENSE" Pack="true" PackagePath="\"/>
     </ItemGroup>
 </Project>

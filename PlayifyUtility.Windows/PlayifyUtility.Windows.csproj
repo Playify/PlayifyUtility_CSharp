@@ -18,9 +18,10 @@
 
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
 
         <UseWindowsForms>true</UseWindowsForms>
-
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
@@ -74,5 +75,7 @@
 		<Compile Update="Features\ShellThumbnail.PInvoke.cs">
 			<DependentUpon>ShellThumbnail.cs</DependentUpon>
 		</Compile>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="../LICENSE" Pack="true" PackagePath="\"/>
     </ItemGroup>
 </Project>
