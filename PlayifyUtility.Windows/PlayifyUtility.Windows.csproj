@@ -77,5 +77,8 @@
 		</Compile>
         <None Include="README.md" Pack="true" PackagePath="\"/>
         <None Include="../LICENSE" Pack="true" PackagePath="\"/>
+        <Compile Update="Features\ShortcutFile.PInvoke.cs">
+          <DependentUpon>WinShortcut.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 </Project>
