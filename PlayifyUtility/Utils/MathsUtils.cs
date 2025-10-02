@@ -18,7 +18,7 @@ public static class MathsUtils{
 	public static float Clamp(float v,float min,float max)=>v<min?min:v>max?max:v;
 	public static double Clamp(double v,double min,double max)=>v<min?min:v>max?max:v;
 
-	public static T Clamp<T>(T v,T min,T max) where T:IComparable<T> =>v.CompareTo(min)<0?min:v.CompareTo(max)>0?max:v;
+	public static T Clamp<T>(T v,T min,T max) where T : IComparable<T> =>v.CompareTo(min)<0?min:v.CompareTo(max)>0?max:v;
 
 	public static float Clamp01(float v)=>v<0?0:v>1?1:v;
 	public static double Clamp01(double v)=>v<0?0:v>1?1:v;
@@ -50,6 +50,7 @@ public static class MathsUtils{
 		=>
 #if NETFRAMEWORK
 			Shared.Value??=new Random();
+
 	private static readonly ThreadLocal<Random> Shared=new();
 #else
 		System.Random.Shared;
@@ -123,4 +124,13 @@ public static class MathsUtils{
 			if(value==0) return str.ToString();
 		}
 	}
+
+	public static int RoundToInt(double d)
+		=>d<0
+			  ?(int)(d-0.5)
+			  :(int)(d+0.5);
+	public static long RoundToLong(double d)
+		=>d<0
+			  ?(long)(d-0.5)
+			  :(long)(d+0.5);
 }
