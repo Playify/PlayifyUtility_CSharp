@@ -41,7 +41,7 @@ public static class FunctionUtils{
 	public static Task DelayForever()=>Task.Delay(Timeout.Infinite);
 	public static Task DelayForever(CancellationToken cancel)=>Task.Delay(Timeout.Infinite,cancel);
 
-
+#region Retry, no args
 	public static void Retry(Action func,int tries=3,TimeSpan? delay=null){
 		var tryNumber=0;
 		while(true)
@@ -99,6 +99,66 @@ public static class FunctionUtils{
 			return default;
 		}
 	}
+	#endregion
+#region Retry, with arg
+	public static void Retry(Action<int> func,int tries=3,TimeSpan? delay=null){
+		var tryNumber=0;
+		while(true)
+			try{
+				func(tryNumber);
+				return;
+			} catch(Exception) when(tryNumber++<tries){
+				if(delay is{} d) Thread.Sleep(d);
+			}
+	}
+
+	public static T Retry<T>(Func<int,T> func,int tries=3,TimeSpan? delay=null){
+		var tryNumber=0;
+		while(true)
+			try{
+				return func(tryNumber);
+			} catch(Exception) when(tryNumber++<tries){
+				if(delay is{} d) Thread.Sleep(d);
+			}
+	}
+
+	public static T? RetryOrDefault<T>(Func<int,T> func,int tries=3,TimeSpan? delay=null){
+		try{
+			return Retry(func,tries,delay);
+		} catch(Exception){
+			return default;
+		}
+	}
+
+	public static async Task RetryAsync(Func<int,Task> func,int tries=3,TimeSpan? delay=null){
+		var tryNumber=0;
+		while(true)
+			try{
+				await func(tryNumber);
+				return;
+			} catch(Exception) when(tryNumber++<tries){
+				if(delay is{} d) await Task.Delay(d);
+			}
+	}
+
+	public static async Task<T> RetryAsync<T>(Func<int,Task<T>> func,int tries=3,TimeSpan? delay=null){
+		var tryNumber=0;
+		while(true)
+			try{
+				return await func(tryNumber);
+			} catch(Exception) when(tryNumber++<tries){
+				if(delay is{} d) await Task.Delay(d);
+			}
+	}
+
+	public static async Task<T?> RetryOrDefaultAsync<T>(Func<int,Task<T>> func,int tries=3,TimeSpan? delay=null){
+		try{
+			return await Retry(func,tries,delay);
+		} catch(Exception){
+			return default;
+		}
+	}
+	#endregion
 }
 
 public delegate bool TryParseFunction<in TSource,TResult>(TSource source,out TResult result);
