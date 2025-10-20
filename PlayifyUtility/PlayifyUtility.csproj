@@ -38,9 +38,6 @@
         <Compile Update="Jsons\Json.Parse.cs">
             <DependentUpon>Json.cs</DependentUpon>
         </Compile>
-        <Compile Update="Utils\Extensions\AsyncExtensions.ValueTask.cs">
-            <DependentUpon>AsyncExtensions.cs</DependentUpon>
-        </Compile>
         <Compile Update="Utils\Extensions\AsyncExtensions.Then.cs">
           <DependentUpon>AsyncExtensions.cs</DependentUpon>
         </Compile>

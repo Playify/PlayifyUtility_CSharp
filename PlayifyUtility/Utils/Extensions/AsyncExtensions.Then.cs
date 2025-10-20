@@ -145,8 +145,15 @@ public static partial class AsyncExtensions{
 		}
 	}
 
-	public static void Background(this ValueTask task)=>Background(task.IsCompleted?Task.CompletedTask:task.AsTask());
-	public static void Background<T>(this ValueTask<T> task)=>Background(task.IsCompleted?Task.CompletedTask:task.AsTask());
+	public static void Background(this ValueTask task,Action<Exception>? @catch=null){
+		if(task.IsCompletedSuccessfully) return;
+		Background(task.AsTask(),@catch);
+	}
+
+	public static void Background<T>(this ValueTask<T> task,Action<Exception>? @catch=null){
+		if(task.IsCompletedSuccessfully) return;
+		Background(task.AsTask(),@catch);
+	}
 	#endregion
 
 	#region ValueTask

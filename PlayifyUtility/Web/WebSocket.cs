@@ -34,7 +34,7 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 		_=ReceiveLoop();
 	}
 
-	private WebSocket(Stream @in,Stream @out):this(null,new WebStream2(@in),@out){
+	private WebSocket(Stream @in,Stream @out):this(null,new WebStream3(@in),@out){
 	}
 	#endregion
 
@@ -87,7 +87,7 @@ public class WebSocket:IAsyncEnumerable<(string? s,byte[] b)>{
 		var hash=WebUtils.Sha1(Encoding.ASCII.GetBytes(webSocketKey));
 		webSocketKey=Convert.ToBase64String(hash);
 
-		var webStream=new WebStream2(stream);
+		var webStream=new WebStream3(stream);
 
 		var first=false;
 		var valid=false;
