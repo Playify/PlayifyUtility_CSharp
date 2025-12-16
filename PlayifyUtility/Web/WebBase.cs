@@ -15,8 +15,10 @@ public abstract class WebBase{
 
 	//Automatically block illegal requests
 	public virtual bool HandleIllegalRequests=>true;
+
 	//Enable Caching by default
 	public virtual bool CacheByDefault=>true;
+
 	//Cache Time, if cache is set (60=1min,604800=1week)
 	public virtual long CacheTime=>604800;
 
@@ -97,7 +99,7 @@ public abstract class WebBase{
 		}
 	}
 
-	protected virtual WebSession CreateSession(TcpClient client,Stream stream)=>new(this,client,new WebStream2(stream),stream);
+	protected virtual WebSession CreateSession(TcpClient client,Stream stream)=>new(this,client,new WebStream3(stream),stream);
 
 	protected abstract Task HandleRequest(WebSession session);
 
@@ -108,5 +110,14 @@ public abstract class WebBase{
 		lock(_running)
 			foreach(var listener in _running)
 				listener.Stop();
+		lock(_clients){
+			foreach(var client in _clients)
+				try{
+					client.Close();
+				} catch(Exception){
+					// ignored
+				}
+			_clients.Clear();
+		}
 	}
 }

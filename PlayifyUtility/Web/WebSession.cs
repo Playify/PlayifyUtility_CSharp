@@ -57,7 +57,7 @@ public class WebSession:MultipartRequest<WebSession>{
 		if(!match.Success){
 			throw new CloseException("Illegal HTTP Request: \""+firstLine+"\"");
 		}
-		Type=(RequestType) Enum.Parse(typeof(RequestType),match.Groups[1].Value,true);
+		Type=(RequestType)Enum.Parse(typeof(RequestType),match.Groups[1].Value,true);
 		Path=Uri.UnescapeDataString(match.Groups[2].Value);
 		RawUrl=match.Groups[2].Value;
 
@@ -76,7 +76,7 @@ public class WebSession:MultipartRequest<WebSession>{
 				await Send.Error(400);
 				return;
 			}
-			if(Path.Contains('\\')){
+			if(Path.Any(c=>c<32||c=='\\')){
 				await Send.Error(400);
 				return;
 			}
@@ -116,6 +116,7 @@ public class WebSession:MultipartRequest<WebSession>{
 
 
 	public bool WantsWebSocket()=>Headers.TryGetValue("Upgrade",out var s)&&s.Equals("websocket",StringComparison.OrdinalIgnoreCase);
+
 	public bool WantsWebSocket([MaybeNullWhen(false)]out Func<Task<WebSocket>> createWebSocket){
 		var b=WantsWebSocket();
 		createWebSocket=b?CreateWebSocketWithoutChecking:null;
