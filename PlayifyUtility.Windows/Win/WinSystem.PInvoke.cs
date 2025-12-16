@@ -30,10 +30,10 @@ public static partial class WinSystem{
 	private static extern int ShellExecute(IntPtr hwnd,string lpOperation,string lpFile,string? lpParameters,string? lpDirectory,int nShowCmd);
 
 	[DllImport("shell32.dll")]
-	public static extern int SHOpenFolderAndSelectItems(IntPtr pidlFolder,uint cidl,[In,MarshalAs(UnmanagedType.LPArray)]IntPtr[] apidl,uint dwFlags);
+	private static extern int SHOpenFolderAndSelectItems(IntPtr pidlFolder,uint cidl,[In,MarshalAs(UnmanagedType.LPArray)]IntPtr[] apidl,uint dwFlags);
 
 	[DllImport("shell32.dll",SetLastError=true)]
-	public static extern void SHParseDisplayName([MarshalAs(UnmanagedType.LPWStr)]string name,IntPtr bindingContext,[Out]out IntPtr pidl,uint sfgaoIn,[Out]out uint psfgaoOut);
+	private static extern void SHParseDisplayName([MarshalAs(UnmanagedType.LPWStr)]string name,IntPtr bindingContext,[Out]out IntPtr pidl,uint sfgaoIn,[Out]out uint psfgaoOut);
 
 	[DllImport("user32.dll")]
 	private static extern bool GetCursorPos(out NativePoint lpPoint);

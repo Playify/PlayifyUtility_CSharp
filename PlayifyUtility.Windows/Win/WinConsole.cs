@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Reflection;
 using System.Text;
 using JetBrains.Annotations;
@@ -25,6 +26,10 @@ public static partial class WinConsole{
 			window.IsVisible=value;
 			if(value) window.SetForeground();
 		}
+	}
+
+	public static void Free(){
+		if(FreeConsole()) throw new Win32Exception();
 	}
 
 	public static bool EnableAnsi()=>EnableAnsi(GetStdHandle(-11))&EnableAnsi(GetStdHandle(-12));//STD_OUTPUT_HANDLE,STD_ERROR_HANDLE

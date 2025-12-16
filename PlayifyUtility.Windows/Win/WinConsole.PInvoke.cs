@@ -10,8 +10,11 @@ public static partial class WinConsole{
 	private const uint OpenExisting=0x3;
 
 
-	[DllImport("kernel32")]
+	[DllImport("kernel32.dll")]
 	private static extern bool AllocConsole();
+
+	[DllImport("kernel32.dll")]
+	private static extern bool FreeConsole();
 
 	[DllImport("kernel32.dll")]
 	private static extern IntPtr GetConsoleWindow();
@@ -21,7 +24,7 @@ public static partial class WinConsole{
 	private static extern IntPtr CreateFile(string fileName,uint access,uint shareMode,uint securityAttribs,uint creationDisposition,uint flagsAndAttributes,uint template);
 
 
-	[DllImport("Kernel32.dll",SetLastError=true,CharSet=CharSet.Auto)]
+	[DllImport("kernel32.dll",SetLastError=true,CharSet=CharSet.Auto)]
 	private static extern bool SetStdHandle(int nStdHandle,IntPtr hHandle);
 
 	[DllImport("kernel32.dll",SetLastError=true)]
