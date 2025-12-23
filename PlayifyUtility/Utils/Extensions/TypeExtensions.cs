@@ -223,6 +223,7 @@ public static class TypeExtensions{
 		return result!=null!;
 	}
 
+	[MustDisposeResource]
 	public static IDisposable AddTemporary<T>(this ISet<T> set,T t)=>new TemporarySetValue<T>(set,t);
 	#endregion
 

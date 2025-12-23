@@ -5,12 +5,15 @@ namespace PlayifyUtility.Utils;
 [PublicAPI]
 public class FileUtils{
 
+	[Pure]
 	public static string MakeSafeFileName(string s,char replacement='#')
 		=>Path.GetInvalidFileNameChars()
 		      .Aggregate(s,(curr,c)=>curr.Replace(c,replacement));
 
 
+	[MustUseReturnValue]
 	public static long DirectorySize(string dir)=>DirectorySize(new DirectoryInfo(dir));
+	[MustUseReturnValue]
 	public static long DirectorySize(DirectoryInfo dir)=>dir.GetFiles().Sum(f=>f.Length)+dir.GetDirectories().Sum(DirectorySize);
 
 
@@ -44,5 +47,6 @@ public class FileUtils{
 	}
 
 
+	[MustUseReturnValue]
 	public static string TempPath(string extension)=>Path.Combine(Path.GetTempPath(),Guid.NewGuid()+extension);
 }

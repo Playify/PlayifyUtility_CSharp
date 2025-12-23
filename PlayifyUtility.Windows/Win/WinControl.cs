@@ -21,16 +21,10 @@ public readonly partial struct WinControl(IntPtr hwnd):IEquatable<WinControl>{
 			var result=GetFocus();
 			if(result!=IntPtr.Zero) return new WinControl(result);
 
-			var window=GetForegroundWindow();
-			if(window==IntPtr.Zero) return new WinControl(IntPtr.Zero);
+			if(!WinWindow.Foreground.NonZero(out var foreground)) return Zero;
 
-			var tid=GetWindowThreadProcessId(window,out _);
-			var currentThreadId=GetCurrentThreadId();
-			if(!AttachThreadInput(currentThreadId,tid,true)) return new WinControl(IntPtr.Zero);
-
-			result=GetFocus();
-			AttachThreadInput(currentThreadId,tid,false);
-			return new WinControl(result);
+			using (foreground.AttachThreadInput())
+				return new WinControl(GetFocus());
 		}
 		set=>value.Focus();
 	}
@@ -86,11 +80,8 @@ public readonly partial struct WinControl(IntPtr hwnd):IEquatable<WinControl>{
 	}
 
 	public void Focus(){
-		var foregroundThreadId=GetWindowThreadProcessId(Window.Hwnd,out _);
-		var currentThreadId=GetCurrentThreadId();
-		AttachThreadInput(currentThreadId,foregroundThreadId,true);
-		SetFocus(Hwnd);
-		AttachThreadInput(currentThreadId,foregroundThreadId,false);
+		using (Window.AttachThreadInput())
+			SetFocus(Hwnd);
 	}
 
 	#region Info

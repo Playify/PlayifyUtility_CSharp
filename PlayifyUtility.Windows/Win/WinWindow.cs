@@ -3,8 +3,10 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
-using PlayifyUtility.Windows.Utils;
 using PlayifyUtility.Windows.Win.Native;
+#if NETFRAMEWORK
+using PlayifyUtility.Windows.Utils;
+#endif
 
 namespace PlayifyUtility.Windows.Win;
 
@@ -99,9 +101,14 @@ public partial struct WinWindow(IntPtr hwnd):IEquatable<WinWindow>{
 
 	public static WinWindow Foreground{
 		get=>new(GetForegroundWindow());
-		set=>SetForegroundWindow(value.Hwnd);
+		set=>value.SetForeground();
 	}
-	public void SetForeground()=>Foreground=this;
+	public void SetForeground(){
+		var foreground=Foreground;
+		using(foreground.AttachThreadInput())
+		using(foreground.AttachThreadInput(this))
+			SetForegroundWindow(Hwnd);
+	}
 
 	#region Rendering
 	public ExStyle ExStyle{
@@ -303,7 +310,7 @@ public partial struct WinWindow(IntPtr hwnd):IEquatable<WinWindow>{
 	public int? ProcessId{
 		get{
 			try{
-				if(GetWindowThreadProcessId(Hwnd,out var pid)==IntPtr.Zero) return null;
+				if(GetWindowThreadProcessId(Hwnd,out var pid)==0) return null;
 				return pid;
 			} catch{
 				return null;
@@ -453,6 +460,27 @@ public partial struct WinWindow(IntPtr hwnd):IEquatable<WinWindow>{
 			Marshal.FreeHGlobal(ptr);
 		}
 	}
+	#endregion
+	
+	#region AttachThreadInput
+
+	[MustDisposeResource]
+	private class AttachedThreadInput:IDisposable{
+		private readonly uint _fromThread,_toThread;
+		public AttachedThreadInput(WinWindow? from,WinWindow? to)
+			=>AttachThreadInput(
+				_fromThread=from is{Hwnd:var fromHwnd}?GetWindowThreadProcessId(fromHwnd,out _):GetCurrentThreadId(),
+				_toThread=to is{Hwnd:var toHwnd}?GetWindowThreadProcessId(toHwnd,out _):GetCurrentThreadId(),
+				true);
+		public void Dispose()=>AttachThreadInput(_fromThread,_toThread,false);
+	}
+
+	[MustDisposeResource]
+	public static IDisposable AttachThreadInput(WinWindow? from,WinWindow? to)=>new AttachedThreadInput(from,to);
+	[MustDisposeResource]
+	public IDisposable AttachThreadInput(WinWindow? to)=>new AttachedThreadInput(this,to);
+	[MustDisposeResource]
+	public IDisposable AttachThreadInput()=>new AttachedThreadInput(null,this);
 	#endregion
 
 	#region Operators

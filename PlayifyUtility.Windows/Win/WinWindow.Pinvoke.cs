@@ -96,10 +96,17 @@ public readonly partial struct WinWindow{
 	[DllImport("user32.dll")]
 	private static extern bool SetLayeredWindowAttributes(IntPtr hWnd,NativeColor color,byte alpha,int dwFlags);
 
+	#if NETFRAMEWORK
 	[DllImport("kernel32.dll")]
 	private static extern int GetCurrentProcessId();
+	#endif
+	
 	[DllImport("user32.dll")]
-	private static extern IntPtr GetWindowThreadProcessId(IntPtr handle,out int processId);
+	private static extern uint GetWindowThreadProcessId(IntPtr handle,out int processId);
+	[DllImport("kernel32.dll")]
+	private static extern uint GetCurrentThreadId();
+	[DllImport("user32.dll")]
+	private static extern bool AttachThreadInput(uint idAttach,uint idAttachTo,bool fAttach);
 
 
 	[DllImport("user32.dll",CharSet=CharSet.Unicode)]

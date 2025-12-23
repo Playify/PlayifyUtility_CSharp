@@ -1,3 +1,4 @@
+
 namespace PlayifyUtility.Utils.Extensions;
 
 public static partial class AsyncExtensions{
