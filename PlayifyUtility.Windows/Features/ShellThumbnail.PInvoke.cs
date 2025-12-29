@@ -133,7 +133,7 @@ public static partial class ShellThumbnail{
 	#endregion
 
 	#region Exe Icon
-	[DllImport("Shell32",CharSet=CharSet.Auto)]
+	[DllImport("shell32.dll", CharSet = CharSet.Unicode)]
 	private static extern int ExtractIconEx(
 		string lpszFile,
 		int nIconIndex,
@@ -144,5 +144,4 @@ public static partial class ShellThumbnail{
 	[DllImport("user32.dll",EntryPoint="DestroyIcon",SetLastError=true)]
 	private static extern IntPtr DestroyIcon(IntPtr hIcon);
 	#endregion
-
 }

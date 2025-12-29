@@ -51,7 +51,7 @@ public static partial class ShellThumbnail{
 			//clonedBitmap=thumbnail.Clone() as Bitmap;
 			//thumbnail.Dispose();
 			clonedBitmap=thumbnail;
-		} catch(COMException ex) when(ex.ErrorCode==-2147175936&&options.HasFlag(ThumbnailOptions.ThumbnailOnly)){
+		} catch(COMException ex) when(ex.ErrorCode==unchecked((int)0x8004B200)&&options.HasFlag(ThumbnailOptions.ThumbnailOnly)){
 			clonedBitmap=null;
 			displayName=Path.GetFileName(fileName);
 		} finally{
@@ -100,5 +100,19 @@ public static partial class ShellThumbnail{
 				if(ptr!=IntPtr.Zero)
 					DestroyIcon(ptr);
 		}
+	}
+	
+
+	public static string GetDisplayName(string fileName){
+		var shellItem2Guid=new Guid(ShellItem2Guid);
+		var retCode=SHCreateItemFromParsingName(Path.GetFullPath(fileName),IntPtr.Zero,ref shellItem2Guid,out var nativeShellItem);
+
+		if(retCode!=0) throw Marshal.GetExceptionForHR(retCode)!;
+
+		nativeShellItem.GetDisplayName(0,out var displayName);
+		
+		Marshal.ReleaseComObject(nativeShellItem);
+
+		return displayName;
 	}
 }
